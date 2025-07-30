@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "WWPYfUUWi+I=",
+  "success": true,
+  "projectFilePath": "/Users/mac/RiderProjects/Movies.Api/Movies.Application/Movies.Application.csproj",
+  "expectedPackageFiles": [
+    "/Users/mac/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/10.0.0-preview.6.25358.103/microsoft.extensions.dependencyinjection.abstractions.10.0.0-preview.6.25358.103.nupkg.sha512"
+  ],
+  "logs": []
+}
