@@ -1,0 +1,11 @@
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/bin/Debug/net8.0/Movies.Contracts.deps.json
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/bin/Debug/net8.0/Movies.Contracts.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/bin/Debug/net8.0/Movies.Contracts.pdb
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.GeneratedMSBuildEditorConfig.editorconfig
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.AssemblyInfoInputs.cache
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.AssemblyInfo.cs
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.csproj.CoreCompileInputs.cache
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/obj/Debug/net8.0/refint/Movies.Contracts.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.pdb
+/Users/mac/RiderProjects/Movies.Api/Movies.Contracts/obj/Debug/net8.0/ref/Movies.Contracts.dll
