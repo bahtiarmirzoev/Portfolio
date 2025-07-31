@@ -13,7 +13,7 @@ public class ApiEndpoints
 
         public const string Create = Base;
         
-        public const string Get = $"{Base}/movie/{{id:guid}}";
+        public const string Get = $"{Base}/{{id:guid}}";
         
         public const string GetAll =  Base;
         
