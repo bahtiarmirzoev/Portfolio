@@ -36,3 +36,6 @@
 /Users/mac/RiderProjects/Movies.Api/Movies.Api/obj/Debug/net8.0/Movies.Api.pdb
 /Users/mac/RiderProjects/Movies.Api/Movies.Api/obj/Debug/net8.0/Movies.Api.genruntimeconfig.cache
 /Users/mac/RiderProjects/Movies.Api/Movies.Api/obj/Debug/net8.0/ref/Movies.Api.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Dapper.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Npgsql.dll
