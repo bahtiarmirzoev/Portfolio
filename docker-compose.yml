@@ -1,0 +1,14 @@
+﻿services:
+  
+ 
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=bakha
+      - POSTGRES_PASSWORD=Bakha658
+      - POSTGRES_DB=cinemadb
+    ports:
+      - '5432:5432'
+
+
