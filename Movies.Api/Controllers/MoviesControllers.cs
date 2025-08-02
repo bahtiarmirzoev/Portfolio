@@ -53,11 +53,11 @@ public class MoviesControllers : ControllerBase
     {
         var movie = request.MapToMovie(id);
         var updatedMovie = await _movieService.UpdateMovieAsync(movie);
-        if (!updatedMovie )
+        if (updatedMovie is null)
         {
             return NotFound();
         }
-        var response = movie.MapToResponse();
+        var response = updatedMovie.MapToResponse();
         return Ok(response);
     }
 
