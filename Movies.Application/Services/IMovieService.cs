@@ -12,7 +12,7 @@ public interface IMovieService
     Task<Movie?> GetBySlugAsync ( string slug);
     Task<IEnumerable<Movie>> GetAllAsync ();
     
-    Task<bool> UpdateMovieAsync (Movie movie);
+    Task<Movie?> UpdateMovieAsync (Movie movie);
     
     Task<bool> DeleteMovieByIdAsync (Guid id);
 }
