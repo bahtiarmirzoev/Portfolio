@@ -13,6 +13,7 @@ public partial class Movie
     public required int Year { get; set; }
 
     public required List<string> Genres { get; init; } = new();
+    
 
     private string GenerateSlug()
     {

@@ -8,7 +8,7 @@ public class MovieService : IMovieService
     
     private readonly IMovieRepository _movieRepository;
     
-    public Task<Movie?> CreateMovieAsync(Movie movie)
+    public Task<bool> CreateMovieAsync(Movie movie)
     {
         return _movieRepository.CreateMovieAsync(movie);
     }
@@ -28,12 +28,18 @@ public class MovieService : IMovieService
        return _movieRepository.GetAllAsync();
     }
 
-    public Task<Movie> UpdateMovieAsync(Movie movie)
+    public async  Task<bool> UpdateMovieAsync(Movie movie)
     {
-        return _movieRepository.UpdateMovieAsync(movie);
+       var movieExists = await _movieRepository.ExistsByIdAsync(movie.Id);
+       if (!movieExists)
+       {
+           return false;
+       }
+       
+       return await _movieRepository.UpdateMovieAsync(movie) is null;
     }
 
-    public Task<Movie?> DeleteMovieByIdAsync(Guid id)
+    public Task<bool> DeleteMovieByIdAsync(Guid id)
     {
         return _movieRepository.DeleteMovieByIdAsync(id);
     }
