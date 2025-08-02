@@ -39,3 +39,5 @@
 /Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Dapper.dll
 /Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
 /Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Npgsql.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/FluentValidation.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/FluentValidation.DependencyInjectionExtensions.dll

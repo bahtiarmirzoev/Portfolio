@@ -78,12 +78,12 @@ public class MovieRepository: IMovieRepository
                                                                        from movies m left join genres g on m.id = g.movieid
                                                                        group by id
                                                                        """));
-
+        
         return result.Select(x => new Movie
         {
             Id = x.id,
             Title = x.title,
-            Year = x.year,
+            YearOfRelease = x.yearofrelease,
             Genres = Enumerable.ToList(x.genres.Split(','))
 
         });
@@ -123,11 +123,13 @@ public class MovieRepository: IMovieRepository
         using var connection = await _connectionFactory.CreateConnectionAsync();
         using var transaction = connection.BeginTransaction();
 
-        var result = await connection.ExecuteAsync(new CommandDefinition("""
+        await connection.ExecuteAsync(new CommandDefinition("""
                                                             delete from genres where movieid = @id
                                                             """, new { id }));
 
-       
+       var result = await connection.ExecuteAsync(new CommandDefinition("""
+                                                                        delete from movies where id=@id
+                                                                        """, new { id }));
         
         transaction.Commit();
         return result > 0;

@@ -12,7 +12,7 @@ public static class ContractMapping
         {
             Id = Guid.NewGuid(),
             Title = request.Title,
-            Year = request.Year,
+            YearOfRelease = request.Year,
             Genres = request.Genres.ToList()
         };
     }
@@ -23,7 +23,7 @@ public static class ContractMapping
         {
             Id = id,
             Title = request.Title,
-            Year = request.Year,
+            YearOfRelease = request.Year,
             Genres = request.Genres.ToList()
         };
     }
@@ -31,10 +31,10 @@ public static class ContractMapping
     {
         return new MovieResponse
         {
-            Id = Guid.NewGuid(),
+            Id = movie.Id,
             Title = movie.Title,
             Slug = movie.Slug,
-            Year = movie.Year,
+            Year = movie.YearOfRelease,
             Genres = movie.Genres.ToList()
         };
     }
