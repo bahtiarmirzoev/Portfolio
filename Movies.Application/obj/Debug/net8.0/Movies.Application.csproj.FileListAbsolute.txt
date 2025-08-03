@@ -10,3 +10,6 @@
 /Users/mac/RiderProjects/Movies.Api/Movies.Application/obj/Debug/net8.0/refint/Movies.Application.dll
 /Users/mac/RiderProjects/Movies.Api/Movies.Application/obj/Debug/net8.0/Movies.Application.pdb
 /Users/mac/RiderProjects/Movies.Api/Movies.Application/obj/Debug/net8.0/ref/Movies.Application.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Application/bin/Debug/net8.0/Microsoft.Extensions.Options.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Application/bin/Debug/net8.0/Microsoft.Extensions.Primitives.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Application/obj/Debug/net8.0/Movies.A.4F942C5D.Up2Date

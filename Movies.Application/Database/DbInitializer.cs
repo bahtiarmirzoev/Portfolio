@@ -36,5 +36,39 @@ public class DbInitializer
                                           name text not null
                                       );
                                       """);
+        
+        await connection.ExecuteAsync("""
+                                      create table if not exists users(
+                                          id  UUID primary key,
+                                          username TEXT not null,
+                                          passwordHash TEXT not null,
+                                          email TEXT not null,
+                                          firstName TEXT,
+                                          lastName TEXT,
+                                          refreshToken TEXT,
+                                          refreshTokenExpiryTime date
+                                      );
+                                      """);
+        
+        await connection.ExecuteAsync("""
+                                          create unique index concurrently if not exists users_username_idx
+                                          on users
+                                          using btree(username);
+                                      """);
+        
+        await connection.ExecuteAsync("""
+                                      create table if not exists roles(
+                                          id SERIAL primary key ,
+                                          name TEXT not null
+                                      );
+                                      """);
+        
+        await connection.ExecuteAsync("""
+                                      create table if not exists userRole(
+                                          id SERIAL primary key,
+                                          userId UUID references users (id),
+                                          roleId integer references roles (id)
+                                      );
+                                      """);
     }
 }

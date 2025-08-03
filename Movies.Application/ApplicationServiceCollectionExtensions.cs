@@ -11,6 +11,9 @@ public static class ApplicationServiceCollectionExtensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddSingleton<IMovieRepository, MovieRepository>();
+        services.AddSingleton<IUserRepository, UserRepository>();
+        services.AddSingleton<ITokenService, TokenService>();
+        services.AddSingleton<IAuthService, AuthService>();
         services.AddSingleton<IMovieService , MovieService>();
         services.AddValidatorsFromAssemblyContaining < IApplicationMarker>(ServiceLifetime.Singleton);
         return services;
