@@ -41,3 +41,9 @@
 /Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Npgsql.dll
 /Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/FluentValidation.dll
 /Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/FluentValidation.DependencyInjectionExtensions.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/BCrypt.Net-Next.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Microsoft.IdentityModel.Abstractions.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Microsoft.IdentityModel.Logging.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/Microsoft.IdentityModel.Tokens.dll
+/Users/mac/RiderProjects/Movies.Api/Movies.Api/bin/Debug/net8.0/System.IdentityModel.Tokens.Jwt.dll

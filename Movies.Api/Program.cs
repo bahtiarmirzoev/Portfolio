@@ -1,8 +1,11 @@
 using Movies.Api.Mapping;
 using Movies.Application;
 using Movies.Application.Database;
+using Movies.Application.Options;
+
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
+builder.Services.Configure<JwtOptions>(config.GetSection("JwtOptions"));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
