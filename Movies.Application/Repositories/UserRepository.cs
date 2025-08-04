@@ -60,9 +60,30 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public Task<IEnumerable<User>> GetAllAsync()
+    public  async Task<IEnumerable<User>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        var result = await connection.QueryAsync(new CommandDefinition(
+            """
+            select u.*,string_agg(r.name , ',') as role
+            from users u left join userrole r on u.id = r.userid
+            group by id
+            """));
+
+        return result.Select(x => new User
+        {
+            Id = x.Id,
+            Email = x.Email,
+            FirstName = x.FirstName,
+            LastName = x.LastName,
+            RefreshToken = x.RefreshToken,
+            RefreshTokenExpiryTime = x.RefreshTokenExpiryTime,
+            Username = x.Username,
+            Roles = Enumerable.ToList(x.roles.Split(',')),
+            PasswordHash = null
+
+        });
+
     }
 
     public async Task<bool> UpdateUserAsync(User user)
@@ -94,13 +115,25 @@ public class UserRepository : IUserRepository
         return res > 0;
     }
 
-    public Task<bool> DeleteUserByIdAsync(Guid id)
+    public async Task<bool> DeleteUserByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using var transaction = connection.BeginTransaction();
+        var result = await connection.ExecuteAsync(new CommandDefinition("""
+                                                                         delete from users where id = @id
+                                                                         """, new {  id }));
+        
+        transaction.Commit();
+        return result > 0;
     }
 
-    public Task<bool> ExistsByIdAsync(Guid id)
+    public async Task<bool> ExistsByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition("""
+                                                                               select count(1) from users where id = @id
+                                                                               """ , new {id}));
+            
+                                                                               
     }
 }
