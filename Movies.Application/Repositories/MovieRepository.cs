@@ -41,15 +41,12 @@ public class MovieRepository: IMovieRepository
     public async Task<Movie?> GetByIdAsync(Guid id)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
-        
+    
         var movie = await connection.QuerySingleOrDefaultAsync<Movie>("select * from movies where id=@id", new { id });
         if (movie is null) return null;
-        
-        var genres = await connection.QueryAsync("select * from genres where movieid=@id", new { id });
-        foreach (var genre in genres)
-        {
-            movie.Genres.Add(genre);
-        }
+    
+        var genres = await connection.QueryAsync<string>("select name from genres where movieid=@id", new { id });
+        movie.Genres.AddRange(genres);
 
         return movie;
     }
@@ -57,15 +54,12 @@ public class MovieRepository: IMovieRepository
     public async Task<Movie?> GetBySlugAsync(string slug)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
-        
+    
         var movie = await connection.QuerySingleOrDefaultAsync<Movie>("select * from movies where slug=@slug", new { slug });
         if (movie is null) return null;
-        
-        var genres = await connection.QueryAsync("select * from genres where movieid=@id", new { id = movie.Id });
-        foreach (var genre in genres)
-        {
-            movie.Genres.Add(genre);
-        }
+    
+        var genres = await connection.QueryAsync<string>("select name from genres where movieid=@id", new { id = movie.Id });
+        movie.Genres.AddRange(genres);
 
         return movie;
     }
