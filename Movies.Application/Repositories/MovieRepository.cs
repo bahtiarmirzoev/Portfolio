@@ -88,28 +88,31 @@ public class MovieRepository: IMovieRepository
         using var connection = await _connectionFactory.CreateConnectionAsync();
         using var transaction = connection.BeginTransaction();
 
+        // Удаляем старые жанры
         await connection.ExecuteAsync(new CommandDefinition("""
                                                             delete from genres where movieid = @id
                                                             """, new { id = movie.Id }));
 
+        // Добавляем новые жанры
         foreach (var genre in movie.Genres)
         {
             await connection.ExecuteAsync(new CommandDefinition("""
                                                                 insert into genres (movieid, name) 
-                                                                values (@MoviesId , @Name)
+                                                                values (@MovieId, @Name)
                                                                 """, new { MovieId = movie.Id, Name = genre }));
         }
+
+        // Обновляем данные фильма
         var result = await connection.ExecuteAsync(new CommandDefinition("""
-                                                                             update movies 
-                                                                             set slug = @Slug, 
-                                                                                 title = @Title, 
-                                                                                 yearofrelease = @YearOfRelease
-                                                                             where id = @Id
+                                                                         update movies 
+                                                                         set slug = @Slug, 
+                                                                             title = @Title, 
+                                                                             yearofrelease = @YearOfRelease
+                                                                         where id = @Id
                                                                          """, movie));
-        
+    
         transaction.Commit();
         return result > 0;
-
     }
 
     public async Task<bool> DeleteMovieByIdAsync(Guid id)
