@@ -70,5 +70,9 @@ public class DbInitializer
                                           roleId integer references roles (id)
                                       );
                                       """);
+        await connection.ExecuteAsync("""
+                                      insert into roles(name)
+                                      values (@admin) , (@user) , (@trusted_user)
+                                      """, new { admin = "admin", user = "user", trusted_user = "trusted_user" });
     }
 }
