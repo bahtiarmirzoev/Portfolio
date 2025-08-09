@@ -18,6 +18,7 @@ public class AuthService : IAuthService
     public async Task<bool> SignUp(User user)
     {
         return await _userRepository.CreateUserAsync(user);
+        
     }
 
     public async Task<TokenData?> SignIn(
