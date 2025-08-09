@@ -8,17 +8,34 @@ public class AuthService : IAuthService
 {
     private readonly ITokenService _tokenService;
     private readonly IUserRepository _userRepository;
+    private readonly IRoleRepository _roleRepository;
+    private readonly IRoleService _roleService;
 
-    public AuthService(IUserRepository userRepository, ITokenService tokenService)
+    public AuthService(IUserRepository userRepository, ITokenService tokenService, IRoleRepository roleRepository, IRoleService roleService)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
+        _roleRepository = roleRepository;
+        _roleService = roleService;
     }
 
     public async Task<bool> SignUp(User user)
     {
-        return await _userRepository.CreateUserAsync(user);
+        var role = await _roleRepository.GetByNameAsync("user");
+        if (role == null)
+        {
+            return false;
+        }
         
+        var result =  await _userRepository.CreateUserAsync(user);
+
+        if (!result)
+        {
+            return false;
+        }
+        
+        await _roleService.AssignRoleToUserAsync(user.Id, role.Name);
+        return true;
     }
 
     public async Task<TokenData?> SignIn(
