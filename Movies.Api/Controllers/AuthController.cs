@@ -61,4 +61,27 @@ public class AuthController(
     {
         return Ok("This works");
     }
+    
+    public class EmailController : ControllerBase
+    {
+        private readonly EmailConfirmation _confirmation;
+
+        public EmailController(EmailConfirmation confirmation)
+        {
+            _confirmation = confirmation;
+        }
+
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(Guid userId, string token)
+        {
+            var success = await _confirmation.ConfirmEmail(userId, token);
+
+            if (success)
+            {
+                return Ok(new { message = "Email успешно подтверждён" });
+            }
+
+            return BadRequest(new { message = "Неверный или просроченный токен" });
+        }
+    }
 }

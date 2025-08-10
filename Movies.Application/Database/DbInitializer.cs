@@ -49,6 +49,17 @@ public class DbInitializer
                                           refreshTokenExpiryTime date
                                       );
                                       """);
+        await connection.ExecuteAsync("""
+                                          create table if not exists email_confirmations(
+                                              userId UUID not null,
+                                              token TEXT not null,
+                                              expiresAt TIMESTAMP not null,
+                                              confirmed BOOLEAN default false,
+                                              primary key(userId, token),
+                                              foreign key (userId) references users(id) on delete cascade
+                                          );
+                                      """);
+
         
         await connection.ExecuteAsync("""
                                           create unique index concurrently if not exists users_username_idx
