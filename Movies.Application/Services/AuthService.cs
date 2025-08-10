@@ -1,3 +1,4 @@
+using Movies.Application.Interfaces;
 using Movies.Application.Models;
 using Movies.Application.Repositories;
 using Movies.Contracts.Responses;
@@ -10,13 +11,17 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
     private readonly IRoleService _roleService;
+    private readonly IEmailConfirmationRepository  _emailConfirmationRepository;
+    private readonly IEmailService _emailService;
 
-    public AuthService(IUserRepository userRepository, ITokenService tokenService, IRoleRepository roleRepository, IRoleService roleService)
+    public AuthService(IUserRepository userRepository, ITokenService tokenService, IRoleRepository roleRepository, IRoleService roleService, IEmailConfirmationRepository emailConfirmationRepository, IEmailService emailService)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
         _roleRepository = roleRepository;
         _roleService = roleService;
+        _emailConfirmationRepository = emailConfirmationRepository;
+        _emailService = emailService;
     }
 
     public async Task<bool> SignUp(User user)
@@ -26,15 +31,31 @@ public class AuthService : IAuthService
         {
             return false;
         }
-        
-        var result =  await _userRepository.CreateUserAsync(user);
 
+        // 1. Создаём пользователя
+        var result = await _userRepository.CreateUserAsync(user);
         if (!result)
         {
             return false;
         }
-        
+
+        // 2. Выдаём роль
         await _roleService.AssignRoleToUserAsync(user.Id, role.Name);
+
+        // 3. Генерируем токен для подтверждения почты
+        var token = Guid.NewGuid().ToString();
+        var expiration = DateTime.UtcNow.AddHours(24);
+
+        await _emailConfirmationRepository.CreateAsync(new EmailConfirmation
+        {
+            UserId = user.Id,
+            Token = token,
+            Expiration = expiration
+        });
+
+        // 4. Отправляем письмо
+        await _emailService.SendConfirmationEmail(user.Email, user.Id, token);
+
         return true;
     }
 
