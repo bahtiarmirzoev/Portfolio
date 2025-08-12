@@ -19,17 +19,16 @@ builder.Services.AddControllers();
 builder.Services.AddApplication();
 builder.Services.AddDatabase(config["Database:ConnectionString"]!);
 
+// Service registrations - ensure consistent lifetimes
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>(); // Only Scoped
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-
-
+builder.Services.AddScoped<IEmailConfirmationRepository, EmailConfirmationRepository>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
