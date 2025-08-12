@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using Microsoft.Extensions.Options;
 using Movies.Application.Interfaces;
 
 namespace Movies.Application.Services;
@@ -13,21 +14,17 @@ public class EmailService : IEmailService
     private readonly string _fromEmail;
     private readonly string _frontendBaseUrl;
 
-    public EmailService(
-        string smtpHost,
-        int smtpPort,
-        string smtpUser,
-        string smtpPass,
-        string fromEmail,
-        string frontendBaseUrl)
+    public EmailService(IOptions<EmailSettings> options)
     {
-        _smtpHost = smtpHost;
-        _smtpPort = smtpPort;
-        _smtpUser = smtpUser;
-        _smtpPass = smtpPass;
-        _fromEmail = fromEmail;
-        _frontendBaseUrl = frontendBaseUrl; // например: https://myapp.com
+        var settings = options.Value;
+        _smtpHost = settings.SmtpHost;
+        _smtpPort = settings.SmtpPort;
+        _smtpUser = settings.SmtpUser;
+        _smtpPass = settings.SmtpPass;
+        _fromEmail = settings.FromEmail;
+        _frontendBaseUrl = settings.FrontendBaseUrl;
     }
+
 
     public async Task SendConfirmationEmail(string toEmail, Guid userId, string token)
     {
