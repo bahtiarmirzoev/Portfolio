@@ -1,25 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "/Users/mac/RiderProjects/Movies.Api/Movies.Application/Movies.Application.csproj": {}
+    "C:\\Users\\nizam\\Documents\\C#\\Portfolio\\Movies.Application\\Movies.Application.csproj": {}
   },
   "projects": {
-    "/Users/mac/RiderProjects/Movies.Api/Movies.Application/Movies.Application.csproj": {
+    "C:\\Users\\nizam\\Documents\\C#\\Portfolio\\Movies.Application\\Movies.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/mac/RiderProjects/Movies.Api/Movies.Application/Movies.Application.csproj",
+        "projectUniqueName": "C:\\Users\\nizam\\Documents\\C#\\Portfolio\\Movies.Application\\Movies.Application.csproj",
         "projectName": "Movies.Application",
-        "projectPath": "/Users/mac/RiderProjects/Movies.Api/Movies.Application/Movies.Application.csproj",
-        "packagesPath": "/Users/mac/.nuget/packages/",
-        "outputPath": "/Users/mac/RiderProjects/Movies.Api/Movies.Application/obj/",
+        "projectPath": "C:\\Users\\nizam\\Documents\\C#\\Portfolio\\Movies.Application\\Movies.Application.csproj",
+        "packagesPath": "C:\\Users\\nizam\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\nizam\\Documents\\C#\\Portfolio\\Movies.Application\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/mac/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\nizam\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -63,6 +70,10 @@
               "target": "Package",
               "version": "[10.0.0-preview.6.25358.103, )"
             },
+            "Microsoft.Extensions.Options": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            },
             "Microsoft.IdentityModel.Tokens": {
               "target": "Package",
               "version": "[8.13.0, )"
@@ -92,7 +103,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.412/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.303/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -60,7 +60,7 @@ public class AuthController(
     [Authorize]
     public IActionResult Check()
     {
-        return Ok("This works");
+        return Ok("Ts works");
     }
     
 }

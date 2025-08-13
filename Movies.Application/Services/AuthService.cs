@@ -43,7 +43,7 @@ public class AuthService : IAuthService
         await _roleService.AssignRoleToUserAsync(user.Id, role.Name);
 
         // 3. Генерируем токен для подтверждения почты
-        var token = Guid.NewGuid().ToString();
+        /*var token = Guid.NewGuid().ToString();
         var expiration = DateTime.UtcNow.AddHours(24);
 
         await _emailConfirmationRepository.CreateAsync(new EmailConfirmation
@@ -51,10 +51,11 @@ public class AuthService : IAuthService
             UserId = user.Id,
             Token = token,
             Expiration = expiration
-        });
+        });*/
 
         // 4. Отправляем письмо
-        await _emailService.SendConfirmationEmail(user.Email, user.Id, token);
+        //xuyna yebannaya
+        /*await _emailService.SendConfirmationEmail(user.Email, user.Id, token);*/
 
         return true;
     }

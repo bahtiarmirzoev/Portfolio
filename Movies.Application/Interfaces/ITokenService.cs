@@ -6,7 +6,7 @@ namespace Movies.Application.Services;
 
 public interface ITokenService
 {
-    Task<string> Generate(User user);
+    ValueTask<string> Generate(User user);
     string GenerateEmailToken(User user);
     string GenerateRefreshToken();
     Task<TokenValidationResult> Validate(string token, bool lifetime = false);
