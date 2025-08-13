@@ -22,8 +22,8 @@ public class DbInitializer
                                               title TEXT not null,
                                               yearofrelease integer not null);
                                       """);
-        
-        
+
+
         await connection.ExecuteAsync("""
                                           create unique index concurrently if not exists movies_slug_idx
                                           on movies
@@ -36,7 +36,7 @@ public class DbInitializer
                                           name text not null
                                       );
                                       """);
-        
+
         await connection.ExecuteAsync("""
                                       create table if not exists users(
                                           id  UUID primary key,
@@ -60,20 +60,20 @@ public class DbInitializer
                                           );
                                       """);
 
-        
+
         await connection.ExecuteAsync("""
                                           create unique index concurrently if not exists users_username_idx
                                           on users
                                           using btree(username);
                                       """);
-        
+
         await connection.ExecuteAsync("""
                                       create table if not exists roles(
                                           id SERIAL primary key ,
                                           name TEXT not null
                                       );
                                       """);
-        
+
         await connection.ExecuteAsync("""
                                       create table if not exists userRole(
                                           id SERIAL primary key,
@@ -81,9 +81,6 @@ public class DbInitializer
                                           roleId integer references roles (id)
                                       );
                                       """);
-        await connection.ExecuteAsync("""
-                                      insert into roles(name)
-                                      values (@admin) , (@user) , (@trusted_user)
-                                      """, new { admin = "admin", user = "user", trusted_user = "trusted_user" });
+        
     }
 }
