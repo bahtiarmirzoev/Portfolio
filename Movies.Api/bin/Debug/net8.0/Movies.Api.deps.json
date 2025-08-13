@@ -257,12 +257,18 @@
           "System.IdentityModel.Tokens.Jwt": "8.13.0"
         },
         "runtime": {
-          "Movies.Application.dll": {}
+          "Movies.Application.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "Movies.Contracts/1.0.0": {
         "runtime": {
-          "Movies.Contracts.dll": {}
+          "Movies.Contracts.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }

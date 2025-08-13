@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mapping;
-using Movies.Application.Interfaces;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
 

@@ -1,4 +1,3 @@
-using Movies.Application.Interfaces;
 using Movies.Application.Models;
 using Movies.Application.Repositories;
 using Movies.Contracts.Responses;
@@ -11,17 +10,15 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
     private readonly IRoleService _roleService;
-    private readonly IEmailConfirmationRepository  _emailConfirmationRepository;
-    private readonly IEmailService _emailService;
+    
 
-    public AuthService(IUserRepository userRepository, ITokenService tokenService, IRoleRepository roleRepository, IRoleService roleService, IEmailConfirmationRepository emailConfirmationRepository, IEmailService emailService)
+    public AuthService(IUserRepository userRepository, ITokenService tokenService, IRoleRepository roleRepository, IRoleService roleService)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
         _roleRepository = roleRepository;
         _roleService = roleService;
-        _emailConfirmationRepository = emailConfirmationRepository;
-        _emailService = emailService;
+        
     }
 
     public async Task<bool> SignUp(User user)
