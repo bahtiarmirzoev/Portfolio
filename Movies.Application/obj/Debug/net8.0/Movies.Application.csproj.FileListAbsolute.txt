@@ -13,3 +13,16 @@
 /Users/mac/RiderProjects/Movies.Api/Movies.Application/bin/Debug/net8.0/Microsoft.Extensions.Options.dll
 /Users/mac/RiderProjects/Movies.Api/Movies.Application/bin/Debug/net8.0/Microsoft.Extensions.Primitives.dll
 /Users/mac/RiderProjects/Movies.Api/Movies.Application/obj/Debug/net8.0/Movies.A.4F942C5D.Up2Date
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\obj\Debug\net8.0\Movies.Application.csproj.AssemblyReference.cache
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\obj\Debug\net8.0\Movies.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\obj\Debug\net8.0\Movies.Application.AssemblyInfoInputs.cache
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\obj\Debug\net8.0\Movies.Application.AssemblyInfo.cs
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\obj\Debug\net8.0\Movies.Application.csproj.CoreCompileInputs.cache
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\obj\Debug\net8.0\Movies.Application.sourcelink.json
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\obj\Debug\net8.0\Movies.Application.dll
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\obj\Debug\net8.0\refint\Movies.Application.dll
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\obj\Debug\net8.0\Movies.Application.pdb
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\bin\Debug\net8.0\Movies.Application.deps.json
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\bin\Debug\net8.0\Movies.Application.dll
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\bin\Debug\net8.0\Movies.Application.pdb
+C:\Users\nizam\Documents\C#\Portfolio\Movies.Application\obj\Debug\net8.0\ref\Movies.Application.dll

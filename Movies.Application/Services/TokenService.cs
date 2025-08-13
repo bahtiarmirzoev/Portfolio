@@ -18,7 +18,7 @@ public class TokenService : ITokenService
         _options = jwtOptions.Value;
     }
 
-    public async Task<string> Generate(User user)
+    public async ValueTask<string> Generate(User user)
     {
         List<Claim> claims =
         [
@@ -36,7 +36,9 @@ public class TokenService : ITokenService
         var token = new JwtSecurityToken(
             claims: claims,
             signingCredentials: signingCredentials,
-            expires: DateTime.UtcNow.AddMinutes(_options.ExpiresMinutes)
+            expires: DateTime.UtcNow.AddMinutes(_options.ExpiresMinutes),
+            issuer: _options.Issuer,
+            audience: _options.Audience
         );
 
         var tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
