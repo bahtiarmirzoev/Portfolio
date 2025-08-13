@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "6fkQNl3wDFs=",
+  "dgSpecHash": "GSuK/gR4Gr4=",
   "success": true,
   "projectFilePath": "/Users/mac/Desktop/Portfolio/Movies.Api/Movies.Api.csproj",
   "expectedPackageFiles": [
@@ -11,10 +11,13 @@
     "/Users/mac/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/8.0.19/microsoft.aspnetcore.authentication.jwtbearer.8.0.19.nupkg.sha512",
     "/Users/mac/.nuget/packages/microsoft.aspnetcore.openapi/8.0.18/microsoft.aspnetcore.openapi.8.0.18.nupkg.sha512",
     "/Users/mac/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5/microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
+    "/Users/mac/.nuget/packages/microsoft.extensions.configuration/10.0.0-preview.7.25380.108/microsoft.extensions.configuration.10.0.0-preview.7.25380.108.nupkg.sha512",
+    "/Users/mac/.nuget/packages/microsoft.extensions.configuration.abstractions/10.0.0-preview.7.25380.108/microsoft.extensions.configuration.abstractions.10.0.0-preview.7.25380.108.nupkg.sha512",
+    "/Users/mac/.nuget/packages/microsoft.extensions.configuration.binder/10.0.0-preview.7.25380.108/microsoft.extensions.configuration.binder.10.0.0-preview.7.25380.108.nupkg.sha512",
     "/Users/mac/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/10.0.0-preview.6.25358.103/microsoft.extensions.dependencyinjection.abstractions.10.0.0-preview.6.25358.103.nupkg.sha512",
     "/Users/mac/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.2/microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
     "/Users/mac/.nuget/packages/microsoft.extensions.options/8.0.2/microsoft.extensions.options.8.0.2.nupkg.sha512",
-    "/Users/mac/.nuget/packages/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "/Users/mac/.nuget/packages/microsoft.extensions.primitives/10.0.0-preview.7.25380.108/microsoft.extensions.primitives.10.0.0-preview.7.25380.108.nupkg.sha512",
     "/Users/mac/.nuget/packages/microsoft.identitymodel.abstractions/8.13.0/microsoft.identitymodel.abstractions.8.13.0.nupkg.sha512",
     "/Users/mac/.nuget/packages/microsoft.identitymodel.jsonwebtokens/8.13.0/microsoft.identitymodel.jsonwebtokens.8.13.0.nupkg.sha512",
     "/Users/mac/.nuget/packages/microsoft.identitymodel.logging/8.13.0/microsoft.identitymodel.logging.8.13.0.nupkg.sha512",

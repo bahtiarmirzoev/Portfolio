@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Movies.Api.Mapping;
 using Movies.Application;
 using Movies.Application.Database;
+using Movies.Application.Interfaces;
 using Movies.Application.Options;
 using Movies.Application.Repositories;
 using Movies.Application.Services;
@@ -18,6 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
+
 builder.Services.AddApplication();
 builder.Services.AddDatabase(config["Database:ConnectionString"]!);
 
@@ -25,6 +27,7 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAuthService, AuthService>(); // Only Scoped
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 var jwtSettings = config.GetSection("JwtOptions");
 

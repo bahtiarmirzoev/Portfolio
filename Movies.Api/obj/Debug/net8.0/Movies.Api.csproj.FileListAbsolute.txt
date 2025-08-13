@@ -155,3 +155,7 @@ C:/Users/nizam/Documents/C#/Portfolio/Movies.Api/bin/Debug/net8.0/Microsoft.Iden
 /Users/mac/Desktop/Portfolio/Movies.Api/obj/Debug/net8.0/Movies.Api.pdb
 /Users/mac/Desktop/Portfolio/Movies.Api/obj/Debug/net8.0/Movies.Api.genruntimeconfig.cache
 /Users/mac/Desktop/Portfolio/Movies.Api/obj/Debug/net8.0/ref/Movies.Api.dll
+/Users/mac/Desktop/Portfolio/Movies.Api/bin/Debug/net8.0/Microsoft.Extensions.Configuration.dll
+/Users/mac/Desktop/Portfolio/Movies.Api/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Abstractions.dll
+/Users/mac/Desktop/Portfolio/Movies.Api/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Binder.dll
+/Users/mac/Desktop/Portfolio/Movies.Api/bin/Debug/net8.0/Microsoft.Extensions.Primitives.dll
