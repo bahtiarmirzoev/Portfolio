@@ -25,9 +25,13 @@ builder.Services.AddDatabase(config["Database:ConnectionString"]!);
 
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IAuthService, AuthService>(); // Only Scoped
+builder.Services.AddScoped<IAuthService, AuthService>(); 
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped < IRoleService , RoleService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddScoped<OtpRepository>();
+builder.Services.AddScoped<OtpService>();
+
 
 var jwtSettings = config.GetSection("JwtOptions");
 
