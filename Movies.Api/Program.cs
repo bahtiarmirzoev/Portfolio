@@ -63,6 +63,9 @@ builder.Services.AddScoped<OtpRepository>();
 builder.Services.AddScoped<OtpService>();
 builder.Services.AddScoped<IFavoriteRepository , FavoriteRepository>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+builder.Services.AddScoped<IRatingService, RatingService>();
+
 
 var jwtSettings = config.GetSection("JwtOptions");
 

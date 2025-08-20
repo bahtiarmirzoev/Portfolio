@@ -11,12 +11,14 @@ public class OtpController : ControllerBase
     private readonly OtpService _otpService;
     private readonly IRoleRepository _roleRepository;
     private readonly IUserRoleRepository _userRoleRepository;
+    private readonly IRoleService _roleService;
 
-    public OtpController(OtpService otpService, IRoleRepository roleRepository, IUserRoleRepository userRoleRepository)
+    public OtpController(OtpService otpService, IRoleRepository roleRepository, IUserRoleRepository userRoleRepository, IRoleService roleService)
     {
         _otpService = otpService;
         _roleRepository = roleRepository;
         _userRoleRepository = userRoleRepository;
+        _roleService = roleService;
     }
 
     [HttpPost("send")]
@@ -40,7 +42,7 @@ public class OtpController : ControllerBase
         }
 
         if (trustedRole is not null)
-            await _userRoleRepository.AssignRoleToUserAsync(request.UserId, trustedRole.Id);
+            await _roleService.UpgradeToTrustedUserAsync(request.UserId);
 
         return Ok(new { message = "OTP verified, user promoted to trusted_user" });
     }

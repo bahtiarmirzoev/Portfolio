@@ -115,7 +115,11 @@
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
-            "projectReferences": {}
+            "projectReferences": {
+              "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj": {
+                "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj"
+              }
+            }
           }
         },
         "warningProperties": {
