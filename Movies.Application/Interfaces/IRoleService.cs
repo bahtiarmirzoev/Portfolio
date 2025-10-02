@@ -7,5 +7,7 @@ namespace Movies.Application.Services
     {
         Task<bool> AssignRoleToUserAsync(Guid userId, string roleName);
         Task<bool> RemoveRoleFromUserAsync(Guid userId, string roleName);
+
+        Task<bool> UpgradeToTrustedUserAsync(Guid userId);
     }
 }

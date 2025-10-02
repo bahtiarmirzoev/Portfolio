@@ -33,3 +33,15 @@ C:/Users/nizam/Documents/C#/Portfolio/Movies.Contracts/obj/Debug/net8.0/ref/Movi
 /Users/mac/Desktop/Portfolio/Movies.Contracts/obj/Debug/net8.0/refint/Movies.Contracts.dll
 /Users/mac/Desktop/Portfolio/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.pdb
 /Users/mac/Desktop/Portfolio/Movies.Contracts/obj/Debug/net8.0/ref/Movies.Contracts.dll
+/Users/mac/Portfolio/Movies.Contracts/bin/Debug/net8.0/Movies.Contracts.deps.json
+/Users/mac/Portfolio/Movies.Contracts/bin/Debug/net8.0/Movies.Contracts.dll
+/Users/mac/Portfolio/Movies.Contracts/bin/Debug/net8.0/Movies.Contracts.pdb
+/Users/mac/Portfolio/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.GeneratedMSBuildEditorConfig.editorconfig
+/Users/mac/Portfolio/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.AssemblyInfoInputs.cache
+/Users/mac/Portfolio/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.AssemblyInfo.cs
+/Users/mac/Portfolio/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.csproj.CoreCompileInputs.cache
+/Users/mac/Portfolio/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.sourcelink.json
+/Users/mac/Portfolio/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.dll
+/Users/mac/Portfolio/Movies.Contracts/obj/Debug/net8.0/refint/Movies.Contracts.dll
+/Users/mac/Portfolio/Movies.Contracts/obj/Debug/net8.0/Movies.Contracts.pdb
+/Users/mac/Portfolio/Movies.Contracts/obj/Debug/net8.0/ref/Movies.Contracts.dll

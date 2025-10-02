@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Movies.Application.Services;
 using System.Security.Claims;
+using Movies.Application.Interfaces;
 
 namespace Movies.API.Controllers
 {

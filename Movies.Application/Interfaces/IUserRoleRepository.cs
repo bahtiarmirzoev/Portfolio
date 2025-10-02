@@ -7,6 +7,6 @@ namespace Movies.Application.Repositories
     {
         Task<bool> AssignRoleToUserAsync(Guid userId, int roleId);
         Task<bool> RemoveRoleFromUserAsync(Guid userId, int roleId);
-       
+        Task<bool> HasRoleAsync(Guid userId, int roleId);
     }
 }

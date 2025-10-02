@@ -1,6 +1,13 @@
-namespace Movies.Application.Interfaces;
+using Movies.Application.Models;
+using System;
+using System.Threading.Tasks;
 
-public class IRatingRepository
+namespace Movies.Application.Interfaces
 {
-    
+    public interface IRatingRepository
+    {
+        Task<bool> AddOrUpdateRatingAsync(Rating rating);
+        Task<double?> GetMovieAverageRatingAsync(Guid movieId);
+        Task<int?> GetUserRatingAsync(Guid userId, Guid movieId);
+    }
 }

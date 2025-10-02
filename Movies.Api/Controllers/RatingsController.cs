@@ -4,6 +4,7 @@ using Movies.Application.Services;
 using Movies.Contracts.Requests;
 using Movies.Contracts.Responses;
 using System.Security.Claims;
+using Movies.Application.Interfaces;
 
 namespace Movies.Api.Controllers;
 
