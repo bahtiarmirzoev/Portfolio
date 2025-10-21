@@ -17,10 +17,10 @@ namespace Movies.Application.Repositories
         public async Task<bool> AssignRoleToUserAsync(Guid userId, int roleId)
         {
             if (await HasRoleAsync(userId, roleId))
-                return false; // роль уже назначена
+                return false; 
 
             const string sql = """
-                                   insert into userrole ("userId", "roleId")
+                                   insert into userrole ("userid", "roleid")
                                    values (@UserId, @RoleId);
                                """;
 
@@ -33,7 +33,7 @@ namespace Movies.Application.Repositories
         {
             const string sql = """
                                    delete from userrole
-                                   where "userId" = @UserId and "roleId" = @RoleId;
+                                   where "userid" = @UserId and "roleid" = @RoleId;
                                """;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
@@ -46,7 +46,7 @@ namespace Movies.Application.Repositories
             const string sql = """
                                    select count(1)
                                    from userrole
-                                   where "userId" = @UserId and "roleId" = @RoleId;
+                                   where "userid" = @UserId and "roleid" = @RoleId;
                                """;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();

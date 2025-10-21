@@ -18,7 +18,7 @@ namespace Movies.Application.Repositories
         public async Task AddOtpAsync(UserOtp otp)
         {
             const string sql = """
-                                   insert into user_otps (id, "userId", code)
+                                   insert into user_otps (id, "userid", code)
                                    values (@Id, @UserId, @Code);
                                """;
 
@@ -30,7 +30,7 @@ namespace Movies.Application.Repositories
         {
             const string sql = """
                                    select * from user_otps
-                                   where "userId" = @UserId and code = @Code
+                                   where "userid" = @UserId and code = @Code
                                    limit 1;
                                """;
 

@@ -18,9 +18,9 @@ namespace Movies.Application.Repositories
         public async Task<bool> AddToFavoritesAsync(FavoriteMovie favorite)
         {
             const string sql = """
-                insert into "favoriteMovies" (id, "userId", "movieId", "createdAt")
-                values (@Id, @UserId, @MovieId, @CreatedAt)
-                on conflict ("userId", "movieId") do nothing;
+                insert into favoritemovies (id, userid, movieid )
+                values (@Id, @UserId, @MovieId )
+                on conflict ("userid", "movieid") do nothing;
             """;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
@@ -31,8 +31,8 @@ namespace Movies.Application.Repositories
         public async Task<bool> RemoveFromFavoritesAsync(Guid userId, Guid movieId)
         {
             const string sql = """
-                delete from "favoriteMovies"
-                where "userId" = @UserId and "movieId" = @MovieId;
+                delete from "favoritemovies"
+                where "userid" = @UserId and "movieid" = @MovieId;
             """;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
@@ -43,9 +43,9 @@ namespace Movies.Application.Repositories
         public async Task<IEnumerable<FavoriteMovie>> GetUserFavoritesAsync(Guid userId)
         {
             const string sql = """
-                select * from "favoriteMovies"
-                where "userId" = @UserId
-                order by "createdAt" desc;
+                select * from "favoritemovies"
+                where "userid" = @UserId
+                order by "createdat" desc;
             """;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
@@ -56,8 +56,8 @@ namespace Movies.Application.Repositories
         {
             const string sql = """
                 select exists(
-                    select 1 from "favoriteMovies"
-                    where "userId" = @UserId and "movieId" = @MovieId
+                    select 1 from "favoritemovies"
+                    where "userid" = @UserId and "movieid" = @MovieId
                 );
             """;
 

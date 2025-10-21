@@ -16,10 +16,10 @@ public class EmailService : IEmailService
     public EmailService(IConfiguration config)
     {
         _config = config;
-        _email = _config["Email:Address"] ?? throw new ArgumentNullException("Email address not configured");
-        _password = _config["Email:Password"] ?? throw new ArgumentNullException("Email password not configured");
-        _host = _config["Email:Host"] ?? throw new ArgumentNullException("SMTP host not configured");
-        _port = int.Parse(_config["Email:Port"] ?? throw new ArgumentNullException("SMTP port not configured"));
+        _email = _config["EMAIL_CONFIGURATION:EMAIL"] ?? throw new ArgumentNullException("Email address not configured");
+        _password = _config["EMAIL_CONFIGURATION:PASSWORD"] ?? throw new ArgumentNullException("Email password not configured");
+        _host = _config["EMAIL_CONFIGURATION:HOST"] ?? throw new ArgumentNullException("SMTP host not configured");
+        _port = int.Parse(_config["EMAIL_CONFIGURATION:PORT"] ?? throw new ArgumentNullException("SMTP port not configured"));
     }
 
     public async Task SendEmail(string recipient, string subject, string body)
