@@ -53,8 +53,12 @@ namespace Movies.Application.Services
                 if (role == null) return false;
             }
 
-            // Назначаем роль пользователю
+           
+            await RemoveRoleFromUserAsync(userId, "user" );
+            
             return await _userRoleRepository.AssignRoleToUserAsync(userId, role.Id);
+            
+            
         }
     }
 }

@@ -20,7 +20,7 @@ public class RatingsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "trusted_user")]
+    [Authorize(Roles = "trusted_user" )]
     public async Task<IActionResult> RateMovie(
         [FromRoute] Guid movieId,
         [FromBody] RatingRequest request,

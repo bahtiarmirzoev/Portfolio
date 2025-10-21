@@ -19,10 +19,10 @@ namespace Movies.Application.Repositories
         public async Task<bool> AddOrUpdateRatingAsync(Rating rating)
         {
             const string sql = """
-                insert into ratings (id, "userId", "movieId", value, "createdAt")
+                insert into ratings (id, userid, movieid, value, createdat)
                 values (@Id, @UserId, @MovieId, @Value, @CreatedAt)
-                on conflict ("userId", "movieId") 
-                do update set value = excluded.value, "createdAt" = excluded."createdAt";
+                on conflict (userid, movieid) 
+                do update set value = excluded.value, createdat = excluded.createdat;
             """;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
@@ -35,7 +35,7 @@ namespace Movies.Application.Repositories
             const string sql = """
                 select avg(value)::float 
                 from ratings 
-                where "movieId" = @MovieId;
+                where movieid = @MovieId;
             """;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
@@ -47,7 +47,7 @@ namespace Movies.Application.Repositories
             const string sql = """
                 select value 
                 from ratings 
-                where "userId" = @UserId and "movieId" = @MovieId;
+                where userid = @UserId and movieid = @MovieId;
             """;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();

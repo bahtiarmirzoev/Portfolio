@@ -83,7 +83,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwtSettings["Audience"],
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero,
-            RoleClaimType = ClaimTypes.Role
+            
+            RoleClaimType = "role",
+            NameClaimType = "userId"
         };
     });
 
