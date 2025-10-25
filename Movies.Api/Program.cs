@@ -57,7 +57,6 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAuthService, AuthService>(); 
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-builder.Services.AddScoped < IRoleService , RoleService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<OtpRepository>();
 builder.Services.AddScoped<OtpService>();
@@ -84,7 +83,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero,
             
-            RoleClaimType = "role",
+            RoleClaimType = "Role",
             NameClaimType = "userId"
         };
     });
