@@ -129,6 +129,28 @@ public class DbInitializer
         await connection.ExecuteAsync("create index if not exists idx_rating_movieid on ratings(movieid);");
 
         // -----------------------------
+        // Таблица комментариев
+        // -----------------------------
+        await connection.ExecuteAsync("""
+            create table if not exists comments (
+                id UUID primary key,
+                movieid UUID not null references movies(id) on delete cascade,
+                userid UUID not null references users(id) on delete cascade,
+                content TEXT not null,
+                createdat TIMESTAMP not null default now(),
+                updatedat TIMESTAMP
+            );
+        """);
+
+        await connection.ExecuteAsync("create index if not exists idx_comments_movieid on comments(movieid);");
+        await connection.ExecuteAsync("create index if not exists idx_comments_userid on comments(userid);");
+        await connection.ExecuteAsync("create index if not exists idx_comments_createdat on comments(createdat desc);");
+
+        // Убираем проблемный constraint или делаем его по-другому
+        // Вместо ALTER TABLE с IF NOT EXISTS, просто создаем constraint при создании таблицы
+        // Или используем DO block для условного создания constraint
+
+        // -----------------------------
         // Таблица OTP
         // -----------------------------
         await connection.ExecuteAsync("""
