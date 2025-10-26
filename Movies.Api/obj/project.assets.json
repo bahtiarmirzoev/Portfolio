@@ -1424,11 +1424,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/mac/Portfolio/Movies.Api/Movies.Api.csproj",
+      "projectUniqueName": "/Users/mac/Desktop/Portfolio/Movies.Api/Movies.Api.csproj",
       "projectName": "Movies.Api",
-      "projectPath": "/Users/mac/Portfolio/Movies.Api/Movies.Api.csproj",
+      "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Api/Movies.Api.csproj",
       "packagesPath": "/Users/mac/.nuget/packages/",
-      "outputPath": "/Users/mac/Portfolio/Movies.Api/obj/",
+      "outputPath": "/Users/mac/Desktop/Portfolio/Movies.Api/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/mac/.nuget/NuGet/NuGet.Config"
@@ -1443,11 +1443,11 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "/Users/mac/Portfolio/Movies.Application/Movies.Application.csproj": {
-              "projectPath": "/Users/mac/Portfolio/Movies.Application/Movies.Application.csproj"
+            "/Users/mac/Desktop/Portfolio/Movies.Application/Movies.Application.csproj": {
+              "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Application/Movies.Application.csproj"
             },
-            "/Users/mac/Portfolio/Movies.Contracts/Movies.Contracts.csproj": {
-              "projectPath": "/Users/mac/Portfolio/Movies.Contracts/Movies.Contracts.csproj"
+            "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj": {
+              "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj"
             }
           }
         }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "pEvbHehgaoU=",
+  "dgSpecHash": "GSuK/gR4Gr4=",
   "success": true,
-  "projectFilePath": "/Users/mac/Portfolio/Movies.Api/Movies.Api.csproj",
+  "projectFilePath": "/Users/mac/Desktop/Portfolio/Movies.Api/Movies.Api.csproj",
   "expectedPackageFiles": [
     "/Users/mac/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/Users/mac/.nuget/packages/dapper/2.1.66/dapper.2.1.66.nupkg.sha512",

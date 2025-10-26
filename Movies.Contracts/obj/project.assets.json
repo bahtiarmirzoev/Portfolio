@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/mac/Portfolio/Movies.Contracts/Movies.Contracts.csproj",
+      "projectUniqueName": "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj",
       "projectName": "Movies.Contracts",
-      "projectPath": "/Users/mac/Portfolio/Movies.Contracts/Movies.Contracts.csproj",
+      "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj",
       "packagesPath": "/Users/mac/.nuget/packages/",
-      "outputPath": "/Users/mac/Portfolio/Movies.Contracts/obj/",
+      "outputPath": "/Users/mac/Desktop/Portfolio/Movies.Contracts/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/mac/.nuget/NuGet/NuGet.Config"
