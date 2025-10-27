@@ -19,61 +19,66 @@ public class DbInitializer
         // Таблица фильмов
         // -----------------------------
         await connection.ExecuteAsync("""
-            create table if not exists movies (
-                id UUID primary key,
-                slug TEXT not null,
-                title TEXT not null,
-                yearofrelease integer not null
+            CREATE TABLE IF NOT EXISTS movies (
+                id UUID PRIMARY KEY,
+                slug TEXT NOT NULL,
+                title TEXT NOT NULL,
+                year INTEGER NOT NULL
             );
         """);
 
         await connection.ExecuteAsync("""
-            create unique index concurrently if not exists movies_slug_idx
-            on movies(slug);
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_movies_slug
+            ON movies(slug);
         """);
 
         // -----------------------------
         // Таблица жанров
         // -----------------------------
         await connection.ExecuteAsync("""
-            create table if not exists genres(
-                movieid UUID references movies(id),
-                name TEXT not null
+            CREATE TABLE IF NOT EXISTS genres (
+                id SERIAL PRIMARY KEY,
+                movieid UUID REFERENCES movies(id) ON DELETE CASCADE,
+                name TEXT NOT NULL
             );
+        """);
+
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_genres_movieid
+            ON genres(movieid);
         """);
 
         // -----------------------------
         // Таблица пользователей
         // -----------------------------
         await connection.ExecuteAsync("""
-            create table if not exists users(
-                id UUID primary key,
-                username TEXT not null,
-                passwordhash TEXT not null,
-                email TEXT not null,
+            CREATE TABLE IF NOT EXISTS users (
+                id UUID PRIMARY KEY,
+                username TEXT NOT NULL,
+                passwordhash TEXT NOT NULL,
+                email TEXT NOT NULL,
                 firstname TEXT,
                 lastname TEXT,
                 refreshtoken TEXT,
-                refreshtokenexpirytime date
+                refreshtokenexpirytime TIMESTAMP
             );
         """);
 
         await connection.ExecuteAsync("""
-            create unique index concurrently if not exists users_username_idx
-            on users(username);
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username
+            ON users(username);
         """);
 
         // -----------------------------
-        // Таблица подтверждений email
+        // Таблица подтверждения email
         // -----------------------------
         await connection.ExecuteAsync("""
-            create table if not exists email_confirmations(
-                userid UUID not null,
-                token TEXT not null,
-                expiresat TIMESTAMP not null,
-                confirmed BOOLEAN default false,
-                primary key(userid, token),
-                foreign key (userid) references users(id) on delete cascade
+            CREATE TABLE IF NOT EXISTS email_confirmations (
+                userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                token TEXT NOT NULL,
+                expiresat TIMESTAMP NOT NULL,
+                confirmed BOOLEAN DEFAULT FALSE,
+                PRIMARY KEY (userid, token)
             );
         """);
 
@@ -81,17 +86,17 @@ public class DbInitializer
         // Таблицы ролей и связей
         // -----------------------------
         await connection.ExecuteAsync("""
-            create table if not exists roles(
-                id SERIAL primary key,
-                name TEXT not null
+            CREATE TABLE IF NOT EXISTS roles (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL
             );
         """);
 
         await connection.ExecuteAsync("""
-            create table if not exists userrole(
-                id SERIAL primary key,
-                userid UUID references users(id),
-                roleid integer references roles(id)
+            CREATE TABLE IF NOT EXISTS userrole (
+                id SERIAL PRIMARY KEY,
+                userid UUID REFERENCES users(id) ON DELETE CASCADE,
+                roleid INTEGER REFERENCES roles(id) ON DELETE CASCADE
             );
         """);
 
@@ -99,68 +104,84 @@ public class DbInitializer
         // Таблица избранного
         // -----------------------------
         await connection.ExecuteAsync("""
-            create table if not exists favoritemovies(
-                id UUID primary key,
-                userid UUID not null references users(id) on delete cascade,
-                movieid UUID not null references movies(id) on delete cascade,
-                createdat TIMESTAMP not null default now(),
-                constraint uq_favorite unique(userid, movieid)
+            CREATE TABLE IF NOT EXISTS favoritemovies (
+                id UUID PRIMARY KEY,
+                userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                movieid UUID NOT NULL REFERENCES movies(id) ON DELETE CASCADE,
+                createdat TIMESTAMP NOT NULL DEFAULT now(),
+                CONSTRAINT uq_favorite UNIQUE (userid, movieid)
             );
         """);
 
-        await connection.ExecuteAsync("create index if not exists idx_favorite_userid on favoritemovies(userid);");
-        await connection.ExecuteAsync("create index if not exists idx_favorite_movieid on favoritemovies(movieid);");
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_favorite_userid ON favoritemovies(userid);
+        """);
+
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_favorite_movieid ON favoritemovies(movieid);
+        """);
 
         // -----------------------------
         // Таблица рейтингов
         // -----------------------------
         await connection.ExecuteAsync("""
-            create table if not exists ratings(
-                id UUID primary key,
-                userid UUID not null references users(id) on delete cascade,
-                movieid UUID not null references movies(id) on delete cascade,
-                value int not null check(value between 1 and 5),
-                createdat timestamp not null default now(),
-                constraint uq_rating unique(userid, movieid)
+            CREATE TABLE IF NOT EXISTS ratings (
+                id UUID PRIMARY KEY,
+                userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                movieid UUID NOT NULL REFERENCES movies(id) ON DELETE CASCADE,
+                value INTEGER NOT NULL CHECK (value BETWEEN 1 AND 5),
+                createdat TIMESTAMP NOT NULL DEFAULT now(),
+                CONSTRAINT uq_rating UNIQUE (userid, movieid)
             );
         """);
 
-        await connection.ExecuteAsync("create index if not exists idx_rating_userid on ratings(userid);");
-        await connection.ExecuteAsync("create index if not exists idx_rating_movieid on ratings(movieid);");
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_rating_userid ON ratings(userid);
+        """);
+
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_rating_movieid ON ratings(movieid);
+        """);
 
         // -----------------------------
         // Таблица комментариев
         // -----------------------------
         await connection.ExecuteAsync("""
-            create table if not exists comments (
-                id UUID primary key,
-                movieid UUID not null references movies(id) on delete cascade,
-                userid UUID not null references users(id) on delete cascade,
-                content TEXT not null,
-                createdat TIMESTAMP not null default now(),
+            CREATE TABLE IF NOT EXISTS comments (
+                id UUID PRIMARY KEY,
+                movieid UUID NOT NULL REFERENCES movies(id) ON DELETE CASCADE,
+                userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                content TEXT NOT NULL,
+                createdat TIMESTAMP NOT NULL DEFAULT now(),
                 updatedat TIMESTAMP
             );
         """);
 
-        await connection.ExecuteAsync("create index if not exists idx_comments_movieid on comments(movieid);");
-        await connection.ExecuteAsync("create index if not exists idx_comments_userid on comments(userid);");
-        await connection.ExecuteAsync("create index if not exists idx_comments_createdat on comments(createdat desc);");
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_comments_movieid ON comments(movieid);
+        """);
 
-        // Убираем проблемный constraint или делаем его по-другому
-        // Вместо ALTER TABLE с IF NOT EXISTS, просто создаем constraint при создании таблицы
-        // Или используем DO block для условного создания constraint
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_comments_userid ON comments(userid);
+        """);
+
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_comments_createdat ON comments(createdat DESC);
+        """);
 
         // -----------------------------
-        // Таблица OTP
+        // Таблица OTP-кодов
         // -----------------------------
         await connection.ExecuteAsync("""
-            create table if not exists user_otps(
-                id UUID primary key,
-                userid UUID not null references users(id) on delete cascade,
-                code TEXT not null
+            CREATE TABLE IF NOT EXISTS user_otps (
+                id UUID PRIMARY KEY,
+                userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                code TEXT NOT NULL
             );
         """);
 
-        await connection.ExecuteAsync("create index if not exists idx_user_otps_userid on user_otps(userid);");
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_user_otps_userid ON user_otps(userid);
+        """);
     }
 }

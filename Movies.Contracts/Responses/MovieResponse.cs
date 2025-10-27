@@ -9,5 +9,6 @@ public class MovieResponse
     
     public required int Year { get; init; }
     
+    public double? AverageRating { get; set; }
     public required IEnumerable<string>  Genres { get; init; } = Enumerable.Empty<string>();
 }

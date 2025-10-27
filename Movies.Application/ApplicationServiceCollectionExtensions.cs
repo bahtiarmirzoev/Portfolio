@@ -10,20 +10,24 @@ public static class ApplicationServiceCollectionExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddSingleton<IMovieRepository, MovieRepository>();
-        services.AddSingleton<IUserRepository, UserRepository>();
-        services.AddSingleton<ITokenService, TokenService>();
+       
+        services.AddScoped<IMovieRepository, MovieRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthService>();
-        services.AddSingleton<IMovieService , MovieService>();
-        services.AddValidatorsFromAssemblyContaining < IApplicationMarker>(ServiceLifetime.Singleton);
+        services.AddScoped<IMovieService, MovieService>();
+
+        
+        services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Scoped);
+
         return services;
     }
 
-    public static IServiceCollection AddDatabase(this IServiceCollection services,
-        string connectionString)
+    public static IServiceCollection AddDatabase(this IServiceCollection services, string connectionString)
     {
-        services.AddSingleton<IDbConnectionFactory> ( _=> 
+        services.AddSingleton<IDbConnectionFactory>(_ =>
             new NpgsqlConnectionFactory(connectionString));
+
         services.AddSingleton<DbInitializer>();
         return services;
     }

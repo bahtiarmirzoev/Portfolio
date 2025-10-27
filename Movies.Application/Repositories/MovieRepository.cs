@@ -1,13 +1,12 @@
-using System.Transactions;
 using Dapper;
 using Movies.Application.Database;
+using Movies.Application.Interfaces;
 using Movies.Application.Models;
 
 namespace Movies.Application.Repositories;
 
-public class MovieRepository: IMovieRepository
+public class MovieRepository : IMovieRepository
 {
-
     private readonly IDbConnectionFactory _connectionFactory;
 
     public MovieRepository(IDbConnectionFactory connectionFactory)
@@ -20,20 +19,22 @@ public class MovieRepository: IMovieRepository
         using var connection = await _connectionFactory.CreateConnectionAsync();
         using var transaction = connection.BeginTransaction();
 
-        var result = await connection.ExecuteAsync(new CommandDefinition("""
-                                                                         insert into movies (id , slug , title , yearofrelease)
-                                                                         values (@Id , @Slug , @Title , @YearOfRelease)
-                                                                         """, movie));
-        if (result > 0)
+        var result = await connection.ExecuteAsync("""
+            INSERT INTO movies (id, slug, title, yearofrelease)
+            VALUES (@Id, @Slug, @Title, @YearOfRelease)
+        """, movie, transaction);
+
+        if (result > 0 && movie.Genres.Any())
         {
             foreach (var genre in movie.Genres)
             {
-                await connection.ExecuteAsync(new CommandDefinition("""
-                                                                    insert into genres (movieId , name)
-                                                                    values (@MovieId , @Name)
-                                                                    """, new { MovieId = movie.Id, Name = genre }));
+                await connection.ExecuteAsync("""
+                    INSERT INTO genres (movieid, name)
+                    VALUES (@MovieId, @Name)
+                """, new { MovieId = movie.Id, Name = genre }, transaction);
             }
         }
+
         transaction.Commit();
         return result > 0;
     }
@@ -41,12 +42,16 @@ public class MovieRepository: IMovieRepository
     public async Task<Movie?> GetByIdAsync(Guid id)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
-    
-        var movie = await connection.QuerySingleOrDefaultAsync<Movie>("select * from movies where id=@id", new { id });
-        if (movie is null) return null;
-    
-        var genres = await connection.QueryAsync<string>("select name from genres where movieid=@id", new { id });
-        movie.Genres.AddRange(genres);
+
+        var movie = await connection.QuerySingleOrDefaultAsync<Movie>("SELECT * FROM movies WHERE id=@id", new { id });
+        if (movie == null) return null;
+
+        var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id });
+        movie.Genres = genres.ToList();
+
+        movie.AverageRating = await connection.ExecuteScalarAsync<double?>(@"
+            SELECT AVG(value)::float FROM ratings WHERE movieid=@id
+        ", new { id });
 
         return movie;
     }
@@ -54,12 +59,16 @@ public class MovieRepository: IMovieRepository
     public async Task<Movie?> GetBySlugAsync(string slug)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
-    
-        var movie = await connection.QuerySingleOrDefaultAsync<Movie>("select * from movies where slug=@slug", new { slug });
-        if (movie is null) return null;
-    
-        var genres = await connection.QueryAsync<string>("select name from genres where movieid=@id", new { id = movie.Id });
-        movie.Genres.AddRange(genres);
+
+        var movie = await connection.QuerySingleOrDefaultAsync<Movie>("SELECT * FROM movies WHERE slug=@slug", new { slug });
+        if (movie == null) return null;
+
+        var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id = movie.Id });
+        movie.Genres = genres.ToList();
+
+        movie.AverageRating = await connection.ExecuteScalarAsync<double?>(@"
+            SELECT AVG(value)::float FROM ratings WHERE movieid=@id
+        ", new { id = movie.Id });
 
         return movie;
     }
@@ -67,20 +76,20 @@ public class MovieRepository: IMovieRepository
     public async Task<IEnumerable<Movie>> GetAllAsync()
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
-        var result = await connection.QueryAsync(new CommandDefinition("""
-                                                                       select m.*,string_agg(g.name , ',') as genres
-                                                                       from movies m left join genres g on m.id = g.movieid
-                                                                       group by id
-                                                                       """));
-        
-        return result.Select(x => new Movie
-        {
-            Id = x.id,
-            Title = x.title,
-            YearOfRelease = x.yearofrelease,
-            Genres = Enumerable.ToList(x.genres.Split(','))
 
-        });
+        var movies = await connection.QueryAsync<Movie>("SELECT * FROM movies");
+
+        foreach (var movie in movies)
+        {
+            var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id = movie.Id });
+            movie.Genres = genres.ToList();
+
+            movie.AverageRating = await connection.ExecuteScalarAsync<double?>(@"
+                SELECT AVG(value)::float FROM ratings WHERE movieid=@id
+            ", new { id = movie.Id });
+        }
+
+        return movies;
     }
 
     public async Task<bool> UpdateMovieAsync(Movie movie)
@@ -89,28 +98,22 @@ public class MovieRepository: IMovieRepository
         using var transaction = connection.BeginTransaction();
 
         // Удаляем старые жанры
-        await connection.ExecuteAsync(new CommandDefinition("""
-                                                            delete from genres where movieid = @id
-                                                            """, new { id = movie.Id }));
+        await connection.ExecuteAsync("DELETE FROM genres WHERE movieid=@id", new { id = movie.Id }, transaction);
 
         // Добавляем новые жанры
         foreach (var genre in movie.Genres)
         {
-            await connection.ExecuteAsync(new CommandDefinition("""
-                                                                insert into genres (movieid, name) 
-                                                                values (@MovieId, @Name)
-                                                                """, new { MovieId = movie.Id, Name = genre }));
+            await connection.ExecuteAsync("INSERT INTO genres (movieid, name) VALUES (@MovieId, @Name)",
+                new { MovieId = movie.Id, Name = genre }, transaction);
         }
 
-        // Обновляем данные фильма
-        var result = await connection.ExecuteAsync(new CommandDefinition("""
-                                                                         update movies 
-                                                                         set slug = @Slug, 
-                                                                             title = @Title, 
-                                                                             yearofrelease = @YearOfRelease
-                                                                         where id = @Id
-                                                                         """, movie));
-    
+        // Обновляем фильм
+        var result = await connection.ExecuteAsync("""
+            UPDATE movies
+            SET slug=@Slug, title=@Title, yearofrelease=@YearOfRelease
+            WHERE id=@Id
+        """, movie, transaction);
+
         transaction.Commit();
         return result > 0;
     }
@@ -120,14 +123,9 @@ public class MovieRepository: IMovieRepository
         using var connection = await _connectionFactory.CreateConnectionAsync();
         using var transaction = connection.BeginTransaction();
 
-        await connection.ExecuteAsync(new CommandDefinition("""
-                                                            delete from genres where movieid = @id
-                                                            """, new { id }));
+        await connection.ExecuteAsync("DELETE FROM genres WHERE movieid=@id", new { id }, transaction);
+        var result = await connection.ExecuteAsync("DELETE FROM movies WHERE id=@id", new { id }, transaction);
 
-       var result = await connection.ExecuteAsync(new CommandDefinition("""
-                                                                        delete from movies where id=@id
-                                                                        """, new { id }));
-        
         transaction.Commit();
         return result > 0;
     }
@@ -135,8 +133,7 @@ public class MovieRepository: IMovieRepository
     public async Task<bool> ExistsByIdAsync(Guid id)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
-        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition("""
-                                                                               select count(1) from movies where id = @id
-                                                                               """, new { id }));
+        var count = await connection.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM movies WHERE id=@id", new { id });
+        return count > 0;
     }
 }
