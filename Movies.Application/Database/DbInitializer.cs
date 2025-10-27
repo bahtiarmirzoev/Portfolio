@@ -26,6 +26,39 @@ public class DbInitializer
                 yearofrelease INTEGER NOT NULL
             );
         """);
+        // В DbInitializer.InitializeAsync() добавьте:
+// -----------------------------
+// Таблица актеров
+// -----------------------------
+        await connection.ExecuteAsync("""
+                                          CREATE TABLE IF NOT EXISTS actors (
+                                              id UUID PRIMARY KEY,
+                                              name TEXT NOT NULL,
+                                              dateofbirth DATE,
+                                              biography TEXT
+                                          );
+                                      """);
+
+// -----------------------------
+// Таблица связи фильмов и актеров (many-to-many)
+// -----------------------------
+        await connection.ExecuteAsync("""
+                                          CREATE TABLE IF NOT EXISTS movie_actors (
+                                              id SERIAL PRIMARY KEY,
+                                              movieid UUID REFERENCES movies(id) ON DELETE CASCADE,
+                                              actorid UUID REFERENCES actors(id) ON DELETE CASCADE,
+                                              character_name TEXT,
+                                              "order" INTEGER DEFAULT 0
+                                          );
+                                      """);
+
+        await connection.ExecuteAsync("""
+                                          CREATE INDEX IF NOT EXISTS idx_movie_actors_movieid ON movie_actors(movieid);
+                                      """);
+
+        await connection.ExecuteAsync("""
+                                          CREATE INDEX IF NOT EXISTS idx_movie_actors_actorid ON movie_actors(actorid);
+                                      """);
 
         await connection.ExecuteAsync("""
             CREATE UNIQUE INDEX IF NOT EXISTS idx_movies_slug

@@ -16,6 +16,9 @@ public partial class Movie
     
     public double? AverageRating { get; set; }
     
+    public List<Actor> Actors { get; set; } = new(); 
+
+    
 
     private string GenerateSlug()
     {

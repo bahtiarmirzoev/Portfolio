@@ -13,7 +13,12 @@ public static class ContractMapping
             Id = Guid.NewGuid(),
             Title = request.Title,
             YearOfRelease = request.Year,
-            Genres = request.Genres.ToList()
+            Genres = request.Genres.ToList(),
+            Actors = request.Actors?.Select(actorName => new Actor // ← используем имена актеров
+            {
+                Id = Guid.NewGuid(), // генерируем новый ID
+                Name = actorName
+            }).ToList() ?? new List<Actor>()
         };
     }
 
@@ -24,7 +29,12 @@ public static class ContractMapping
             Id = id,
             Title = request.Title,
             YearOfRelease = request.Year,
-            Genres = request.Genres.ToList()
+            Genres = request.Genres.ToList(),
+            Actors = request.Actors?.Select(actorName => new Actor // ← используем имена актеров
+            {
+                Id = Guid.NewGuid(), // генерируем новый ID
+                Name = actorName
+            }).ToList() ?? new List<Actor>()
         };
     }
 
@@ -36,8 +46,15 @@ public static class ContractMapping
             Title = movie.Title,
             Slug = movie.Slug,
             Year = movie.YearOfRelease,
-            AverageRating = movie.AverageRating, // ← ДОБАВЬТЕ ЭТУ СТРОКУ
-            Genres = movie.Genres.ToList()
+            AverageRating = movie.AverageRating,
+            Genres = movie.Genres.ToList(),
+            Actors = movie.Actors.Select(a => new ActorResponse
+            {
+                Id = a.Id,
+                Name = a.Name,
+                DateOfBirth = a.DateOfBirth,
+                Biography = a.Biography
+            })
         };
     }
 

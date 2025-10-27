@@ -66,7 +66,7 @@ builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICommentService, CommentService>();
-
+builder.Services.AddScoped<IActorRepository, ActorRepository>();
 
 var jwtSettings = config.GetSection("JwtOptions");
 

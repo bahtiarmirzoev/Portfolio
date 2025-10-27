@@ -11,4 +11,6 @@ public class MovieResponse
     
     public double? AverageRating { get; set; }
     public required IEnumerable<string>  Genres { get; init; } = Enumerable.Empty<string>();
+    
+    public required IEnumerable<ActorResponse> Actors { get; init; } = Enumerable.Empty<ActorResponse>();
 }
