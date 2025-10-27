@@ -49,10 +49,11 @@ public class MovieRepository : IMovieRepository
         var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id });
         movie.Genres = genres.ToList();
 
-        movie.AverageRating = await connection.ExecuteScalarAsync<double?>(@"
-            SELECT AVG(value)::float FROM ratings WHERE movieid=@id
-        ", new { id });
+        var avgRating = await connection.ExecuteScalarAsync<double?>(@"
+        SELECT AVG(value)::float FROM ratings WHERE movieid=@id
+    ", new { id }); // ✅ Исправлено
 
+        movie.AverageRating = avgRating ?? 0;
         return movie;
     }
 
@@ -66,13 +67,13 @@ public class MovieRepository : IMovieRepository
         var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id = movie.Id });
         movie.Genres = genres.ToList();
 
-        movie.AverageRating = await connection.ExecuteScalarAsync<double?>(@"
-            SELECT AVG(value)::float FROM ratings WHERE movieid=@id
-        ", new { id = movie.Id });
+        var avgRating = await connection.ExecuteScalarAsync<double?>(@"
+        SELECT AVG(value)::float FROM ratings WHERE movieid=@id
+    ", new { id = movie.Id }); // ✅ Одинаковое имя параметра
 
+        movie.AverageRating = avgRating ?? 0;
         return movie;
     }
-
     public async Task<IEnumerable<Movie>> GetAllAsync()
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
@@ -84,9 +85,11 @@ public class MovieRepository : IMovieRepository
             var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id = movie.Id });
             movie.Genres = genres.ToList();
 
-            movie.AverageRating = await connection.ExecuteScalarAsync<double?>(@"
-                SELECT AVG(value)::float FROM ratings WHERE movieid=@id
-            ", new { id = movie.Id });
+            var avgRating = await connection.ExecuteScalarAsync<double?>(@"
+            SELECT AVG(value)::float FROM ratings WHERE movieid=@id
+        ", new { id = movie.Id }); // ✅ Исправлено
+
+            movie.AverageRating = avgRating ?? 0;
         }
 
         return movies;

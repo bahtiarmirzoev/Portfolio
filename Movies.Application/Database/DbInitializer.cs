@@ -23,7 +23,7 @@ public class DbInitializer
                 id UUID PRIMARY KEY,
                 slug TEXT NOT NULL,
                 title TEXT NOT NULL,
-                year INTEGER NOT NULL
+                yearofrelease INTEGER NOT NULL
             );
         """);
 

@@ -27,6 +27,7 @@ public static class ContractMapping
             Genres = request.Genres.ToList()
         };
     }
+
     public static MovieResponse MapToResponse(this Movie movie)
     {
         return new MovieResponse
@@ -35,6 +36,7 @@ public static class ContractMapping
             Title = movie.Title,
             Slug = movie.Slug,
             Year = movie.YearOfRelease,
+            AverageRating = movie.AverageRating, // ← ДОБАВЬТЕ ЭТУ СТРОКУ
             Genres = movie.Genres.ToList()
         };
     }
