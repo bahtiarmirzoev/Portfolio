@@ -52,8 +52,7 @@ public static class ContractMapping
             {
                 Id = a.Id,
                 Name = a.Name,
-                DateOfBirth = a.DateOfBirth,
-                Biography = a.Biography
+               
             })
         };
     }

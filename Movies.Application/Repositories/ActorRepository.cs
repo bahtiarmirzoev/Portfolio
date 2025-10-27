@@ -37,6 +37,12 @@ public class ActorRepository : IActorRepository
         return await connection.QueryAsync<Actor>(sql, new { MovieId = movieId });
     }
 
+    public async Task<IEnumerable<Actor>> GetAllAsync(CancellationToken token = default)
+    {
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        return await connection.QueryAsync<Actor>("SELECT * FROM actors ORDER BY name");
+    }
+
     public async Task<bool> CreateAsync(Actor actor, CancellationToken token = default)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();

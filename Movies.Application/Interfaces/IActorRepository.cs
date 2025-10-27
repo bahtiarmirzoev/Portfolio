@@ -6,6 +6,7 @@ public interface IActorRepository
 {
     Task<Actor?> GetByIdAsync(Guid id, CancellationToken token = default);
     Task<IEnumerable<Actor>> GetByMovieIdAsync(Guid movieId, CancellationToken token = default);
+    Task<IEnumerable<Actor>> GetAllAsync(CancellationToken token = default); // ← ДОБАВЬ ЭТОТ МЕТОД
     Task<bool> CreateAsync(Actor actor, CancellationToken token = default);
     Task<bool> UpdateAsync(Actor actor, CancellationToken token = default);
     Task<bool> DeleteAsync(Guid id, CancellationToken token = default);

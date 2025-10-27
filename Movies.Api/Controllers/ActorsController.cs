@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Movies.Application.Interfaces;
+using Movies.Application.Models;
+using Movies.Contracts.Requests;
 
 [ApiController]
 [Route("api/actors")]
-[Authorize]
+[Authorize(Roles = "admin")]
 public class ActorsController : ControllerBase
 {
     private readonly IActorRepository _actorRepository;
@@ -14,13 +16,41 @@ public class ActorsController : ControllerBase
         _actorRepository = actorRepository;
     }
 
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> Get(Guid id)
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateActorRequest request)
     {
-        var actor = await _actorRepository.GetByIdAsync(id);
-        if (actor == null) return NotFound();
-        return Ok(actor);
+        var actor = new Actor
+        {
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            DateOfBirth = request.DateOfBirth,
+            Biography = request.Biography
+        };
+
+        var result = await _actorRepository.CreateAsync(actor);
+        return result ? Ok(actor) : BadRequest();
     }
 
-   
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateActorRequest request)
+    {
+        var actor = new Actor
+        {
+            Id = id,
+            Name = request.Name,
+            DateOfBirth = request.DateOfBirth,
+            Biography = request.Biography
+        };
+
+        var result = await _actorRepository.UpdateAsync(actor);
+        return result ? Ok(actor) : NotFound();
+    }
+
+    [HttpGet]
+    [AllowAnonymous] // Все могут видеть актеров
+    public async Task<IActionResult> GetAll()
+    {
+        var actors = await _actorRepository.GetAllAsync();
+        return Ok(actors);
+    }
 }
