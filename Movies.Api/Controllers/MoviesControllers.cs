@@ -40,24 +40,6 @@ public class MoviesController : ControllerBase
         return Ok(response);
     }
 
-    // ❌ УДАЛИ ЭТОТ СТАРЫЙ МЕТОД
-    // [HttpGet]
-    // public async Task<IActionResult> GetAll()
-    // {
-    //     var movies = await _movieService.GetAllAsync();
-    //     var moviesResponse = movies.MapToResponse();
-    //     return Ok(moviesResponse);
-    // }
-
-    // ✅ ОСТАВЬ ТОЛЬКО ЭТОТ МЕТОД С ПАГИНАЦИЕЙ
-    [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] PagedRequest request)
-    {
-        var result = await _movieService.GetAllAsync(request.Skip, request.Take);
-        var response = result.MapToResponse(request);
-        return Ok(response);
-    }
-
     [HttpPut("{id:guid}")]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateMovieRequest request)
@@ -80,5 +62,22 @@ public class MoviesController : ControllerBase
             return NotFound();
 
         return Ok();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] PagedRequest request)
+    {
+        // Если есть поисковый запрос, используем поиск
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var searchResult = await _movieService.SearchAsync(request.Search, request.Skip, request.Take);
+            var searchResponse = searchResult.MapToResponse(request); // ← изменил имя переменной
+            return Ok(searchResponse);
+        }
+        
+        // Иначе обычный список
+        var result = await _movieService.GetAllAsync(request.Skip, request.Take);
+        var response = result.MapToResponse(request); // ← изменил имя переменной
+        return Ok(response);
     }
 }

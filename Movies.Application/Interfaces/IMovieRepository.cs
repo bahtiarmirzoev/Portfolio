@@ -19,4 +19,6 @@ public interface IMovieRepository
     
     Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take); 
     
+    Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take);
+    
 }

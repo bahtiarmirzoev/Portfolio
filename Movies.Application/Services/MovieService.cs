@@ -60,4 +60,14 @@ public class MovieService : IMovieService
     {
         return await _movieRepository.GetAllAsync(skip, take);
     }
+    public async Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            // Если поиск пустой, возвращаем обычный список
+            return await _movieRepository.GetAllAsync(skip, take);
+        }
+    
+        return await _movieRepository.SearchAsync(search, skip, take);
+    }
 }

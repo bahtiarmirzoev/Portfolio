@@ -4,6 +4,7 @@ public class PagedRequest
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
+    public string? Search { get; set; } // ← ДОБАВИМ ПОИСК
     
     private const int MaxPageSize = 50;
     

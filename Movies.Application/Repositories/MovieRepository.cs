@@ -263,5 +263,43 @@ public class MovieRepository : IMovieRepository
 
         return (movies, totalCount);
     }
-    
+    public async Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take)
+    {
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+
+        // Получаем общее количество по поиску
+        var totalCount = await connection.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM movies WHERE title ILIKE @Search",
+            new { Search = $"%{search}%" });
+
+        // Получаем фильмы с поиском и пагинацией
+        var movies = await connection.QueryAsync<Movie>(
+            "SELECT id, title, yearofrelease as YearOfRelease, slug FROM movies WHERE title ILIKE @Search ORDER BY title LIMIT @Take OFFSET @Skip",
+            new { Search = $"%{search}%", Take = take, Skip = skip });
+
+        // Для каждого фильма загружаем жанры, рейтинг и актеров
+        foreach (var movie in movies)
+        {
+            // Загрузка жанров
+            var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id = movie.Id });
+            movie.Genres = genres.ToList();
+
+            // Загрузка рейтинга
+            var avgRating = await connection.ExecuteScalarAsync<double?>(@"
+            SELECT AVG(value)::float FROM ratings WHERE movieid=@id
+        ", new { id = movie.Id });
+            movie.AverageRating = avgRating ?? 0;
+
+            // Загрузка актеров
+            var actors = await connection.QueryAsync<Actor>(@"
+            SELECT a.id, a.name
+            FROM actors a 
+            INNER JOIN movie_actors ma ON a.id = ma.actorid 
+            WHERE ma.movieid = @id
+        ", new { id = movie.Id });
+            movie.Actors = actors.ToList();
+        }
+
+        return (movies, totalCount);
+    }
 }
