@@ -21,4 +21,12 @@ public interface IMovieRepository
     
     Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take);
     
+    Task<(IEnumerable<Movie> movies, int totalCount)> FilterAsync(
+        string? genre, 
+        int? yearFrom, 
+        int? yearTo, 
+        string? actor,
+        int skip, 
+        int take);
+    
 }

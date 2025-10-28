@@ -70,4 +70,14 @@ public class MovieService : IMovieService
     
         return await _movieRepository.SearchAsync(search, skip, take);
     }
+    public async Task<(IEnumerable<Movie> movies, int totalCount)> FilterAsync(
+        string? genre, 
+        int? yearFrom, 
+        int? yearTo, 
+        string? actor,
+        int skip, 
+        int take)
+    {
+        return await _movieRepository.FilterAsync(genre, yearFrom, yearTo, actor, skip, take);
+    }
 }

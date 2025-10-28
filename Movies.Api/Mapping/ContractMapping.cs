@@ -56,7 +56,6 @@ public static class ContractMapping
         };
     }
 
-    // ✅ ЕДИНСТВЕННЫЙ МЕТОД ДЛЯ ПАГИНАЦИИ
     public static MoviesResponse MapToResponse(this (IEnumerable<Movie> movies, int totalCount) result, PagedRequest request)
     {
         return new MoviesResponse

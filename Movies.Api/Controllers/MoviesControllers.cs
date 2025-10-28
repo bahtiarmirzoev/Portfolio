@@ -67,17 +67,35 @@ public class MoviesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] PagedRequest request)
     {
-        // Если есть поисковый запрос, используем поиск
+        // 1. Если есть поисковый запрос - используем поиск
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var searchResult = await _movieService.SearchAsync(request.Search, request.Skip, request.Take);
-            var searchResponse = searchResult.MapToResponse(request); // ← изменил имя переменной
+            var searchResponse = searchResult.MapToResponse(request);
             return Ok(searchResponse);
         }
+
+        // 2. Если есть фильтры - используем фильтрацию
+        if (!string.IsNullOrWhiteSpace(request.Genre) || 
+            request.YearFrom.HasValue || 
+            request.YearTo.HasValue || 
+            !string.IsNullOrWhiteSpace(request.Actor))
+        {
+            var filterResult = await _movieService.FilterAsync(
+                request.Genre, 
+                request.YearFrom, 
+                request.YearTo, 
+                request.Actor,
+                request.Skip, 
+                request.Take);
+                
+            var filterResponse = filterResult.MapToResponse(request);
+            return Ok(filterResponse);
+        }
         
-        // Иначе обычный список
+        // 3. Иначе - обычный список с пагинацией
         var result = await _movieService.GetAllAsync(request.Skip, request.Take);
-        var response = result.MapToResponse(request); // ← изменил имя переменной
+        var response = result.MapToResponse(request);
         return Ok(response);
     }
 }
