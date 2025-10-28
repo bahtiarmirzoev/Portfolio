@@ -20,18 +20,18 @@ public class MovieRepository : IMovieRepository
         using var transaction = connection.BeginTransaction();
 
         var result = await connection.ExecuteAsync("""
-                                                       INSERT INTO movies (id, slug, title, yearofrelease)
-                                                       VALUES (@Id, @Slug, @Title, @YearOfRelease)
-                                                   """, movie, transaction);
+            INSERT INTO movies (id, slug, title, yearofrelease)
+            VALUES (@Id, @Slug, @Title, @YearOfRelease)
+        """, movie, transaction);
 
         if (result > 0 && movie.Genres.Any())
         {
             foreach (var genre in movie.Genres)
             {
                 await connection.ExecuteAsync("""
-                                                  INSERT INTO genres (movieid, name)
-                                                  VALUES (@MovieId, @Name)
-                                              """, new { MovieId = movie.Id, Name = genre }, transaction);
+                    INSERT INTO genres (movieid, name)
+                    VALUES (@MovieId, @Name)
+                """, new { MovieId = movie.Id, Name = genre }, transaction);
             }
         }
 
@@ -48,16 +48,16 @@ public class MovieRepository : IMovieRepository
                 if (!actorExists)
                 {
                     await connection.ExecuteAsync("""
-                                                      INSERT INTO actors (id, name)
-                                                      VALUES (@Id, @Name)
-                                                  """, new { actor.Id, actor.Name }, transaction);
+                        INSERT INTO actors (id, name)
+                        VALUES (@Id, @Name)
+                    """, new { actor.Id, actor.Name }, transaction);
                 }
 
                 // Потом создаем связь
                 await connection.ExecuteAsync("""
-                                                  INSERT INTO movie_actors (movieid, actorid)
-                                                  VALUES (@MovieId, @ActorId)
-                                              """, new { 
+                    INSERT INTO movie_actors (movieid, actorid)
+                    VALUES (@MovieId, @ActorId)
+                """, new { 
                     MovieId = movie.Id, 
                     ActorId = actor.Id
                 }, transaction);
@@ -88,9 +88,9 @@ public class MovieRepository : IMovieRepository
         ", new { id });
         movie.AverageRating = avgRating ?? 0;
 
-        // Загрузка актеров
+        // Загрузка актеров - ТОЛЬКО ID И NAME
         var actors = await connection.QueryAsync<Actor>(@"
-            SELECT a.*
+            SELECT a.id, a.name  -- ← ИСПРАВЛЕНО: только нужные поля
             FROM actors a 
             INNER JOIN movie_actors ma ON a.id = ma.actorid 
             WHERE ma.movieid = @id
@@ -120,9 +120,9 @@ public class MovieRepository : IMovieRepository
         ", new { id = movie.Id });
         movie.AverageRating = avgRating ?? 0;
 
-        // Загрузка актеров
+        // Загрузка актеров - ТОЛЬКО ID И NAME
         var actors = await connection.QueryAsync<Actor>(@"
-            SELECT a.*
+            SELECT a.id, a.name  -- ← ИСПРАВЛЕНО: только нужные поля
             FROM actors a 
             INNER JOIN movie_actors ma ON a.id = ma.actorid 
             WHERE ma.movieid = @id
@@ -151,9 +151,9 @@ public class MovieRepository : IMovieRepository
             ", new { id = movie.Id });
             movie.AverageRating = avgRating ?? 0;
 
-            // Загрузка актеров
+            // Загрузка актеров - ТОЛЬКО ID И NAME
             var actors = await connection.QueryAsync<Actor>(@"
-                SELECT a.*
+                SELECT a.id, a.name  -- ← ИСПРАВЛЕНО: только нужные поля
                 FROM actors a 
                 INNER JOIN movie_actors ma ON a.id = ma.actorid 
                 WHERE ma.movieid = @id
