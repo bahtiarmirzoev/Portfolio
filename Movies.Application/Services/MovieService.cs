@@ -55,4 +55,9 @@ public class MovieService : IMovieService
     {
         return _movieRepository.DeleteMovieByIdAsync(id);
     }
+    
+    public async Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take)
+    {
+        return await _movieRepository.GetAllAsync(skip, take);
+    }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mapping;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
+using Movies.Contracts.Responses;
 
 [ApiController]
 [Route("api/movies")]
@@ -39,12 +40,22 @@ public class MoviesController : ControllerBase
         return Ok(response);
     }
 
+    // ❌ УДАЛИ ЭТОТ СТАРЫЙ МЕТОД
+    // [HttpGet]
+    // public async Task<IActionResult> GetAll()
+    // {
+    //     var movies = await _movieService.GetAllAsync();
+    //     var moviesResponse = movies.MapToResponse();
+    //     return Ok(moviesResponse);
+    // }
+
+    // ✅ ОСТАВЬ ТОЛЬКО ЭТОТ МЕТОД С ПАГИНАЦИЕЙ
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] PagedRequest request)
     {
-        var movies = await _movieService.GetAllAsync();
-        var moviesResponse = movies.MapToResponse();
-        return Ok(moviesResponse);
+        var result = await _movieService.GetAllAsync(request.Skip, request.Take);
+        var response = result.MapToResponse(request);
+        return Ok(response);
     }
 
     [HttpPut("{id:guid}")]

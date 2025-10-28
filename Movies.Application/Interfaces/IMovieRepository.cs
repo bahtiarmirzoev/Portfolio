@@ -16,4 +16,7 @@ public interface IMovieRepository
     Task<bool> DeleteMovieByIdAsync (Guid id);
     
     Task<bool> ExistsByIdAsync(Guid id);
+    
+    Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take); 
+    
 }

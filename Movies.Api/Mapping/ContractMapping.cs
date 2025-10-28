@@ -14,9 +14,9 @@ public static class ContractMapping
             Title = request.Title,
             YearOfRelease = request.Year,
             Genres = request.Genres.ToList(),
-            Actors = request.Actors?.Select(actorName => new Actor // ← используем имена актеров
+            Actors = request.Actors?.Select(actorName => new Actor
             {
-                Id = Guid.NewGuid(), // генерируем новый ID
+                Id = Guid.NewGuid(),
                 Name = actorName
             }).ToList() ?? new List<Actor>()
         };
@@ -30,9 +30,9 @@ public static class ContractMapping
             Title = request.Title,
             YearOfRelease = request.Year,
             Genres = request.Genres.ToList(),
-            Actors = request.Actors?.Select(actorName => new Actor // ← используем имена актеров
+            Actors = request.Actors?.Select(actorName => new Actor
             {
-                Id = Guid.NewGuid(), // генерируем новый ID
+                Id = Guid.NewGuid(),
                 Name = actorName
             }).ToList() ?? new List<Actor>()
         };
@@ -51,17 +51,20 @@ public static class ContractMapping
             Actors = movie.Actors.Select(a => new ActorResponse
             {
                 Id = a.Id,
-                Name = a.Name,
-               
+                Name = a.Name
             })
         };
     }
 
-    public static MoviesResponse MapToResponse(this IEnumerable<Movie> movies)
+    // ✅ ЕДИНСТВЕННЫЙ МЕТОД ДЛЯ ПАГИНАЦИИ
+    public static MoviesResponse MapToResponse(this (IEnumerable<Movie> movies, int totalCount) result, PagedRequest request)
     {
         return new MoviesResponse
         {
-            Items = movies.Select(MapToResponse)
+            Items = result.movies.Select(MapToResponse),
+            Page = request.Page,
+            PageSize = request.Take,
+            TotalCount = result.totalCount
         };
     }
 }

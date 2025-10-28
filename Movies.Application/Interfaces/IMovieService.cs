@@ -15,4 +15,7 @@ public interface IMovieService
     Task<Movie?> UpdateMovieAsync (Movie movie);
     
     Task<bool> DeleteMovieByIdAsync (Guid id);
+    
+    Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take); 
+    
 }
