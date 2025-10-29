@@ -19,10 +19,10 @@ public class MovieRepository : IMovieRepository
         using var connection = await _connectionFactory.CreateConnectionAsync();
         using var transaction = connection.BeginTransaction();
 
-        // 🆕 Добавляем description в INSERT
+        // 🆕 Добавляем PosterUrl и TrailerUrl в INSERT
         var result = await connection.ExecuteAsync("""
-            INSERT INTO movies (id, slug, title, yearofrelease, description)
-            VALUES (@Id, @Slug, @Title, @YearOfRelease, @Description)
+            INSERT INTO movies (id, slug, title, yearofrelease, description, posterurl, trailerurl)
+            VALUES (@Id, @Slug, @Title, @YearOfRelease, @Description, @PosterUrl, @TrailerUrl)
         """, movie, transaction);
 
         if (result > 0 && movie.Genres.Any())
@@ -70,9 +70,9 @@ public class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
-        // 🆕 Добавляем description в SELECT
+        // 🆕 Добавляем PosterUrl и TrailerUrl в SELECT
         var movie = await connection.QuerySingleOrDefaultAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug, description FROM movies WHERE id=@id", 
+            "SELECT id, title, yearofrelease as YearOfRelease, slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl FROM movies WHERE id=@id", 
             new { id });
         
         if (movie == null) return null;
@@ -100,9 +100,9 @@ public class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
-        // 🆕 Добавляем description в SELECT
+        // 🆕 Добавляем PosterUrl и TrailerUrl в SELECT
         var movie = await connection.QuerySingleOrDefaultAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug, description FROM movies WHERE slug=@slug", 
+            "SELECT id, title, yearofrelease as YearOfRelease, slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl FROM movies WHERE slug=@slug", 
             new { slug });
         
         if (movie == null) return null;
@@ -130,9 +130,9 @@ public class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
-        // 🆕 Добавляем description в SELECT
+        // 🆕 Добавляем PosterUrl и TrailerUrl в SELECT
         var movies = await connection.QueryAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug, description FROM movies");
+            "SELECT id, title, yearofrelease as YearOfRelease, slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl FROM movies");
 
         foreach (var movie in movies)
         {
@@ -181,10 +181,11 @@ public class MovieRepository : IMovieRepository
             }, transaction);
         }
 
-        // 🆕 Добавляем description в UPDATE
+        // 🆕 Добавляем PosterUrl и TrailerUrl в UPDATE
         var result = await connection.ExecuteAsync("""
             UPDATE movies
-            SET slug=@Slug, title=@Title, yearofrelease=@YearOfRelease, description=@Description
+            SET slug=@Slug, title=@Title, yearofrelease=@YearOfRelease, 
+                description=@Description, posterurl=@PosterUrl, trailerurl=@TrailerUrl
             WHERE id=@Id
         """, movie, transaction);
 
@@ -218,9 +219,9 @@ public class MovieRepository : IMovieRepository
 
         var totalCount = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM movies");
 
-        // 🆕 Добавляем description в SELECT
+        // 🆕 Добавляем PosterUrl и TrailerUrl в SELECT
         var movies = await connection.QueryAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug, description FROM movies ORDER BY title LIMIT @Take OFFSET @Skip",
+            "SELECT id, title, yearofrelease as YearOfRelease, slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl FROM movies ORDER BY title LIMIT @Take OFFSET @Skip",
             new { Take = take, Skip = skip });
 
         foreach (var movie in movies)
@@ -253,9 +254,9 @@ public class MovieRepository : IMovieRepository
             "SELECT COUNT(*) FROM movies WHERE title ILIKE @Search",
             new { Search = $"%{search}%" });
 
-        // 🆕 Добавляем description в SELECT
+        // 🆕 Добавляем PosterUrl и TrailerUrl в SELECT
         var movies = await connection.QueryAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug, description FROM movies WHERE title ILIKE @Search ORDER BY title LIMIT @Take OFFSET @Skip",
+            "SELECT id, title, yearofrelease as YearOfRelease, slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl FROM movies WHERE title ILIKE @Search ORDER BY title LIMIT @Take OFFSET @Skip",
             new { Search = $"%{search}%", Take = take, Skip = skip });
 
         foreach (var movie in movies)
@@ -331,9 +332,9 @@ public class MovieRepository : IMovieRepository
         parameters.Add("Take", take);
         parameters.Add("Skip", skip);
 
-        // 🆕 Добавляем description в SELECT
+        // 🆕 Добавляем PosterUrl и TrailerUrl в SELECT
         var moviesSql = $@"
-            SELECT m.id, m.title, m.yearofrelease as YearOfRelease, m.slug, m.description 
+            SELECT m.id, m.title, m.yearofrelease as YearOfRelease, m.slug, m.description, m.posterurl as PosterUrl, m.trailerurl as TrailerUrl 
             FROM movies m 
             {whereClause}
             ORDER BY m.title 

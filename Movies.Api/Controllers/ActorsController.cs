@@ -30,7 +30,7 @@ public class ActorsController : ControllerBase
         var result = await _actorRepository.CreateAsync(actor);
         if (!result) return BadRequest();
         
-        // Возвращаем ActorResponse вместо Actor
+      
         var response = new ActorResponse
         {
             Id = actor.Id,

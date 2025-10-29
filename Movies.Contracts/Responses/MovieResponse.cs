@@ -7,6 +7,10 @@ public class MovieResponse
     
     public string? Description { get; init; } 
     
+    public string? PosterUrl { get; init; }
+    
+    public string? TrailerUrl { get; init; } 
+    
     public required string Slug { get; init; }
     
     public required int Year { get; init; }

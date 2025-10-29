@@ -9,7 +9,11 @@ public partial class Movie
     public required string Title { get; set; }
     public string Slug => GenerateSlug();
     public required int YearOfRelease { get; set; }
-    public string? Description { get; set; } // 🆕 ДОБАВЬ ЭТО СВОЙСТВО
+    public string? Description { get; set; } 
+    
+    public string? PosterUrl { get; set; } 
+    
+    public string? TrailerUrl { get; set; }
     public required List<string> Genres { get; set; } = new();
     public double? AverageRating { get; set; }
     public List<Actor> Actors { get; set; } = new();

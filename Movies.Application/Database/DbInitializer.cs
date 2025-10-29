@@ -25,7 +25,9 @@ public class DbInitializer
                                               slug TEXT NOT NULL,
                                               title TEXT NOT NULL,
                                               yearofrelease INTEGER NOT NULL,
-                                              description TEXT -- 🆕 Добавляем поле description
+                                              description TEXT,
+                                              posterurl TEXT, -- 🆕 Добавляем постер
+                                              trailerurl TEXT -- 🆕 Добавляем трейлер
                                           );
                                       """);
         // В DbInitializer.InitializeAsync() добавьте:

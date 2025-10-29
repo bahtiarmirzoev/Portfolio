@@ -14,6 +14,8 @@ public static class ContractMapping
             Title = request.Title,
             YearOfRelease = request.Year,
             Description = request.Description, // 🆕 Добавляем описание
+            PosterUrl = request.PosterUrl, // 🆕 Маппим постер
+            TrailerUrl = request.TrailerUrl, // 🆕 Маппим трейлер
             Genres = request.Genres.ToList(),
             Actors = request.Actors?.Select(actorName => new Actor
             {
@@ -31,6 +33,8 @@ public static class ContractMapping
             Title = request.Title,
             YearOfRelease = request.Year,
             Description = request.Description, // 🆕 Добавляем описание
+            PosterUrl = request.PosterUrl, // 🆕 Маппим постер
+            TrailerUrl = request.TrailerUrl, // 🆕 Маппим трейлер
             Genres = request.Genres.ToList(),
             Actors = request.Actors?.Select(actorName => new Actor
             {
@@ -48,7 +52,9 @@ public static class ContractMapping
             Title = movie.Title,
             Slug = movie.Slug,
             Year = movie.YearOfRelease,
-            Description = movie.Description, // 🆕 Добавляем описание
+            Description = movie.Description,
+            PosterUrl = movie.PosterUrl, // ✅ Используем movie.PosterUrl
+            TrailerUrl = movie.TrailerUrl, // ✅ Используем movie.TrailerUrl
             AverageRating = movie.AverageRating,
             Genres = movie.Genres.ToList(),
             Actors = movie.Actors.Select(a => new ActorResponse
