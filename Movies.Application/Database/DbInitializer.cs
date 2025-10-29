@@ -18,14 +18,16 @@ public class DbInitializer
         // -----------------------------
         // Таблица фильмов
         // -----------------------------
+        
         await connection.ExecuteAsync("""
-            CREATE TABLE IF NOT EXISTS movies (
-                id UUID PRIMARY KEY,
-                slug TEXT NOT NULL,
-                title TEXT NOT NULL,
-                yearofrelease INTEGER NOT NULL
-            );
-        """);
+                                          CREATE TABLE IF NOT EXISTS movies (
+                                              id UUID PRIMARY KEY,
+                                              slug TEXT NOT NULL,
+                                              title TEXT NOT NULL,
+                                              yearofrelease INTEGER NOT NULL,
+                                              description TEXT -- 🆕 Добавляем поле description
+                                          );
+                                      """);
         // В DbInitializer.InitializeAsync() добавьте:
 // -----------------------------
 // Таблица актеров

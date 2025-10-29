@@ -19,9 +19,10 @@ public class MovieRepository : IMovieRepository
         using var connection = await _connectionFactory.CreateConnectionAsync();
         using var transaction = connection.BeginTransaction();
 
+        // 🆕 Добавляем description в INSERT
         var result = await connection.ExecuteAsync("""
-            INSERT INTO movies (id, slug, title, yearofrelease)
-            VALUES (@Id, @Slug, @Title, @YearOfRelease)
+            INSERT INTO movies (id, slug, title, yearofrelease, description)
+            VALUES (@Id, @Slug, @Title, @YearOfRelease, @Description)
         """, movie, transaction);
 
         if (result > 0 && movie.Genres.Any())
@@ -35,12 +36,10 @@ public class MovieRepository : IMovieRepository
             }
         }
 
-        // Добавляем актеров, если они есть
         if (result > 0 && movie.Actors.Any())
         {
             foreach (var actor in movie.Actors)
             {
-                // Сначала создаем актера если его нет
                 var actorExists = await connection.ExecuteScalarAsync<bool>(
                     "SELECT COUNT(1) FROM actors WHERE id = @Id", 
                     new { actor.Id }, transaction);
@@ -53,7 +52,6 @@ public class MovieRepository : IMovieRepository
                     """, new { actor.Id, actor.Name }, transaction);
                 }
 
-                // Потом создаем связь
                 await connection.ExecuteAsync("""
                     INSERT INTO movie_actors (movieid, actorid)
                     VALUES (@MovieId, @ActorId)
@@ -72,25 +70,23 @@ public class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
+        // 🆕 Добавляем description в SELECT
         var movie = await connection.QuerySingleOrDefaultAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug FROM movies WHERE id=@id", 
+            "SELECT id, title, yearofrelease as YearOfRelease, slug, description FROM movies WHERE id=@id", 
             new { id });
         
         if (movie == null) return null;
 
-        // Загрузка жанров
         var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id });
         movie.Genres = genres.ToList();
 
-        // Загрузка рейтинга
         var avgRating = await connection.ExecuteScalarAsync<double?>(@"
             SELECT AVG(value)::float FROM ratings WHERE movieid=@id
         ", new { id });
         movie.AverageRating = avgRating ?? 0;
 
-        // Загрузка актеров - ТОЛЬКО ID И NAME
         var actors = await connection.QueryAsync<Actor>(@"
-            SELECT a.id, a.name  -- ← ИСПРАВЛЕНО: только нужные поля
+            SELECT a.id, a.name
             FROM actors a 
             INNER JOIN movie_actors ma ON a.id = ma.actorid 
             WHERE ma.movieid = @id
@@ -104,25 +100,23 @@ public class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
+        // 🆕 Добавляем description в SELECT
         var movie = await connection.QuerySingleOrDefaultAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug FROM movies WHERE slug=@slug", 
+            "SELECT id, title, yearofrelease as YearOfRelease, slug, description FROM movies WHERE slug=@slug", 
             new { slug });
         
         if (movie == null) return null;
 
-        // Загрузка жанров
         var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id = movie.Id });
         movie.Genres = genres.ToList();
 
-        // Загрузка рейтинга
         var avgRating = await connection.ExecuteScalarAsync<double?>(@"
             SELECT AVG(value)::float FROM ratings WHERE movieid=@id
         ", new { id = movie.Id });
         movie.AverageRating = avgRating ?? 0;
 
-        // Загрузка актеров - ТОЛЬКО ID И NAME
         var actors = await connection.QueryAsync<Actor>(@"
-            SELECT a.id, a.name  -- ← ИСПРАВЛЕНО: только нужные поля
+            SELECT a.id, a.name
             FROM actors a 
             INNER JOIN movie_actors ma ON a.id = ma.actorid 
             WHERE ma.movieid = @id
@@ -136,24 +130,22 @@ public class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
+        // 🆕 Добавляем description в SELECT
         var movies = await connection.QueryAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug FROM movies");
+            "SELECT id, title, yearofrelease as YearOfRelease, slug, description FROM movies");
 
         foreach (var movie in movies)
         {
-            // Загрузка жанров
             var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id = movie.Id });
             movie.Genres = genres.ToList();
 
-            // Загрузка рейтинга
             var avgRating = await connection.ExecuteScalarAsync<double?>(@"
                 SELECT AVG(value)::float FROM ratings WHERE movieid=@id
             ", new { id = movie.Id });
             movie.AverageRating = avgRating ?? 0;
 
-            // Загрузка актеров - ТОЛЬКО ID И NAME
             var actors = await connection.QueryAsync<Actor>(@"
-                SELECT a.id, a.name  -- ← ИСПРАВЛЕНО: только нужные поля
+                SELECT a.id, a.name
                 FROM actors a 
                 INNER JOIN movie_actors ma ON a.id = ma.actorid 
                 WHERE ma.movieid = @id
@@ -169,20 +161,15 @@ public class MovieRepository : IMovieRepository
         using var connection = await _connectionFactory.CreateConnectionAsync();
         using var transaction = connection.BeginTransaction();
 
-        // Удаляем старые жанры
         await connection.ExecuteAsync("DELETE FROM genres WHERE movieid=@id", new { id = movie.Id }, transaction);
-
-        // Удаляем старых актеров
         await connection.ExecuteAsync("DELETE FROM movie_actors WHERE movieid=@id", new { id = movie.Id }, transaction);
 
-        // Добавляем новые жанры
         foreach (var genre in movie.Genres)
         {
             await connection.ExecuteAsync("INSERT INTO genres (movieid, name) VALUES (@MovieId, @Name)",
                 new { MovieId = movie.Id, Name = genre }, transaction);
         }
 
-        // Добавляем новых актеров
         foreach (var actor in movie.Actors)
         {
             await connection.ExecuteAsync("""
@@ -194,10 +181,10 @@ public class MovieRepository : IMovieRepository
             }, transaction);
         }
 
-        // Обновляем фильм
+        // 🆕 Добавляем description в UPDATE
         var result = await connection.ExecuteAsync("""
             UPDATE movies
-            SET slug=@Slug, title=@Title, yearofrelease=@YearOfRelease
+            SET slug=@Slug, title=@Title, yearofrelease=@YearOfRelease, description=@Description
             WHERE id=@Id
         """, movie, transaction);
 
@@ -225,78 +212,68 @@ public class MovieRepository : IMovieRepository
         return count > 0;
     }
 
-    // В MovieRepository.cs добавить метод:
     public async Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
-        // Получаем общее количество
         var totalCount = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM movies");
 
-        // Получаем фильмы с пагинацией
+        // 🆕 Добавляем description в SELECT
         var movies = await connection.QueryAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug FROM movies ORDER BY title LIMIT @Take OFFSET @Skip",
+            "SELECT id, title, yearofrelease as YearOfRelease, slug, description FROM movies ORDER BY title LIMIT @Take OFFSET @Skip",
             new { Take = take, Skip = skip });
 
-        // Для каждого фильма загружаем жанры, рейтинг и актеров
         foreach (var movie in movies)
         {
-            // Загрузка жанров
             var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id = movie.Id });
             movie.Genres = genres.ToList();
 
-            // Загрузка рейтинга
             var avgRating = await connection.ExecuteScalarAsync<double?>(@"
-            SELECT AVG(value)::float FROM ratings WHERE movieid=@id
-        ", new { id = movie.Id });
+                SELECT AVG(value)::float FROM ratings WHERE movieid=@id
+            ", new { id = movie.Id });
             movie.AverageRating = avgRating ?? 0;
 
-            // Загрузка актеров
             var actors = await connection.QueryAsync<Actor>(@"
-            SELECT a.id, a.name
-            FROM actors a 
-            INNER JOIN movie_actors ma ON a.id = ma.actorid 
-            WHERE ma.movieid = @id
-        ", new { id = movie.Id });
+                SELECT a.id, a.name
+                FROM actors a 
+                INNER JOIN movie_actors ma ON a.id = ma.actorid 
+                WHERE ma.movieid = @id
+            ", new { id = movie.Id });
             movie.Actors = actors.ToList();
         }
 
         return (movies, totalCount);
     }
+
     public async Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
-        // Получаем общее количество по поиску
         var totalCount = await connection.ExecuteScalarAsync<int>(
             "SELECT COUNT(*) FROM movies WHERE title ILIKE @Search",
             new { Search = $"%{search}%" });
 
-        // Получаем фильмы с поиском и пагинацией
+        // 🆕 Добавляем description в SELECT
         var movies = await connection.QueryAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug FROM movies WHERE title ILIKE @Search ORDER BY title LIMIT @Take OFFSET @Skip",
+            "SELECT id, title, yearofrelease as YearOfRelease, slug, description FROM movies WHERE title ILIKE @Search ORDER BY title LIMIT @Take OFFSET @Skip",
             new { Search = $"%{search}%", Take = take, Skip = skip });
 
-        // Для каждого фильма загружаем жанры, рейтинг и актеров
         foreach (var movie in movies)
         {
-            // Загрузка жанров
             var genres = await connection.QueryAsync<string>("SELECT name FROM genres WHERE movieid=@id", new { id = movie.Id });
             movie.Genres = genres.ToList();
 
-            // Загрузка рейтинга
             var avgRating = await connection.ExecuteScalarAsync<double?>(@"
-            SELECT AVG(value)::float FROM ratings WHERE movieid=@id
-        ", new { id = movie.Id });
+                SELECT AVG(value)::float FROM ratings WHERE movieid=@id
+            ", new { id = movie.Id });
             movie.AverageRating = avgRating ?? 0;
 
-            // Загрузка актеров
             var actors = await connection.QueryAsync<Actor>(@"
-            SELECT a.id, a.name
-            FROM actors a 
-            INNER JOIN movie_actors ma ON a.id = ma.actorid 
-            WHERE ma.movieid = @id
-        ", new { id = movie.Id });
+                SELECT a.id, a.name
+                FROM actors a 
+                INNER JOIN movie_actors ma ON a.id = ma.actorid 
+                WHERE ma.movieid = @id
+            ", new { id = movie.Id });
             movie.Actors = actors.ToList();
         }
 
@@ -304,98 +281,87 @@ public class MovieRepository : IMovieRepository
     }
     
     public async Task<(IEnumerable<Movie> movies, int totalCount)> FilterAsync(
-    string? genre, 
-    int? yearFrom, 
-    int? yearTo, 
-    string? actor,
-    int skip, 
-    int take)
-{
-    using var connection = await _connectionFactory.CreateConnectionAsync();
-
-    // 1. Собираем условия WHERE динамически
-    var whereConditions = new List<string>();
-    var parameters = new DynamicParameters();
-
-    // Фильтр по жанру
-    if (!string.IsNullOrWhiteSpace(genre))
+        string? genre, 
+        int? yearFrom, 
+        int? yearTo, 
+        string? actor,
+        int skip, 
+        int take)
     {
-        whereConditions.Add("EXISTS (SELECT 1 FROM genres g WHERE g.movieid = m.id AND g.name = @Genre)");
-        parameters.Add("Genre", genre);
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+
+        var whereConditions = new List<string>();
+        var parameters = new DynamicParameters();
+
+        if (!string.IsNullOrWhiteSpace(genre))
+        {
+            whereConditions.Add("EXISTS (SELECT 1 FROM genres g WHERE g.movieid = m.id AND g.name = @Genre)");
+            parameters.Add("Genre", genre);
+        }
+
+        if (yearFrom.HasValue)
+        {
+            whereConditions.Add("m.yearofrelease >= @YearFrom");
+            parameters.Add("YearFrom", yearFrom.Value);
+        }
+
+        if (yearTo.HasValue)
+        {
+            whereConditions.Add("m.yearofrelease <= @YearTo");
+            parameters.Add("YearTo", yearTo.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(actor))
+        {
+            whereConditions.Add(@"EXISTS (
+                SELECT 1 FROM movie_actors ma 
+                INNER JOIN actors a ON ma.actorid = a.id 
+                WHERE ma.movieid = m.id AND a.name ILIKE @Actor
+            )");
+            parameters.Add("Actor", $"%{actor}%");
+        }
+
+        var whereClause = whereConditions.Any() 
+            ? "WHERE " + string.Join(" AND ", whereConditions)
+            : string.Empty;
+
+        var countSql = $@"SELECT COUNT(*) FROM movies m {whereClause}";
+        var totalCount = await connection.ExecuteScalarAsync<int>(countSql, parameters);
+
+        parameters.Add("Take", take);
+        parameters.Add("Skip", skip);
+
+        // 🆕 Добавляем description в SELECT
+        var moviesSql = $@"
+            SELECT m.id, m.title, m.yearofrelease as YearOfRelease, m.slug, m.description 
+            FROM movies m 
+            {whereClause}
+            ORDER BY m.title 
+            LIMIT @Take OFFSET @Skip";
+
+        var movies = await connection.QueryAsync<Movie>(moviesSql, parameters);
+
+        foreach (var movie in movies)
+        {
+            var genres = await connection.QueryAsync<string>(
+                "SELECT name FROM genres WHERE movieid = @id", 
+                new { id = movie.Id });
+            movie.Genres = genres.ToList();
+
+            var avgRating = await connection.ExecuteScalarAsync<double?>(@"
+                SELECT AVG(value)::float FROM ratings WHERE movieid = @id
+            ", new { id = movie.Id });
+            movie.AverageRating = avgRating ?? 0;
+
+            var actors = await connection.QueryAsync<Actor>(@"
+                SELECT a.id, a.name
+                FROM actors a 
+                INNER JOIN movie_actors ma ON a.id = ma.actorid 
+                WHERE ma.movieid = @id
+            ", new { id = movie.Id });
+            movie.Actors = actors.ToList();
+        }
+
+        return (movies, totalCount);
     }
-
-    // Фильтр по году (ОТ)
-    if (yearFrom.HasValue)
-    {
-        whereConditions.Add("m.yearofrelease >= @YearFrom");
-        parameters.Add("YearFrom", yearFrom.Value);
-    }
-
-    // Фильтр по году (ДО)
-    if (yearTo.HasValue)
-    {
-        whereConditions.Add("m.yearofrelease <= @YearTo");
-        parameters.Add("YearTo", yearTo.Value);
-    }
-
-    // 🆕 Фильтр по актеру
-    if (!string.IsNullOrWhiteSpace(actor))
-    {
-        whereConditions.Add(@"EXISTS (
-            SELECT 1 FROM movie_actors ma 
-            INNER JOIN actors a ON ma.actorid = a.id 
-            WHERE ma.movieid = m.id AND a.name ILIKE @Actor
-        )");
-        parameters.Add("Actor", $"%{actor}%");
-    }
-
-    // Формируем WHERE clause
-    var whereClause = whereConditions.Any() 
-        ? "WHERE " + string.Join(" AND ", whereConditions)
-        : string.Empty;
-
-    // 2. Получаем общее количество с учетом фильтров
-    var countSql = $@"SELECT COUNT(*) FROM movies m {whereClause}";
-    var totalCount = await connection.ExecuteScalarAsync<int>(countSql, parameters);
-
-    // 3. Получаем фильмы с фильтрацией и пагинацией
-    parameters.Add("Take", take);
-    parameters.Add("Skip", skip);
-
-    var moviesSql = $@"
-        SELECT m.id, m.title, m.yearofrelease as YearOfRelease, m.slug 
-        FROM movies m 
-        {whereClause}
-        ORDER BY m.title 
-        LIMIT @Take OFFSET @Skip";
-
-    var movies = await connection.QueryAsync<Movie>(moviesSql, parameters);
-
-    // 4. Для каждого фильма загружаем дополнительные данные
-    foreach (var movie in movies)
-    {
-        // Загрузка жанров
-        var genres = await connection.QueryAsync<string>(
-            "SELECT name FROM genres WHERE movieid = @id", 
-            new { id = movie.Id });
-        movie.Genres = genres.ToList();
-
-        // Загрузка рейтинга
-        var avgRating = await connection.ExecuteScalarAsync<double?>(@"
-            SELECT AVG(value)::float FROM ratings WHERE movieid = @id
-        ", new { id = movie.Id });
-        movie.AverageRating = avgRating ?? 0;
-
-        // Загрузка актеров
-        var actors = await connection.QueryAsync<Actor>(@"
-            SELECT a.id, a.name
-            FROM actors a 
-            INNER JOIN movie_actors ma ON a.id = ma.actorid 
-            WHERE ma.movieid = @id
-        ", new { id = movie.Id });
-        movie.Actors = actors.ToList();
-    }
-
-    return (movies, totalCount);
-}
 }
