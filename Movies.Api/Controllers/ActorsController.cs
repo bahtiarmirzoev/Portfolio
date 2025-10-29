@@ -24,8 +24,7 @@ public class ActorsController : ControllerBase
         {
             Id = Guid.NewGuid(),
             Name = request.Name,
-            DateOfBirth = request.DateOfBirth,
-            Biography = request.Biography
+          
         };
 
         var result = await _actorRepository.CreateAsync(actor);
@@ -47,8 +46,7 @@ public class ActorsController : ControllerBase
         {
             Id = id,
             Name = request.Name,
-            DateOfBirth = request.DateOfBirth,
-            Biography = request.Biography
+            
         };
 
         var result = await _actorRepository.UpdateAsync(actor);
