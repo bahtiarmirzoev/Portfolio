@@ -61,5 +61,33 @@ public class AuthController(
     {
         return Ok("Ts works");
     }
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var result = await identityService.ForgotPasswordAsync(request.Email);
+    
+        // Всегда возвращаем OK для безопасности
+        return Ok(new { message = "If the email exists, a password reset link has been sent." });
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var result = await identityService.ResetPasswordAsync(
+            request.Token, 
+            request.Email, 
+            request.NewPassword);
+
+        if (!result)
+        {
+            return BadRequest("Invalid or expired reset token.");
+        }
+
+        return Ok(new { message = "Password has been reset successfully." });
+    }
     
 }

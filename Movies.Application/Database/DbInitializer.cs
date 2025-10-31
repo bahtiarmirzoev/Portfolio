@@ -14,6 +14,27 @@ public class DbInitializer
     public async Task InitializeAsync()
     {
         using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        // -----------------------------
+// Таблица токенов сброса пароля
+// -----------------------------
+        await connection.ExecuteAsync("""
+                                          CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                                              id UUID PRIMARY KEY,
+                                              userid UUID REFERENCES users(id) ON DELETE CASCADE,
+                                              token TEXT NOT NULL UNIQUE,
+                                              expires_at TIMESTAMP NOT NULL,
+                                              used BOOLEAN DEFAULT FALSE,
+                                              created_at TIMESTAMP DEFAULT NOW()
+                                          );
+                                      """);
+
+        await connection.ExecuteAsync("""
+                                          CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token ON password_reset_tokens(token);
+                                      """);
+
+        await connection.ExecuteAsync("""
+                                          CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_userid ON password_reset_tokens(userid);
+                                      """);
 
         // -----------------------------
         // Таблица фильмов
@@ -221,4 +242,5 @@ public class DbInitializer
             CREATE INDEX IF NOT EXISTS idx_user_otps_userid ON user_otps(userid);
         """);
     }
+    
 }

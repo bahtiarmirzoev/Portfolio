@@ -136,4 +136,13 @@ public class UserRepository : IUserRepository
             
                                                                                
     }
+
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+    
+        return await connection.QuerySingleOrDefaultAsync<User>(
+            "SELECT * FROM users WHERE email = @Email",
+            new { Email = email });
+    }
 }
