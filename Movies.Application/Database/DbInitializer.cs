@@ -231,11 +231,15 @@ public class DbInitializer
         // Таблица OTP-кодов
         // -----------------------------
         await connection.ExecuteAsync("""
-            CREATE TABLE IF NOT EXISTS user_otps (
-                id UUID PRIMARY KEY,
-                userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                code TEXT NOT NULL
-            );
+           CREATE TABLE IF NOT EXISTS user_otps (
+            id UUID PRIMARY KEY,
+            userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            code TEXT NOT NULL,
+            expiresat TIMESTAMP NOT NULL,
+            createdat TIMESTAMP DEFAULT NOW(),
+            used BOOLEAN DEFAULT FALSE
+        );
+        
         """);
 
         await connection.ExecuteAsync("""

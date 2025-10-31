@@ -18,24 +18,28 @@ namespace Movies.Application.Repositories
         public async Task AddOtpAsync(UserOtp otp)
         {
             const string sql = """
-                                   insert into user_otps (id, "userid", code)
-                                   values (@Id, @UserId, @Code);
+                                   INSERT INTO user_otps (id, "userid", code, expiresat, createdat)
+                                   VALUES (@Id, @UserId, @Code, @ExpiresAt, @CreatedAt);
                                """;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             await connection.ExecuteAsync(sql, otp);
         }
 
+
         public async Task<UserOtp?> GetOtpAsync(Guid userId, string code)
         {
             const string sql = """
-                                   select * from user_otps
-                                   where "userid" = @UserId and code = @Code
-                                   limit 1;
+                                   SELECT * FROM user_otps
+                                   WHERE "userid" = @UserId 
+                                     AND code = @Code 
+                                     AND expiresat > NOW()
+                                   LIMIT 1;
                                """;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             return await connection.QueryFirstOrDefaultAsync<UserOtp>(sql, new { UserId = userId, Code = code });
         }
+
     }
 }

@@ -16,7 +16,6 @@ public class AuthController(
     public async Task<IActionResult> RefreshToken(RefreshTokenRequest tokens)
     {
         var tokenData = await identityService.RefreshTokenAsync(tokens.AccessToken, tokens.RefreshToken);
-
         if (tokenData is null) return BadRequest();
 
         return Ok(tokenData);
@@ -28,7 +27,6 @@ public class AuthController(
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var response = await identityService.SignUp(request.MapToUser());
-
         return Created(nameof(SignUp), response);
     }
 
@@ -42,7 +40,8 @@ public class AuthController(
             request.Password
         );
 
-        if (tokenData is null) return BadRequest("Invalid username or password");
+        if (tokenData is null) 
+            return BadRequest("Invalid username or password");
 
         return Ok(tokenData);
     }
@@ -51,7 +50,6 @@ public class AuthController(
     public new async Task<IActionResult> SignOut(SignOutRequest request)
     {
         await identityService.SignOut(request.AccessToken, request.RefreshToken);
-
         return NoContent();
     }
 
@@ -59,35 +57,38 @@ public class AuthController(
     [Authorize]
     public IActionResult Check()
     {
-        return Ok("Ts works");
+        return Ok("Token is valid ✅");
     }
+
+    // 🔹 Отправка OTP-кода для сброса пароля
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
         var result = await identityService.ForgotPasswordAsync(request.Email);
-    
-        // Всегда возвращаем OK для безопасности
-        return Ok(new { message = "If the email exists, a password reset link has been sent." });
+
+        // Независимо от результата возвращаем Ok для безопасности
+        return Ok(new { message = "If the email exists, an OTP code has been sent." });
     }
 
+    // 🔹 Проверка OTP и смена пароля
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
         var result = await identityService.ResetPasswordAsync(
-            request.Token, 
-            request.Email, 
-            request.NewPassword);
+            request.Email,
+            request.OtpCode, // заменили Token → OtpCode
+            request.NewPassword
+        );
 
         if (!result)
-        {
-            return BadRequest("Invalid or expired reset token.");
-        }
+            return BadRequest("Invalid or expired OTP code.");
 
         return Ok(new { message = "Password has been reset successfully." });
     }
-    
 }

@@ -13,6 +13,7 @@ public class AuthService : IAuthService
     private readonly IRoleService _roleService;
     private readonly IPasswordResetRepository _passwordResetRepository;
     private readonly IEmailService _emailService;
+    private readonly OtpService _otpService;
 
     public AuthService(
         IUserRepository userRepository, 
@@ -20,7 +21,8 @@ public class AuthService : IAuthService
         IRoleRepository roleRepository, 
         IRoleService roleService,
         IPasswordResetRepository passwordResetRepository,
-        IEmailService emailService)
+        IEmailService emailService,
+        OtpService otpService)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
@@ -28,6 +30,7 @@ public class AuthService : IAuthService
         _roleService = roleService;
         _passwordResetRepository = passwordResetRepository;
         _emailService = emailService; 
+        _otpService = otpService;
     }
 
     public async Task<bool> SignUp(User user)
@@ -141,124 +144,54 @@ public class AuthService : IAuthService
         await _userRepository.UpdateUserAsync(user);
     }
 
-    // 🆕 РЕАЛИЗАЦИЯ FORGOT PASSWORD
-    public async Task<bool> ForgotPasswordAsync(string email)
+   public async Task<bool> ForgotPasswordAsync(string email)
     {
-        // Находим пользователя по email
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
         {
-            // Возвращаем true даже если пользователя нет, для безопасности
+            // Возвращаем true даже если пользователя нет — чтобы не раскрывать наличие email
             return true;
         }
 
-        // Инвалидируем старые токены пользователя
-        await _passwordResetRepository.InvalidateUserTokensAsync(user.Id);
+        // Генерируем и отправляем OTP через твой сервис
+        await _otpService.GenerateAndSendOtp(user.Id, user.Email);
 
-        // Создаем новый токен сброса пароля
-        var resetToken = new PasswordResetToken
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            Token = GenerateResetToken(),
-            ExpiresAt = DateTime.UtcNow.AddHours(24) // Токен действует 24 часа
-        };
-
-        // Сохраняем токен в базу
-        var created = await _passwordResetRepository.CreateAsync(resetToken);
-        if (!created)
-        {
-            return false;
-        }
-
-        // Отправляем email с ссылкой для сброса пароля
-        await SendPasswordResetEmail(user.Email, resetToken.Token);
-        
+        Console.WriteLine($"✅ OTP sent for password reset to {user.Email}");
         return true;
     }
 
-    // 🆕 РЕАЛИЗАЦИЯ RESET PASSWORD
-    public async Task<bool> ResetPasswordAsync(string token, string email, string newPassword)
+    // 🔹 Reset Password — теперь проверяет OTP вместо токена
+    public async Task<bool> ResetPasswordAsync(string email, string otpCode, string newPassword)
     {
-        // Находим токен в базе
-        var resetToken = await _passwordResetRepository.GetByTokenAsync(token);
-        if (resetToken == null || resetToken.ExpiresAt < DateTime.UtcNow)
-        {
-            return false; // Токен не найден или просрочен
-        }
+        var user = await _userRepository.GetByEmailAsync(email);
+        if (user == null)
+            return false;
 
-        // Находим пользователя
-        var user = await _userRepository.GetByIdAsync(resetToken.UserId);
-        if (user == null || !user.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
-        {
-            return false; // Пользователь не найден или email не совпадает
-        }
+        // Проверяем OTP-код
+        var isValidOtp = await _otpService.VerifyOtp(user.Id, otpCode);
+        if (!isValidOtp)
+            return false;
 
-        // Проверяем сложность пароля
+        // Проверка сложности пароля
         if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
-        {
-            return false; // Слишком простой пароль
-        }
+            return false;
 
-        // Хешируем новый пароль с помощью вашего PasswordHasher
+        // Обновляем пароль
         user.PasswordHash = PasswordHasher.Generate(newPassword);
-        
-        // Обновляем пользователя в базе
         var updated = await _userRepository.UpdateUserAsync(user);
         if (!updated)
-        {
-            return false; // Ошибка обновления
-        }
+            return false;
 
-        // Помечаем токен как использованный
-        await _passwordResetRepository.MarkAsUsedAsync(resetToken.Id);
-
-        // Инвалидируем все refresh токены пользователя (для безопасности)
+        // Инвалидируем refresh токен (если используешь)
         user.RefreshToken = null;
         user.RefreshTokenExpiryTime = DateTime.UtcNow;
         await _userRepository.UpdateUserAsync(user);
 
-        // Отправляем email подтверждение смены пароля
+        // Отправляем уведомление об изменении пароля
         await SendPasswordChangedEmail(user.Email);
-        
+
+        Console.WriteLine($"✅ Password successfully changed for {user.Email}");
         return true;
-    }
-
-    private static string GenerateResetToken()
-    {
-        // Генерируем уникальный токен
-        return Guid.NewGuid().ToString("N") + "-" + DateTime.UtcNow.Ticks.ToString("x");
-    }
-
-    private async Task SendPasswordResetEmail(string email, string token)
-    {
-        var resetLink = $"http://localhost:3000/reset-password?token={token}&email={email}";
-        
-        var subject = "Сброс пароля - Movies App";
-        var body = $@"
-            Сброс пароля
-
-            Вы запросили сброс пароля для вашего аккаунта.
-
-            Для сброса пароля перейдите по ссылке:
-            {resetLink}
-
-            Или используйте этот токен: {token}
-
-            Ссылка действительна в течение 24 часов.
-
-            Если вы не запрашивали сброс пароля, проигнорируйте это письмо.";
-
-        try
-        {
-            await _emailService.SendEmail(email, subject, body);
-            Console.WriteLine($"Password reset email sent to: {email}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to send password reset email: {ex.Message}");
-            throw;
-        }
     }
 
     private async Task SendPasswordChangedEmail(string email)
@@ -271,15 +204,6 @@ public class AuthService : IAuthService
 
             Если это были не вы, немедленно свяжитесь с поддержкой.";
 
-        try
-        {
-            await _emailService.SendEmail(email, subject, body);
-            Console.WriteLine($"Password changed notification sent to: {email}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to send password changed email: {ex.Message}");
-            throw;
-        }
+        await _emailService.SendEmail(email, subject, body);
     }
 }

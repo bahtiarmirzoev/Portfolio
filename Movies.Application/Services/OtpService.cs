@@ -26,31 +26,39 @@ namespace Movies.Application.Services
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 Code = otpCode,
-                
+                ExpiresAt = DateTime.UtcNow.AddMinutes(5),
+                CreatedAt = DateTime.UtcNow
             };
 
             await _otpRepository.AddOtpAsync(otp);
 
-            // ✅ Отправляем письмо через EmailService
             var subject = "Ваш OTP код для входа";
-            var body = $"Здравствуйте!\n\nВаш OTP-код для подтверждения: {otpCode}\n\nОн действует 5 минут.";
+            var body = $"Здравствуйте!\n\nВаш OTP-код: {otpCode}\nОн действует 5 минут.";
 
             try
             {
                 await _emailService.SendEmail(email, subject, body);
-                Console.WriteLine($"✅ OTP {otpCode} успешно отправлен на {email}");
+                Console.WriteLine($"✅ OTP {otpCode} отправлен на {email}");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ Ошибка при отправке OTP: {ex.Message}");
-                throw; // важно не глушить исключение
+                throw;
             }
         }
 
         public async Task<bool> VerifyOtp(Guid userId, string code)
         {
             var otp = await _otpRepository.GetOtpAsync(userId, code);
-            return otp != null;
+
+            if (otp is null)
+                return false;
+
+            // ✅ Проверяем срок действия
+            if (DateTime.UtcNow > otp.ExpiresAt)
+                return false;
+
+            return true;
         }
     }
 }
