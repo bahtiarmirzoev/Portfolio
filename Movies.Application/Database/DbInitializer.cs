@@ -17,7 +17,7 @@ public class DbInitializer
         
         // Таблицы для сериалов
         await connection.ExecuteAsync("""
-            -- Создание таблицы series
+            
             CREATE TABLE IF NOT EXISTS series (
                 id UUID PRIMARY KEY,
                 slug TEXT NOT NULL UNIQUE,
@@ -58,12 +58,12 @@ public class DbInitializer
             CREATE INDEX IF NOT EXISTS idx_series_actors_seriesid ON series_actors(seriesid);
             CREATE INDEX IF NOT EXISTS idx_series_actors_actorid ON series_actors(actorid);
             
-            -- Таблица рейтингов для сериалов
+            -- Таблица рейтингов для сериалов (ИСПРАВЛЕНО: value BETWEEN 1 AND 5)
             CREATE TABLE IF NOT EXISTS series_ratings (
                 id UUID PRIMARY KEY,
                 seriesid UUID REFERENCES series(id) ON DELETE CASCADE,
                 userid UUID NOT NULL,
-                value INTEGER NOT NULL CHECK (value >= 1 AND value <= 10),
+                value INTEGER NOT NULL CHECK (value BETWEEN 1 AND 5), -- ИЗМЕНЕНО С 10 НА 5
                 createdat TIMESTAMP NOT NULL DEFAULT NOW(),
                 UNIQUE(seriesid, userid)
             );
@@ -72,6 +72,31 @@ public class DbInitializer
             CREATE INDEX IF NOT EXISTS idx_series_ratings_userid ON series_ratings(userid);
             """);
 
+        // Таблица комментариев для сериалов
+        await connection.ExecuteAsync("""
+            CREATE TABLE IF NOT EXISTS series_comments (
+                id UUID PRIMARY KEY,
+                seriesid UUID REFERENCES series(id) ON DELETE CASCADE,
+                userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                content TEXT NOT NULL,
+                createdat TIMESTAMP NOT NULL DEFAULT now(),
+                updatedat TIMESTAMP
+            );
+            """);
+
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_series_comments_seriesid ON series_comments(seriesid);
+            """);
+
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_series_comments_userid ON series_comments(userid);
+            """);
+
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_series_comments_createdat ON series_comments(createdat DESC);
+            """);
+
+        // Остальные таблицы остаются без изменений...
         // Таблица токенов сброса пароля
         await connection.ExecuteAsync("""
             CREATE TABLE IF NOT EXISTS password_reset_tokens (
@@ -218,7 +243,7 @@ public class DbInitializer
             CREATE INDEX IF NOT EXISTS idx_favorite_movieid ON favoritemovies(movieid);
             """);
 
-        // Таблица рейтингов
+        // Таблица рейтингов для фильмов
         await connection.ExecuteAsync("""
             CREATE TABLE IF NOT EXISTS ratings (
                 id UUID PRIMARY KEY,
@@ -238,7 +263,7 @@ public class DbInitializer
             CREATE INDEX IF NOT EXISTS idx_rating_movieid ON ratings(movieid);
             """);
 
-        // Таблица комментариев
+        // Таблица комментариев для фильмов
         await connection.ExecuteAsync("""
             CREATE TABLE IF NOT EXISTS comments (
                 id UUID PRIMARY KEY,

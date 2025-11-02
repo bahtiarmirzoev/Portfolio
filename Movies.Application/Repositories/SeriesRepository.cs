@@ -81,15 +81,18 @@ public class SeriesRepository : ISeriesRepository
         
         if (series == null) return null;
 
+        // Загружаем жанры
         var genres = await connection.QueryAsync<string>(
             "SELECT name FROM series_genres WHERE seriesid=@id", new { id });
         series.Genres = genres.ToList();
 
+        // Рассчитываем средний рейтинг
         var avgRating = await connection.ExecuteScalarAsync<double?>(@"
-            SELECT AVG(value)::float FROM series_ratings WHERE seriesid=@id
+            SELECT AVG(value)::float FROM series_ratings WHERE seriesid = @id
         ", new { id });
-        series.AverageRating = avgRating ?? 0;
+        series.AverageRating = avgRating;
 
+        // Загружаем актеров
         var actors = await connection.QueryAsync<Actor>(@"
             SELECT a.id, a.name
             FROM actors a 
@@ -115,15 +118,18 @@ public class SeriesRepository : ISeriesRepository
         
         if (series == null) return null;
 
+        // Загружаем жанры
         var genres = await connection.QueryAsync<string>(
             "SELECT name FROM series_genres WHERE seriesid=@id", new { id = series.Id });
         series.Genres = genres.ToList();
 
+        // Рассчитываем средний рейтинг
         var avgRating = await connection.ExecuteScalarAsync<double?>(@"
-            SELECT AVG(value)::float FROM series_ratings WHERE seriesid=@id
+            SELECT AVG(value)::float FROM series_ratings WHERE seriesid = @id
         ", new { id = series.Id });
-        series.AverageRating = avgRating ?? 0;
+        series.AverageRating = avgRating;
 
+        // Загружаем актеров
         var actors = await connection.QueryAsync<Actor>(@"
             SELECT a.id, a.name
             FROM actors a 
@@ -149,15 +155,18 @@ public class SeriesRepository : ISeriesRepository
 
         foreach (var series in seriesList)
         {
+            // Загружаем жанры
             var genres = await connection.QueryAsync<string>(
                 "SELECT name FROM series_genres WHERE seriesid=@id", new { id = series.Id });
             series.Genres = genres.ToList();
 
+            // Рассчитываем средний рейтинг
             var avgRating = await connection.ExecuteScalarAsync<double?>(@"
-                SELECT AVG(value)::float FROM series_ratings WHERE seriesid=@id
+                SELECT AVG(value)::float FROM series_ratings WHERE seriesid = @id
             ", new { id = series.Id });
-            series.AverageRating = avgRating ?? 0;
+            series.AverageRating = avgRating;
 
+            // Загружаем актеров
             var actors = await connection.QueryAsync<Actor>(@"
                 SELECT a.id, a.name
                 FROM actors a 
@@ -254,15 +263,18 @@ public class SeriesRepository : ISeriesRepository
 
         foreach (var series in seriesList)
         {
+            // Загружаем жанры
             var genres = await connection.QueryAsync<string>(
                 "SELECT name FROM series_genres WHERE seriesid=@id", new { id = series.Id });
             series.Genres = genres.ToList();
 
+            // Рассчитываем средний рейтинг
             var avgRating = await connection.ExecuteScalarAsync<double?>(@"
-                SELECT AVG(value)::float FROM series_ratings WHERE seriesid=@id
+                SELECT AVG(value)::float FROM series_ratings WHERE seriesid = @id
             ", new { id = series.Id });
-            series.AverageRating = avgRating ?? 0;
+            series.AverageRating = avgRating;
 
+            // Загружаем актеров
             var actors = await connection.QueryAsync<Actor>(@"
                 SELECT a.id, a.name
                 FROM actors a 
@@ -297,15 +309,18 @@ public class SeriesRepository : ISeriesRepository
 
         foreach (var series in seriesList)
         {
+            // Загружаем жанры
             var genres = await connection.QueryAsync<string>(
                 "SELECT name FROM series_genres WHERE seriesid=@id", new { id = series.Id });
             series.Genres = genres.ToList();
 
+            // Рассчитываем средний рейтинг
             var avgRating = await connection.ExecuteScalarAsync<double?>(@"
-                SELECT AVG(value)::float FROM series_ratings WHERE seriesid=@id
+                SELECT AVG(value)::float FROM series_ratings WHERE seriesid = @id
             ", new { id = series.Id });
-            series.AverageRating = avgRating ?? 0;
+            series.AverageRating = avgRating;
 
+            // Загружаем актеров
             var actors = await connection.QueryAsync<Actor>(@"
                 SELECT a.id, a.name
                 FROM actors a 
@@ -384,16 +399,19 @@ public class SeriesRepository : ISeriesRepository
 
         foreach (var series in seriesList)
         {
+            // Загружаем жанры
             var genres = await connection.QueryAsync<string>(
                 "SELECT name FROM series_genres WHERE seriesid = @id", 
                 new { id = series.Id });
             series.Genres = genres.ToList();
 
+            // Рассчитываем средний рейтинг
             var avgRating = await connection.ExecuteScalarAsync<double?>(@"
                 SELECT AVG(value)::float FROM series_ratings WHERE seriesid = @id
             ", new { id = series.Id });
-            series.AverageRating = avgRating ?? 0;
+            series.AverageRating = avgRating;
 
+            // Загружаем актеров
             var actors = await connection.QueryAsync<Actor>(@"
                 SELECT a.id, a.name
                 FROM actors a 
@@ -426,15 +444,18 @@ public class SeriesRepository : ISeriesRepository
 
         foreach (var series in seriesList)
         {
+            // Загружаем жанры
             var genres = await connection.QueryAsync<string>(
                 "SELECT name FROM series_genres WHERE seriesid=@id", new { id = series.Id });
             series.Genres = genres.ToList();
 
+            // Рассчитываем средний рейтинг
             var avgRating = await connection.ExecuteScalarAsync<double?>(@"
-                SELECT AVG(value)::float FROM series_ratings WHERE seriesid=@id
+                SELECT AVG(value)::float FROM series_ratings WHERE seriesid = @id
             ", new { id = series.Id });
-            series.AverageRating = avgRating ?? 0;
+            series.AverageRating = avgRating;
 
+            // Загружаем актеров
             var actors = await connection.QueryAsync<Actor>(@"
                 SELECT a.id, a.name
                 FROM actors a 

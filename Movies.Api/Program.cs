@@ -74,6 +74,11 @@ builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<ISeriesRepository, SeriesRepository>();
 builder.Services.AddScoped<ISeriesService, SeriesService>();
 builder.Services.AddScoped<IValidator<Series>, SeriesValidator>();
+builder.Services.AddScoped<ISeriesRatingRepository, SeriesRatingRepository>();
+builder.Services.AddScoped<ISeriesRatingService, SeriesRatingService>();
+builder.Services.AddScoped<ISeriesCommentRepository, SeriesCommentRepository>();
+builder.Services.AddScoped<ISeriesCommentService, SeriesCommentService>();
+
 var jwtSettings = config.GetSection("JwtOptions");
 
 
