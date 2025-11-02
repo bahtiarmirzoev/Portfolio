@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -7,9 +8,11 @@ using Movies.Api.Mapping;
 using Movies.Application;
 using Movies.Application.Database;
 using Movies.Application.Interfaces;
+using Movies.Application.Models;
 using Movies.Application.Options;
 using Movies.Application.Repositories;
 using Movies.Application.Services;
+using Movies.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -68,7 +71,9 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IActorRepository, ActorRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
-
+builder.Services.AddScoped<ISeriesRepository, SeriesRepository>();
+builder.Services.AddScoped<ISeriesService, SeriesService>();
+builder.Services.AddScoped<IValidator<Series>, SeriesValidator>();
 var jwtSettings = config.GetSection("JwtOptions");
 
 
