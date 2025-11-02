@@ -18,9 +18,10 @@ public class SeriesValidator : AbstractValidator<Series>
             .GreaterThan(1800)
             .LessThanOrEqualTo(DateTime.UtcNow.Year + 5);
 
+        // Условие для YearOfEnd - только если не ongoing и указан
         RuleFor(s => s.YearOfEnd)
             .GreaterThanOrEqualTo(s => s.YearOfRelease)
-            .When(s => s.YearOfEnd.HasValue)
+            .When(s => s.YearOfEnd.HasValue && !s.IsOngoing)
             .WithMessage("Year of end must be greater than or equal to year of release");
 
         RuleFor(s => s.Description)
@@ -53,6 +54,7 @@ public class SeriesValidator : AbstractValidator<Series>
             .GreaterThan(0)
             .When(s => s.TotalEpisodes.HasValue);
 
+        // Упрощенное правило для ongoing сериалов
         RuleFor(s => s.YearOfEnd)
             .Null()
             .When(s => s.IsOngoing)

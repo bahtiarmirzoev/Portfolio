@@ -13,7 +13,7 @@ public static class SeriesMapping
             Id = Guid.NewGuid(),
             Title = request.Title,
             YearOfRelease = request.YearOfRelease,
-            YearOfEnd = request.YearOfEnd,
+            YearOfEnd = request.IsOngoing ? null : request.YearOfEnd, // ← Такая же логика
             Description = request.Description,
             PosterUrl = request.PosterUrl,
             TrailerUrl = request.TrailerUrl,
@@ -36,7 +36,7 @@ public static class SeriesMapping
             Id = id,
             Title = request.Title,
             YearOfRelease = request.YearOfRelease,
-            YearOfEnd = request.YearOfEnd == 0 ? null : request.YearOfEnd,
+            YearOfEnd = request.IsOngoing ? null : request.YearOfEnd, // ← Исправлено здесь
             Description = request.Description,
             PosterUrl = request.PosterUrl,
             TrailerUrl = request.TrailerUrl,
