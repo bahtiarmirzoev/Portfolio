@@ -60,5 +60,24 @@ namespace Movies.Application.Services
 
             return true;
         }
+        public async Task<bool> VerifyAndConsumeOtp(Guid userId, string code)
+        {
+            var otp = await _otpRepository.GetOtpAsync(userId, code);
+            
+            if (otp is null)
+                return false;
+
+            // Помечаем OTP как использованный
+            await _otpRepository.MarkAsUsedAsync(otp.Id);
+            Console.WriteLine($"✅ OTP {code} помечен как использованный для пользователя {userId}");
+            
+            return true;
+        }
+
+        // ✅ ДОБАВЬ ОЧИСТКУ СТАРЫХ OTP
+        public async Task CleanupExpiredOtpsAsync()
+        {
+            await _otpRepository.CleanupExpiredOtpsAsync();
+        }
     }
 }

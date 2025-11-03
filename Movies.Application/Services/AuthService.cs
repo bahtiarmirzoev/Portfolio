@@ -168,7 +168,7 @@ public class AuthService : IAuthService
             return false;
 
         // Проверяем OTP-код
-        var isValidOtp = await _otpService.VerifyOtp(user.Id, otpCode);
+        var isValidOtp = await _otpService.VerifyAndConsumeOtp(user.Id, otpCode);
         if (!isValidOtp)
             return false;
 

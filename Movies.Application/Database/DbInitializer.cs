@@ -288,19 +288,25 @@ public class DbInitializer
             """);
 
         // Таблица OTP-кодов
+        // В методе InitializeAsync() замени создание таблицы user_otps на:
         await connection.ExecuteAsync("""
-            CREATE TABLE IF NOT EXISTS user_otps (
-                id UUID PRIMARY KEY,
-                userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                code TEXT NOT NULL,
-                expiresat TIMESTAMP NOT NULL,
-                createdat TIMESTAMP DEFAULT NOW(),
-                used BOOLEAN DEFAULT FALSE
-            );
-            """);
+                                          CREATE TABLE IF NOT EXISTS user_otps (
+                                              id UUID PRIMARY KEY,
+                                              userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                                              code TEXT NOT NULL,
+                                              expiresat TIMESTAMP NOT NULL,
+                                              createdat TIMESTAMP DEFAULT NOW(),
+                                              used BOOLEAN DEFAULT FALSE
+                                          );
+                                      """);
 
         await connection.ExecuteAsync("""
-            CREATE INDEX IF NOT EXISTS idx_user_otps_userid ON user_otps(userid);
-            """);
+                                          CREATE INDEX IF NOT EXISTS idx_user_otps_userid ON user_otps(userid);
+                                      """);
+
+// ДОБАВЬ ЭТОТ ИНДЕКС ДЛЯ ПРОИЗВОДИТЕЛЬНОСТИ
+        await connection.ExecuteAsync("""
+                                          CREATE INDEX IF NOT EXISTS idx_user_otps_code ON user_otps(code);
+                                      """);
     }
 }
