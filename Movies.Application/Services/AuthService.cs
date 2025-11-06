@@ -2,6 +2,7 @@ using Movies.Application.Interfaces;
 using Movies.Application.Models;
 using Movies.Application.Repositories;
 using Movies.Contracts.Responses;
+using Microsoft.Extensions.Logging; // ✅ ДОБАВЬ ЭТОТ USING
 
 namespace Movies.Application.Services;
 
@@ -13,7 +14,8 @@ public class AuthService : IAuthService
     private readonly IRoleService _roleService;
     private readonly IPasswordResetRepository _passwordResetRepository;
     private readonly IEmailService _emailService;
-    private readonly OtpService _otpService;
+    private readonly IOtpService _otpService; // ✅ ИЗМЕНИЛ НА ИНТЕРФЕЙС
+    private readonly ILogger<AuthService> _logger; // ✅ ДОБАВИЛ ПОЛЕ
 
     public AuthService(
         IUserRepository userRepository, 
@@ -22,7 +24,8 @@ public class AuthService : IAuthService
         IRoleService roleService,
         IPasswordResetRepository passwordResetRepository,
         IEmailService emailService,
-        OtpService otpService)
+        IOtpService otpService, // ✅ ИЗМЕНИЛ НА ИНТЕРФЕЙС
+        ILogger<AuthService> logger) // ✅ ДОБАВИЛ ПАРАМЕТР
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
@@ -30,7 +33,8 @@ public class AuthService : IAuthService
         _roleService = roleService;
         _passwordResetRepository = passwordResetRepository;
         _emailService = emailService; 
-        _otpService = otpService;
+        _otpService = otpService; // ✅ ИЗМЕНИЛ
+        _logger = logger; // ✅ ДОБАВИЛ ИНИЦИАЛИЗАЦИЮ
     }
 
     public async Task<bool> SignUp(User user)
@@ -144,66 +148,103 @@ public class AuthService : IAuthService
         await _userRepository.UpdateUserAsync(user);
     }
 
-   public async Task<bool> ForgotPasswordAsync(string email)
+    public async Task<ForgotPasswordResult> ForgotPasswordAsync(string email)
     {
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
         {
-            // Возвращаем true даже если пользователя нет — чтобы не раскрывать наличие email
-            return true;
+            // 🔐 Security: Не раскрываем существование email
+            await Task.Delay(Random.Shared.Next(500, 1500));
+            _logger.LogInformation("Forgot password request for non-existent email: {Email}", email);
+            return ForgotPasswordResult.SuccessResult();
         }
 
-        // Генерируем и отправляем OTP через твой сервис
-        await _otpService.GenerateAndSendOtp(user.Id, user.Email);
+        var otpResult = await _otpService.GenerateAndSendOtpAsync(user.Id, user.Email);
+        
+        if (otpResult.IsError)
+        {
+            _logger.LogWarning("Failed to generate OTP for user {UserId}: {Error}", user.Id, otpResult.ErrorMessage);
+            return ForgotPasswordResult.Error(otpResult.ErrorMessage);
+        }
 
-        Console.WriteLine($"✅ OTP sent for password reset to {user.Email}");
-        return true;
+        _logger.LogInformation("✅ OTP sent for password reset to {Email}", user.Email);
+        return ForgotPasswordResult.SuccessResult();
     }
 
-    // 🔹 Reset Password — теперь проверяет OTP вместо токена
-    public async Task<bool> ResetPasswordAsync(string email, string otpCode, string newPassword)
+    public async Task<ResetPasswordResult> ResetPasswordAsync(string email, string otpCode, string newPassword)
+{
+    _logger.LogInformation("🔧 RESET PASSWORD STARTED: Email={Email}", email);
+    
+    var user = await _userRepository.GetByEmailAsync(email);
+    if (user == null)
     {
-        var user = await _userRepository.GetByEmailAsync(email);
-        if (user == null)
-            return false;
+        _logger.LogWarning("❌ User not found for email: {Email}", email);
+        return ResetPasswordResult.InvalidOtp();
+    }
+    
+    _logger.LogInformation("👤 User found: Id={UserId}, Email={Email}", user.Id, user.Email);
 
-        // Проверяем OTP-код
-        var isValidOtp = await _otpService.VerifyAndConsumeOtp(user.Id, otpCode);
-        if (!isValidOtp)
-            return false;
-
-        // Проверка сложности пароля
-        if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
-            return false;
-
-        // Обновляем пароль
-        user.PasswordHash = PasswordHasher.Generate(newPassword);
-        var updated = await _userRepository.UpdateUserAsync(user);
-        if (!updated)
-            return false;
-
-        // Инвалидируем refresh токен (если используешь)
-        user.RefreshToken = null;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow;
-        await _userRepository.UpdateUserAsync(user);
-
-        // Отправляем уведомление об изменении пароля
-        await SendPasswordChangedEmail(user.Email);
-
-        Console.WriteLine($"✅ Password successfully changed for {user.Email}");
-        return true;
+    var otpValidation = await _otpService.ValidateOtpAsync(user.Id, otpCode);
+    if (otpValidation.IsError)
+    {
+        _logger.LogWarning("❌ Invalid OTP for user {UserId}", user.Id);
+        return ResetPasswordResult.FromOtpValidation(otpValidation);
     }
 
+    _logger.LogInformation("✅ OTP validated successfully");
+
+    await _otpService.ConsumeOtpAsync(otpValidation.OtpId!.Value);
+
+    // Генерируем хеш пароля
+    var newPasswordHash = PasswordHasher.Generate(newPassword);
+    _logger.LogInformation("🔐 Generated password hash: {PasswordHash}", newPasswordHash);
+
+    // Обновляем пароль в базе
+    _logger.LogInformation("💾 Updating password in database for user {UserId}", user.Id);
+    var updated = await _userRepository.UpdatePasswordAsync(user.Id, newPasswordHash);
+    
+    if (!updated)
+    {
+        _logger.LogError("❌ FAILED to update password for user {UserId}", user.Id);
+        return ResetPasswordResult.Error("Failed to update password");
+    }
+
+    _logger.LogInformation("✅ Password updated successfully for user {UserId}", user.Id);
+
+    // Проверим что пароль действительно обновился
+    var updatedUser = await _userRepository.GetByEmailAsync(email);
+    if (updatedUser != null)
+    {
+        _logger.LogInformation("🔍 Verification: New password hash in DB: {NewHash}", updatedUser.PasswordHash);
+        
+        // Проверим что новый пароль работает
+        var isNewPasswordValid = PasswordHasher.Verify(newPassword, updatedUser.PasswordHash);
+        _logger.LogInformation("🔑 New password verification: {IsValid}", isNewPasswordValid);
+    }
+
+    await SendPasswordChangedEmail(user.Email);
+
+    _logger.LogInformation("🎉 PASSWORD RESET COMPLETED for {Email}", user.Email);
+    return ResetPasswordResult.SuccessResult();
+}
     private async Task SendPasswordChangedEmail(string email)
     {
-        var subject = "Пароль изменен - Movies App";
-        var body = @"
-            Пароль успешно изменен
+        try
+        {
+            var subject = "Пароль изменен - Movies App";
+            var body = @"
+                Пароль успешно изменен
 
-            Пароль для вашего аккаунта был успешно изменен.
+                Пароль для вашего аккаунта был успешно изменен.
 
-            Если это были не вы, немедленно свяжитесь с поддержкой.";
+                Если это были не вы, немедленно свяжитесь с поддержкой.";
 
-        await _emailService.SendEmail(email, subject, body);
+            await _emailService.SendEmail(email, subject, body);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to send password changed email to {Email}", email);
+        }
     }
+    
 }

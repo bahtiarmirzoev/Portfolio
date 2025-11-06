@@ -7,5 +7,12 @@ public class UserOtp
     public string Code { get; set; } = default!;
     public DateTime ExpiresAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public bool Used { get; set; } = false;  // ✅ ДОБАВЛЕНО
+    
+    public bool Used { get; set; }
+    
+    public int Attempts { get; set; } 
+    
+    public DateTime? LockedUntil { get; set; } 
+    
+    
 }

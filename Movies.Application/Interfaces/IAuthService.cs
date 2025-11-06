@@ -1,15 +1,16 @@
+// Movies.Application/Interfaces/IAuthService.cs
 using Movies.Application.Models;
 using Movies.Contracts.Responses;
 
-namespace Movies.Application.Services;
-
-public interface IAuthService
+namespace Movies.Application.Interfaces
 {
-    Task<bool> SignUp(User user);
-    Task<TokenData?> SignIn(string username, string password);
-    Task<TokenData?> RefreshTokenAsync(string accessToken, string refreshToken);
-    Task SignOut(string accessToken, string refreshToken);
-    
-    Task<bool> ForgotPasswordAsync(string email);
-    Task<bool> ResetPasswordAsync(string token, string email, string newPassword);
+    public interface IAuthService
+    {
+        Task<bool> SignUp(User user);
+        Task<TokenData?> SignIn(string username, string password);
+        Task<TokenData?> RefreshTokenAsync(string accessToken, string refreshToken);
+        Task SignOut(string accessToken, string refreshToken);
+        Task<ForgotPasswordResult> ForgotPasswordAsync(string email);
+        Task<ResetPasswordResult> ResetPasswordAsync(string email, string otpCode, string newPassword);
+    }
 }

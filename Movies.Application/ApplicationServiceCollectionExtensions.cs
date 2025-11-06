@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Movies.Application.Database;
+using Movies.Application.Interfaces;
 using Movies.Application.Repositories;
 using Movies.Application.Services;
 

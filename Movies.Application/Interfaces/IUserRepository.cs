@@ -19,4 +19,5 @@ public interface IUserRepository
     Task<bool> ExistsByIdAsync(Guid id);
     
     Task<User?> GetByEmailAsync(string email);
+    Task<bool> UpdatePasswordAsync(Guid userId, string newPasswordHash);
 }

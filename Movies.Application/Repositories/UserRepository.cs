@@ -1,16 +1,17 @@
 using Dapper;
 using Movies.Application.Database;
 using Movies.Application.Models;
-
+using Microsoft.Extensions.Logging;
 namespace Movies.Application.Repositories;
 
 public class UserRepository : IUserRepository
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
-
-    public UserRepository(IDbConnectionFactory dbConnectionFactory)
+    private readonly ILogger<UserRepository> _logger;
+    public UserRepository(IDbConnectionFactory dbConnectionFactory , ILogger<UserRepository> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _logger = logger;
     }
 
     public async Task<bool> CreateUserAsync(User user)
@@ -91,12 +92,17 @@ public class UserRepository : IUserRepository
         using var connection = await _dbConnectionFactory.CreateConnectionAsync();
         using var transaction = connection.BeginTransaction();
 
-        await connection.ExecuteAsync(new CommandDefinition("delete from userrole where userid = @userId",
-            new { userId = user.Id }));
-        foreach (var role in user.Roles)
-            await connection.ExecuteAsync(new CommandDefinition("""
-                                                                insert into userrole(userid, roleid) values (@userId, @roleId)
-                                                                """, new { userId = user.Id, roleId = role.Id }));
+        // ✅ ДОБАВЬ ПРОВЕРКУ НА NULL
+        if (user.Roles != null && user.Roles.Any())
+        {
+            await connection.ExecuteAsync(new CommandDefinition("delete from userrole where userid = @userId",
+                new { userId = user.Id }));
+        
+            foreach (var role in user.Roles)
+                await connection.ExecuteAsync(new CommandDefinition("""
+                                                                    insert into userrole(userid, roleid) values (@userId, @roleId)
+                                                                    """, new { userId = user.Id, roleId = role.Id }));
+        }
 
         var res = await connection.ExecuteAsync(new CommandDefinition("""
                                                                       update users
@@ -145,4 +151,32 @@ public class UserRepository : IUserRepository
             "SELECT * FROM users WHERE email = @Email",
             new { Email = email });
     }
+    
+    public async Task<bool> UpdatePasswordAsync(Guid userId, string newPasswordHash)
+    {
+        const string sql = """
+                               UPDATE users 
+                               SET passwordhash = @PasswordHash,
+                                   refreshtoken = NULL,
+                                   refreshtokenexpirytime = @Now
+                               WHERE id = @UserId
+                           """;
+
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            
+        _logger.LogInformation("🛠️ Executing SQL: {Sql}", sql);
+        _logger.LogInformation("🛠️ Parameters: UserId={UserId}, PasswordHash={PasswordHash}", userId, newPasswordHash);
+            
+        var result = await connection.ExecuteAsync(sql, new 
+        { 
+            UserId = userId,
+            PasswordHash = newPasswordHash,
+            Now = DateTime.UtcNow
+        });
+            
+        _logger.LogInformation("🛠️ SQL result: {Result} rows affected", result);
+            
+        return result > 0;
+    }
+
 }

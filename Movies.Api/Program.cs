@@ -52,17 +52,23 @@ builder.Services.AddSwaggerGen(c =>
 });
 builder.Services.AddControllers();
 
-
 builder.Services.AddApplication();
 builder.Services.AddDatabase(config["Database:ConnectionString"]!);
 
+
+// 🔴 ИСПРАВЬ ЭТИ СТРОЧКИ:
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAuthService, AuthService>(); 
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddTransient<IEmailService, EmailService>();
-builder.Services.AddScoped<OtpRepository>();
-builder.Services.AddScoped<OtpService>();
+
+// ✅ ДОБАВЬ ЭТИ РЕГИСТРАЦИИ:
+builder.Services.AddScoped<IOtpRepository, OtpRepository>(); // 🔴 ВАЖНО: интерфейс, а не класс
+builder.Services.AddScoped<IOtpService, OtpService>();       // 🔴 ВАЖНО: интерфейс, а не класс
+
+
+
 builder.Services.AddScoped<IFavoriteRepository , FavoriteRepository>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
@@ -80,7 +86,6 @@ builder.Services.AddScoped<ISeriesCommentRepository, SeriesCommentRepository>();
 builder.Services.AddScoped<ISeriesCommentService, SeriesCommentService>();
 
 var jwtSettings = config.GetSection("JwtOptions");
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -119,5 +124,6 @@ app.MapControllers();
 
 var dbInitializer = app.Services.GetRequiredService<DbInitializer>();
 await dbInitializer.InitializeAsync();
+
 
 app.Run();
