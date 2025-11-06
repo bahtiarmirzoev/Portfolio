@@ -1,0 +1,165 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import SignIn from './components/auth/SignIn';
+import SignUp from './components/auth/SignUp';
+import ForgotPassword from './components/auth/ForgotPassword';
+import ResetPassword from './components/auth/ResetPassword';
+import Home from './components/Home';
+import Profile from './components/profile/Profile';
+import MoviesList from './components/movies/MoviesList';
+import MovieDetail from './components/movies/MovieDetail';
+import SeriesList from './components/series/SeriesList';
+import SeriesDetail from './components/series/SeriesDetail';
+import ActorsList from './components/actors/ActorsList';
+import ActorDetail from './components/actors/ActorDetail';
+import Layout from './components/layout/Layout';
+import { AnimatePresence } from 'framer-motion';
+
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  return isAuthenticated ? children : <Navigate to="/sign-in" replace />;
+};
+
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  return !isAuthenticated ? children : <Navigate to="/" replace />;
+};
+
+function AppRoutes() {
+  return (
+    <AnimatePresence mode="wait">
+      <Routes>
+        <Route
+          path="/sign-in"
+          element={
+            <PublicRoute>
+              <SignIn />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/sign-up"
+          element={
+            <PublicRoute>
+              <SignUp />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <PublicRoute>
+              <ResetPassword />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <Layout>
+              <Home />
+            </Layout>
+          }
+        />
+        <Route
+          path="/movies"
+          element={
+            <Layout>
+              <MoviesList />
+            </Layout>
+          }
+        />
+        <Route
+          path="/movies/:id"
+          element={
+            <Layout>
+              <MovieDetail />
+            </Layout>
+          }
+        />
+        <Route
+          path="/series"
+          element={
+            <Layout>
+              <SeriesList />
+            </Layout>
+          }
+        />
+        <Route
+          path="/series/:id"
+          element={
+            <Layout>
+              <SeriesDetail />
+            </Layout>
+          }
+        />
+        <Route
+          path="/actors"
+          element={
+            <Layout>
+              <ActorsList />
+            </Layout>
+          }
+        />
+        <Route
+          path="/actors/:id"
+          element={
+            <Layout>
+              <ActorDetail />
+            </Layout>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <Layout>
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            </Layout>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
+  );
+}
+
+export default App;
+

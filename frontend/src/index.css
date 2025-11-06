@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-gray-900 via-black to-gray-900 min-h-screen;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  * {
+    @apply transition-colors duration-200;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Улучшенная прокрутка */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+  
+  .glass-strong {
+    @apply bg-white/10 backdrop-blur-2xl border border-white/20 shadow-2xl;
+  }
+  
+  .glass-hover {
+    @apply hover:bg-white/10 hover:border-white/20 transition-all duration-500;
+  }
+  
+  .btn-primary {
+    @apply bg-white text-black hover:bg-gray-200 font-semibold py-3 px-8 rounded-lg 
+           transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] 
+           shadow-lg hover:shadow-2xl hover:shadow-white/20;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  .btn-primary:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .btn-secondary {
+    @apply bg-transparent hover:bg-white/10 text-white font-semibold py-3 px-8 rounded-lg 
+           transition-all duration-500 border border-white/20 hover:border-white/40 
+           hover:shadow-lg hover:shadow-white/10;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+  }
+  .btn-secondary:hover::before {
+    left: 100%;
+  }
+  
+  .btn-danger {
+    @apply bg-transparent hover:bg-white/10 text-white font-semibold py-2 px-6 rounded-lg 
+           transition-all duration-500 border border-white/20 hover:border-red-500/50 
+           hover:border-red-500 hover:text-red-400;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg 
+           text-white placeholder-white/30 focus:outline-none focus:ring-2 
+           focus:ring-white/50 focus:border-white/30 focus:bg-white/10 
+           transition-all duration-500;
+  }
+  .input-field:focus {
+    transform: scale(1.01);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  }
+  
+  .card {
+    @apply glass rounded-xl p-6 glass-hover;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .card:hover::before {
+    opacity: 1;
+  }
+  
+  .smooth-transition {
+    @apply transition-all duration-700 ease-in-out;
+  }
+}
+

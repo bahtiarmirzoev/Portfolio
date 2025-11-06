@@ -693,11 +693,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/mac/Desktop/Portfolio/Movies.Application/Movies.Application.csproj",
+      "projectUniqueName": "/Users/mac/Desktop/Cinema/Movies.Application/Movies.Application.csproj",
       "projectName": "Movies.Application",
-      "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Application/Movies.Application.csproj",
+      "projectPath": "/Users/mac/Desktop/Cinema/Movies.Application/Movies.Application.csproj",
       "packagesPath": "/Users/mac/.nuget/packages/",
-      "outputPath": "/Users/mac/Desktop/Portfolio/Movies.Application/obj/",
+      "outputPath": "/Users/mac/Desktop/Cinema/Movies.Application/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/mac/.nuget/NuGet/NuGet.Config"

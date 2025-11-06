@@ -8,7 +8,6 @@ namespace Movies.Api.Controllers;
 
 [ApiController]
 [Route("api/series")]
-[Authorize]
 public class SeriesController : ControllerBase
 {
     private readonly ISeriesService _seriesService;
@@ -28,6 +27,7 @@ public class SeriesController : ControllerBase
     }
 
     [HttpGet("{idOrSlug}")]
+    [AllowAnonymous]
     public async Task<IActionResult> Get([FromRoute] string idOrSlug)
     {
         var series = Guid.TryParse(idOrSlug, out var id)
@@ -66,6 +66,7 @@ public class SeriesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll([FromQuery] PagedRequest request)
     {
         // 1. Если есть поисковый запрос - используем поиск
@@ -101,6 +102,7 @@ public class SeriesController : ControllerBase
     }
 
     [HttpGet("ongoing")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetOngoing([FromQuery] PagedRequest request)
     {
         var result = await _seriesService.GetOngoingAsync(request.Skip, request.Take);

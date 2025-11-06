@@ -52,3 +52,16 @@ C:/Users/nizam/Documents/C#/Portfolio/Movies.Application/obj/Debug/net8.0/ref/Mo
 /Users/mac/Portfolio/Movies.Application/obj/Debug/net8.0/refint/Movies.Application.dll
 /Users/mac/Portfolio/Movies.Application/obj/Debug/net8.0/Movies.Application.pdb
 /Users/mac/Portfolio/Movies.Application/obj/Debug/net8.0/ref/Movies.Application.dll
+/Users/mac/Desktop/Cinema/Movies.Application/bin/Debug/net8.0/Movies.Application.deps.json
+/Users/mac/Desktop/Cinema/Movies.Application/bin/Debug/net8.0/Movies.Application.dll
+/Users/mac/Desktop/Cinema/Movies.Application/bin/Debug/net8.0/Movies.Application.pdb
+/Users/mac/Desktop/Cinema/Movies.Application/obj/Debug/net8.0/Movies.Application.csproj.AssemblyReference.cache
+/Users/mac/Desktop/Cinema/Movies.Application/obj/Debug/net8.0/Movies.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/mac/Desktop/Cinema/Movies.Application/obj/Debug/net8.0/Movies.Application.AssemblyInfoInputs.cache
+/Users/mac/Desktop/Cinema/Movies.Application/obj/Debug/net8.0/Movies.Application.AssemblyInfo.cs
+/Users/mac/Desktop/Cinema/Movies.Application/obj/Debug/net8.0/Movies.Application.csproj.CoreCompileInputs.cache
+/Users/mac/Desktop/Cinema/Movies.Application/obj/Debug/net8.0/Movies.Application.sourcelink.json
+/Users/mac/Desktop/Cinema/Movies.Application/obj/Debug/net8.0/Movies.Application.dll
+/Users/mac/Desktop/Cinema/Movies.Application/obj/Debug/net8.0/refint/Movies.Application.dll
+/Users/mac/Desktop/Cinema/Movies.Application/obj/Debug/net8.0/Movies.Application.pdb
+/Users/mac/Desktop/Cinema/Movies.Application/obj/Debug/net8.0/ref/Movies.Application.dll

@@ -7,7 +7,6 @@ using Movies.Contracts.Responses;
 
 [ApiController]
 [Route("api/movies")]
-[Authorize]
 public class MoviesController : ControllerBase
 {
     private readonly IMovieService _movieService;
@@ -27,6 +26,7 @@ public class MoviesController : ControllerBase
     }
 
     [HttpGet("{idOrSlug}")]
+    [AllowAnonymous]
     public async Task<IActionResult> Get([FromRoute] string idOrSlug)
     {
         var movie = Guid.TryParse(idOrSlug, out var id)
@@ -65,6 +65,7 @@ public class MoviesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll([FromQuery] PagedRequest request)
     {
         // 1. Если есть поисковый запрос - используем поиск

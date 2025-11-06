@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj": {}
+    "/Users/mac/Desktop/Cinema/Movies.Contracts/Movies.Contracts.csproj": {}
   },
   "projects": {
-    "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj": {
+    "/Users/mac/Desktop/Cinema/Movies.Contracts/Movies.Contracts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj",
+        "projectUniqueName": "/Users/mac/Desktop/Cinema/Movies.Contracts/Movies.Contracts.csproj",
         "projectName": "Movies.Contracts",
-        "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj",
+        "projectPath": "/Users/mac/Desktop/Cinema/Movies.Contracts/Movies.Contracts.csproj",
         "packagesPath": "/Users/mac/.nuget/packages/",
-        "outputPath": "/Users/mac/Desktop/Portfolio/Movies.Contracts/obj/",
+        "outputPath": "/Users/mac/Desktop/Cinema/Movies.Contracts/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/mac/.nuget/NuGet/NuGet.Config"

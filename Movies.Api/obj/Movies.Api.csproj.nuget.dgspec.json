@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/mac/Desktop/Portfolio/Movies.Api/Movies.Api.csproj": {}
+    "/Users/mac/Desktop/Cinema/Movies.Api/Movies.Api.csproj": {}
   },
   "projects": {
-    "/Users/mac/Desktop/Portfolio/Movies.Api/Movies.Api.csproj": {
+    "/Users/mac/Desktop/Cinema/Movies.Api/Movies.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/mac/Desktop/Portfolio/Movies.Api/Movies.Api.csproj",
+        "projectUniqueName": "/Users/mac/Desktop/Cinema/Movies.Api/Movies.Api.csproj",
         "projectName": "Movies.Api",
-        "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Api/Movies.Api.csproj",
+        "projectPath": "/Users/mac/Desktop/Cinema/Movies.Api/Movies.Api.csproj",
         "packagesPath": "/Users/mac/.nuget/packages/",
-        "outputPath": "/Users/mac/Desktop/Portfolio/Movies.Api/obj/",
+        "outputPath": "/Users/mac/Desktop/Cinema/Movies.Api/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/mac/.nuget/NuGet/NuGet.Config"
@@ -26,11 +26,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "/Users/mac/Desktop/Portfolio/Movies.Application/Movies.Application.csproj": {
-                "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Application/Movies.Application.csproj"
+              "/Users/mac/Desktop/Cinema/Movies.Application/Movies.Application.csproj": {
+                "projectPath": "/Users/mac/Desktop/Cinema/Movies.Application/Movies.Application.csproj"
               },
-              "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj": {
-                "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj"
+              "/Users/mac/Desktop/Cinema/Movies.Contracts/Movies.Contracts.csproj": {
+                "projectPath": "/Users/mac/Desktop/Cinema/Movies.Contracts/Movies.Contracts.csproj"
               }
             }
           }
@@ -94,14 +94,14 @@
         }
       }
     },
-    "/Users/mac/Desktop/Portfolio/Movies.Application/Movies.Application.csproj": {
+    "/Users/mac/Desktop/Cinema/Movies.Application/Movies.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/mac/Desktop/Portfolio/Movies.Application/Movies.Application.csproj",
+        "projectUniqueName": "/Users/mac/Desktop/Cinema/Movies.Application/Movies.Application.csproj",
         "projectName": "Movies.Application",
-        "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Application/Movies.Application.csproj",
+        "projectPath": "/Users/mac/Desktop/Cinema/Movies.Application/Movies.Application.csproj",
         "packagesPath": "/Users/mac/.nuget/packages/",
-        "outputPath": "/Users/mac/Desktop/Portfolio/Movies.Application/obj/",
+        "outputPath": "/Users/mac/Desktop/Cinema/Movies.Application/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/mac/.nuget/NuGet/NuGet.Config"
@@ -194,14 +194,14 @@
         }
       }
     },
-    "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj": {
+    "/Users/mac/Desktop/Cinema/Movies.Contracts/Movies.Contracts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj",
+        "projectUniqueName": "/Users/mac/Desktop/Cinema/Movies.Contracts/Movies.Contracts.csproj",
         "projectName": "Movies.Contracts",
-        "projectPath": "/Users/mac/Desktop/Portfolio/Movies.Contracts/Movies.Contracts.csproj",
+        "projectPath": "/Users/mac/Desktop/Cinema/Movies.Contracts/Movies.Contracts.csproj",
         "packagesPath": "/Users/mac/.nuget/packages/",
-        "outputPath": "/Users/mac/Desktop/Portfolio/Movies.Contracts/obj/",
+        "outputPath": "/Users/mac/Desktop/Cinema/Movies.Contracts/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/mac/.nuget/NuGet/NuGet.Config"
