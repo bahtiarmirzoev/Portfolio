@@ -12,6 +12,7 @@ import SeriesList from './components/series/SeriesList';
 import SeriesDetail from './components/series/SeriesDetail';
 import ActorsList from './components/actors/ActorsList';
 import ActorDetail from './components/actors/ActorDetail';
+import AdminPanel from './components/admin/AdminPanel';
 import Layout from './components/layout/Layout';
 import { AnimatePresence } from 'framer-motion';
 
@@ -27,6 +28,28 @@ const ProtectedRoute = ({ children }) => {
   }
 
   return isAuthenticated ? children : <Navigate to="/sign-in" replace />;
+};
+
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/sign-in" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
 const PublicRoute = ({ children }) => {
@@ -142,6 +165,16 @@ function AppRoutes() {
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
+            </Layout>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <Layout>
+              <AdminRoute>
+                <AdminPanel />
+              </AdminRoute>
             </Layout>
           }
         />

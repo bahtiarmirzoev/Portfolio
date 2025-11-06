@@ -3,16 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { FiUser, FiHeart, FiMessageSquare, FiStar, FiLogOut, FiMenu, FiX } from 'react-icons/fi';
+import { FiUser, FiHeart, FiMessageSquare, FiStar, FiLogOut, FiMenu, FiX, FiShield } from 'react-icons/fi';
 import Favorites from './Favorites';
 import Comments from './Comments';
 import Ratings from './Ratings';
+import TrustedUser from './TrustedUser';
 
 const Profile = () => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('favorites');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { signOut } = useAuth();
+  const { signOut, isTrusted } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -24,6 +25,7 @@ const Profile = () => {
     { id: 'favorites', label: t('favorites'), icon: FiHeart },
     { id: 'comments', label: t('myComments'), icon: FiMessageSquare },
     { id: 'ratings', label: t('myRatings'), icon: FiStar },
+    { id: 'trusted', label: t('trustedUser'), icon: FiShield },
   ];
 
   const tabVariants = {
@@ -71,15 +73,28 @@ const Profile = () => {
               <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
                 <FiUser className="text-white text-xl" />
               </div>
-              <div>
-                <motion.h1 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="text-2xl font-bold text-white"
-                >
-                  {t('personalCabinet')}
-                </motion.h1>
-                <p className="text-white/60 text-sm">{t('manageProfile')}</p>
+              <div className="flex items-center gap-2">
+                <div>
+                  <motion.h1 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-2xl font-bold text-white flex items-center gap-2"
+                  >
+                    {t('personalCabinet')}
+                    {isTrusted && (
+                      <motion.div
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                        className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-white/20 shadow-lg"
+                        title={t('trustedUser')}
+                      >
+                        <FiCheck className="text-white text-xs" />
+                      </motion.div>
+                    )}
+                  </motion.h1>
+                  <p className="text-white/60 text-sm">{t('manageProfile')}</p>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -191,6 +206,17 @@ const Profile = () => {
                   exit="exit"
                 >
                   <Ratings />
+                </motion.div>
+              )}
+              {activeTab === 'trusted' && (
+                <motion.div
+                  key="trusted"
+                  variants={tabVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
+                  <TrustedUser />
                 </motion.div>
               )}
             </AnimatePresence>

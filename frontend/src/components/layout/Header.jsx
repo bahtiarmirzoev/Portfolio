@@ -10,20 +10,20 @@ import {
   FiLogOut, 
   FiMenu, 
   FiX, 
-  FiSearch,
-  FiHeart,
-  FiHome,
   FiGlobe,
-  FiChevronDown
+  FiChevronDown,
+  FiLogIn,
+  FiUserPlus,
+  FiCheck,
+  FiShield
 } from 'react-icons/fi';
 
 const Header = () => {
-  const { isAuthenticated, signOut } = useAuth();
+  const { isAuthenticated, signOut, isTrusted, isAdmin } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const languageMenuRef = useRef(null);
 
@@ -56,17 +56,7 @@ const Header = () => {
     setMobileMenuOpen(false);
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/movies?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-      setMobileMenuOpen(false);
-    }
-  };
-
   const navLinks = [
-    { to: '/', label: t('home'), icon: FiHome },
     { to: '/movies', label: t('movies'), icon: FiFilm },
     { to: '/series', label: t('series'), icon: FiTv },
     { to: '/actors', label: t('actors'), icon: FiUser },
@@ -108,7 +98,7 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-2">
+          <nav className="hidden md:flex items-center gap-4">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.to);
@@ -144,20 +134,6 @@ const Header = () => {
               );
             })}
           </nav>
-
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="hidden lg:flex items-center flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('searchPlaceholder')}
-                className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/40 focus:bg-white/15 transition-all duration-300 shadow-lg hover:bg-white/15"
-              />
-            </div>
-          </form>
 
           {/* Language Selector */}
           <div className="hidden md:block relative" ref={languageMenuRef}>
@@ -215,15 +191,36 @@ const Header = () => {
           </div>
 
           {/* Auth Buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-4">
             {isAuthenticated ? (
               <>
+                {isAdmin && (
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link
+                      to="/admin"
+                      className="btn-secondary flex items-center gap-2 px-5 py-2.5 relative bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/30"
+                    >
+                      <FiShield size={18} />
+                      <span>Админ</span>
+                    </Link>
+                  </motion.div>
+                )}
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Link
                     to="/profile"
-                    className="btn-secondary flex items-center gap-2 px-5 py-2.5"
+                    className="btn-secondary flex items-center gap-2 px-5 py-2.5 relative"
                   >
-                    <FiUser size={18} /> {t('profile')}
+                    <FiUser size={18} />
+                    <span>{t('profile')}</span>
+                    {isTrusted && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-black shadow-lg"
+                      >
+                        <FiCheck className="text-white text-xs" />
+                      </motion.div>
+                    )}
                   </Link>
                 </motion.div>
                 <motion.button
@@ -237,12 +234,24 @@ const Header = () => {
               </>
             ) : (
               <>
-                <Link to="/sign-in" className="btn-secondary px-5 py-2.5">
-                  {t('signIn')}
-                </Link>
-                <Link to="/sign-up" className="btn-primary px-6 py-2.5">
-                  {t('signUp')}
-                </Link>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link 
+                    to="/sign-in" 
+                    className="btn-secondary flex items-center gap-2 px-4 py-2.5 min-w-[100px] justify-center"
+                  >
+                    <FiLogIn size={18} />
+                    <span>{t('signInShort')}</span>
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link 
+                    to="/sign-up" 
+                    className="btn-primary flex items-center gap-2 px-4 py-2.5 min-w-[100px] justify-center"
+                  >
+                    <FiUserPlus size={18} />
+                    <span>{t('signUpShort')}</span>
+                  </Link>
+                </motion.div>
               </>
             )}
           </div>
@@ -269,20 +278,6 @@ const Header = () => {
             className="md:hidden overflow-hidden border-t border-white/10"
           >
             <div className="px-4 py-4 space-y-2">
-              {/* Mobile Search */}
-              <form onSubmit={handleSearch} className="mb-4">
-                <div className="relative">
-                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Поиск..."
-                    className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
-                  />
-                </div>
-              </form>
-
               {/* Mobile Navigation */}
               {navLinks.map((link, index) => {
                 const Icon = link.icon;
@@ -314,7 +309,7 @@ const Header = () => {
                 <div className="px-4 py-2 mb-2">
                   <p className="text-white/60 text-sm mb-2 flex items-center gap-2">
                     <FiGlobe size={16} />
-                    {t('search')}
+                    {t('catalog')}
                   </p>
                   <div className="flex gap-2">
                     {languages.map((lang) => (
@@ -350,13 +345,32 @@ const Header = () => {
               <div className="pt-4 border-t border-white/10 space-y-2">
                 {isAuthenticated ? (
                   <>
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30"
+                      >
+                        <FiShield size={20} />
+                        <span>Админ</span>
+                      </Link>
+                    )}
                     <Link
                       to="/profile"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all relative"
                     >
                       <FiUser size={20} />
-                      {t('profile')}
+                      <span>{t('profile')}</span>
+                      {isTrusted && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-black shadow-lg"
+                        >
+                          <FiCheck className="text-white text-xs" />
+                        </motion.div>
+                      )}
                     </Link>
                     <button
                       onClick={handleSignOut}
@@ -371,16 +385,18 @@ const Header = () => {
                     <Link
                       to="/sign-in"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="block w-full text-center btn-secondary"
+                      className="flex items-center justify-center gap-2 w-full text-center btn-secondary"
                     >
-                      {t('signIn')}
+                      <FiLogIn size={18} />
+                      {t('signInShort')}
                     </Link>
                     <Link
                       to="/sign-up"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="block w-full text-center btn-primary"
+                      className="flex items-center justify-center gap-2 w-full text-center btn-primary"
                     >
-                      {t('signUp')}
+                      <FiUserPlus size={18} />
+                      {t('signUpShort')}
                     </Link>
                   </>
                 )}

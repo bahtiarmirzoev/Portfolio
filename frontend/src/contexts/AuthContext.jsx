@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/authService';
+import { getRolesFromToken, isTrustedUser, isAdmin as checkIsAdmin } from '../utils/jwt';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
@@ -16,9 +17,26 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isTrusted, setIsTrusted] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRoles, setUserRoles] = useState([]);
 
   useEffect(() => {
     checkAuth();
+  }, []);
+
+  const updateUserRoles = useCallback((token) => {
+    if (!token) {
+      setIsTrusted(false);
+      setIsAdmin(false);
+      setUserRoles([]);
+      return;
+    }
+    
+    const roles = getRolesFromToken(token);
+    setUserRoles(roles);
+    setIsTrusted(isTrustedUser(token));
+    setIsAdmin(checkIsAdmin(token));
   }, []);
 
   const checkAuth = async () => {
@@ -31,10 +49,14 @@ export const AuthProvider = ({ children }) => {
 
       await authService.checkAuth();
       setIsAuthenticated(true);
+      updateUserRoles(accessToken);
     } catch (error) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       setIsAuthenticated(false);
+      setIsTrusted(false);
+      setIsAdmin(false);
+      setUserRoles([]);
     } finally {
       setLoading(false);
     }
@@ -46,6 +68,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('accessToken', tokenData.accessToken);
       localStorage.setItem('refreshToken', tokenData.refreshToken);
       setIsAuthenticated(true);
+      updateUserRoles(tokenData.accessToken);
       toast.success('Вход выполнен успешно!');
       return { success: true };
     } catch (error) {
@@ -80,9 +103,25 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setIsAuthenticated(false);
       setUser(null);
+      setIsTrusted(false);
+      setIsAdmin(false);
+      setUserRoles([]);
       toast.success('Вы вышли из системы');
     }
   };
+
+  const refreshUserRoles = () => {
+    const accessToken = localStorage.getItem('accessToken');
+    updateUserRoles(accessToken);
+  };
+
+  // Экспортируем функцию для обновления ролей глобально (для использования в api.js)
+  useEffect(() => {
+    window.updateUserRoles = updateUserRoles;
+    return () => {
+      delete window.updateUserRoles;
+    };
+  }, [updateUserRoles]);
 
   const forgotPassword = async (email) => {
     try {
@@ -117,11 +156,15 @@ export const AuthProvider = ({ children }) => {
     user,
     isAuthenticated,
     loading,
+    isTrusted,
+    isAdmin,
+    userRoles,
     signIn,
     signUp,
     signOut,
     forgotPassword,
     resetPassword,
+    refreshUserRoles,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

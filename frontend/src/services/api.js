@@ -46,6 +46,11 @@ api.interceptors.response.use(
           localStorage.setItem('accessToken', newAccessToken);
           localStorage.setItem('refreshToken', newRefreshToken);
 
+          // Обновляем роли после обновления токена
+          if (window.updateUserRoles) {
+            window.updateUserRoles(newAccessToken);
+          }
+
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return api(originalRequest);
         }
