@@ -5,10 +5,5 @@ export const actorsService = {
     const response = await api.get('/actors');
     return response.data;
   },
-
-  async getById(id) {
-    const response = await api.get(`/actors/${id}`);
-    return response.data;
-  },
 };
 

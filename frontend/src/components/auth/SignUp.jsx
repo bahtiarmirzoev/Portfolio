@@ -49,233 +49,209 @@ const SignUp = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen flex items-center justify-center p-4 py-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.6 }}
+      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-black via-gray-950 to-black flex items-center justify-center p-6"
     >
-      <div className="w-full max-w-md">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="glass rounded-2xl p-8 shadow-2xl"
-        >
-          <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-center mb-8"
-          >
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 3 }}
-            >
-              <FiUserPlus className="mx-auto text-5xl text-white mb-4" />
-            </motion.div>
-            <h1 className="text-4xl font-bold text-white mb-2">{t('signUp')}</h1>
-            <p className="text-white/70">{t('signUpTitle')}</p>
-          </motion.div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="grid grid-cols-2 gap-4"
-            >
-              <div>
-                <label className="block text-white/80 text-sm font-medium mb-2">
-                  {t('firstName')}
-                </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder={t('firstName')}
-                />
-              </div>
-              <div>
-                <label className="block text-white/80 text-sm font-medium mb-2">
-                  {t('lastName')}
-                </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder={t('lastName')}
-                />
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <label className="block text-white/80 text-sm font-medium mb-2">
-                {t('username')} *
-              </label>
-              <div className="relative">
-                <motion.div
-                  animate={{ rotate: [0, 5, -5, 0] }}
-                  transition={{ repeat: Infinity, duration: 3 }}
-                >
-                  <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" />
-                </motion.div>
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  required
-                  className="input-field pl-10"
-                  placeholder={t('username')}
-                />
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.6 }}
-            >
-              <label className="block text-white/80 text-sm font-medium mb-2">
-                {t('email')} *
-              </label>
-              <div className="relative">
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                >
-                  <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" />
-                </motion.div>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="input-field pl-10"
-                  placeholder={t('email')}
-                />
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.7 }}
-            >
-              <label className="block text-white/80 text-sm font-medium mb-2">
-                {t('password')} *
-              </label>
-              <div className="relative">
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                >
-                  <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" />
-                </motion.div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  minLength={8}
-                  className="input-field pl-10 pr-10"
-                  placeholder={t('password')}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white transition-colors"
-                >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.8 }}
-            >
-              <label className="block text-white/80 text-sm font-medium mb-2">
-                {t('confirmPassword')} *
-              </label>
-              <div className="relative">
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 2, delay: 0.3 }}
-                >
-                  <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" />
-                </motion.div>
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  className="input-field pl-10 pr-10"
-                  placeholder={t('confirmPassword')}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white transition-colors"
-                >
-                  {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
-              </div>
-            </motion.div>
-
-            <motion.button
-              type="submit"
-              disabled={loading}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="btn-primary w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    className="rounded-full h-5 w-5 border-t-2 border-b-2 border-white"
-                  />
-                  {t('signingUp')}
-                </span>
-              ) : (
-                t('signUp')
-              )}
-            </motion.button>
-          </form>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9 }}
-            className="mt-6 text-center"
-          >
-            <p className="text-white/70">
-              {t('alreadyHaveAccount')}{' '}
-              <Link
-                to="/sign-in"
-                className="text-white hover:text-white/80 font-semibold transition-colors duration-300 underline decoration-white/40 hover:decoration-white/60"
-              >
-                {t('signIn')}
-              </Link>
-            </p>
-          </motion.div>
-        </motion.div>
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-32 right-12 w-72 h-72 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-56 h-56 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
       </div>
+
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="relative w-full max-w-4xl mx-auto"
+      >
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl">
+          <div className="grid md:grid-cols-2">
+            <div className="hidden md:flex flex-col justify-between border-r border-white/10 bg-gradient-to-br from-black/80 via-gray-900/80 to-black/80 p-10">
+              <div>
+                <div className="w-14 h-14 rounded-2xl border border-white/10 flex items-center justify-center mb-8 bg-white/5">
+                  <FiUserPlus className="text-white text-2xl" />
+                </div>
+                <h2 className="text-4xl font-bold text-white tracking-tight">
+                  {t('signUp')}
+                </h2>
+                <p className="mt-4 text-white/60 leading-relaxed">
+                  {t('signUpTitle')}
+                </p>
+              </div>
+              <div className="space-y-2 text-white/40 text-sm">
+                <p className="uppercase tracking-widest text-white/30">Cinema</p>
+                <div className="h-px w-16 bg-white/10"></div>
+                <p>{t('trustedUserBenefits')}</p>
+              </div>
+            </div>
+
+            <div className="p-8 md:p-10">
+              <div className="mb-8">
+                <h1 className="text-3xl font-semibold text-white tracking-tight mb-2">
+                  {t('createAccount')}
+                </h1>
+                <p className="text-white/50 text-sm">
+                  {t('signUpSubtitle') || t('signUpTitle')}
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                      {t('firstName')}
+                    </label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      placeholder={t('firstName')}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                      {t('lastName')}
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      placeholder={t('lastName')}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                    {t('username')} *
+                  </label>
+                  <div className="relative">
+                    <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="text"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      placeholder={t('username')}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                    {t('email')} *
+                  </label>
+                  <div className="relative">
+                    <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      placeholder={t('email')}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                    {t('password')} *
+                  </label>
+                  <div className="relative">
+                    <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      minLength={8}
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      placeholder={t('password')}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
+                    >
+                      {showPassword ? <FiEyeOff /> : <FiEye />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                    {t('confirmPassword')} *
+                  </label>
+                  <div className="relative">
+                    <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      placeholder={t('confirmPassword')}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
+                    >
+                      {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                    </button>
+                  </div>
+                </div>
+
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="w-full rounded-xl bg-white text-black py-3 font-semibold tracking-wide transition-colors duration-300 hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2 text-sm">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                        className="h-4 w-4 rounded-full border-2 border-black border-t-transparent"
+                      />
+                      {t('signingUp')}
+                    </span>
+                  ) : (
+                    t('signUp')
+                  )}
+                </motion.button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-white/50 text-sm">
+                  {t('alreadyHaveAccount')}{' '}
+                  <Link
+                    to="/sign-in"
+                    className="text-white hover:text-white/80 font-medium"
+                  >
+                    {t('signIn')}
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </motion.div>
   );
 };

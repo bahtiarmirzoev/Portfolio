@@ -32,17 +32,8 @@ const ActorsList = () => {
     try {
       setLoading(true);
       const data = await actorsService.getAll();
-      
-      // Убираем дубликаты по ID
-      const uniqueActors = Array.from(
-        new Map(data.map(actor => [actor.id, actor])).values()
-      );
-      
-      // Сортируем по имени
-      uniqueActors.sort((a, b) => a.name.localeCompare(b.name));
-      
-      setActors(uniqueActors);
-      setFilteredActors(uniqueActors);
+      setActors(data);
+      setFilteredActors(data);
     } catch (error) {
       toast.error(t('errorLoadingActors'));
       console.error(error);

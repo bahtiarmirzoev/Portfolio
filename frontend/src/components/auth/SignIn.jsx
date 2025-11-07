@@ -32,173 +32,141 @@ const SignIn = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.8 }}
-      className="min-h-screen flex items-center justify-center p-4"
+      transition={{ duration: 0.6 }}
+      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-black via-gray-950 to-black flex items-center justify-center p-6"
     >
-      <div className="w-full max-w-md">
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0, y: 30 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.8, ease: "easeOut" }}
-          className="glass rounded-2xl p-8 shadow-2xl"
-        >
-            <motion.div
-              initial={{ y: -30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
-              className="text-center mb-8"
-            >
-              <motion.h1 
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
-                className="text-5xl font-bold text-white mb-3 tracking-tight"
-              >
-                {t('welcome')}
-              </motion.h1>
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-                className="text-white/60 text-lg"
-              >
-                {t('signInTitle')}
-              </motion.p>
-            </motion.div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <motion.div
-              initial={{ x: -30, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.7, ease: "easeOut" }}
-            >
-              <motion.label 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="block text-white/80 text-sm font-medium mb-2"
-              >
-                {t('email')}
-              </motion.label>
-              <div className="relative">
-                <motion.div
-                  animate={{ rotate: [0, 5, -5, 0] }}
-                  transition={{ repeat: Infinity, duration: 3 }}
-                >
-                  <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" />
-                </motion.div>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  className="input-field pl-10"
-                  placeholder={t('email')}
-                />
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ x: -30, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.7, ease: "easeOut" }}
-            >
-              <motion.label 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="block text-white/80 text-sm font-medium mb-2"
-              >
-                {t('password')}
-              </motion.label>
-              <div className="relative">
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                >
-                  <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" />
-                </motion.div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="input-field pl-10 pr-10"
-                  placeholder={t('password')}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white transition-colors"
-                >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="flex justify-end"
-            >
-              <Link
-                to="/forgot-password"
-                className="text-white/60 hover:text-white text-sm transition-colors duration-300"
-              >
-                {t('forgotPassword')}
-              </Link>
-            </motion.div>
-
-            <motion.button
-              type="submit"
-              disabled={loading}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.9, duration: 0.7, ease: "easeOut" }}
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <motion.svg
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    className="h-5 w-5 text-white mr-3"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </motion.svg>
-                  {t('signingIn')}
-                </span>
-              ) : (
-                t('signIn')
-              )}
-            </motion.button>
-          </form>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1, duration: 0.7 }}
-            className="mt-6 text-center"
-          >
-            <p className="text-white/70">
-              {t('noAccount')}{' '}
-              <Link
-                to="/sign-up"
-                className="text-white hover:text-white/80 font-semibold transition-colors duration-300 underline decoration-white/40 hover:decoration-white/60"
-              >
-                {t('createAccount')}
-              </Link>
-            </p>
-          </motion.div>
-        </motion.div>
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-24 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-16 right-24 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute inset-y-0 left-1/2 w-px bg-gradient-to-b from-white/10 via-white/5 to-transparent"></div>
       </div>
+
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="relative w-full max-w-4xl mx-auto"
+      >
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl">
+          <div className="grid md:grid-cols-2">
+            <div className="hidden md:flex flex-col justify-between border-r border-white/10 bg-gradient-to-br from-black/80 via-gray-900/80 to-black/80 p-10">
+              <div>
+                <div className="w-14 h-14 rounded-2xl border border-white/10 flex items-center justify-center mb-8 bg-white/5">
+                  <FiLock className="text-white text-2xl" />
+                </div>
+                <h2 className="text-4xl font-bold text-white tracking-tight">
+                  {t('welcome')}
+                </h2>
+                <p className="mt-4 text-white/60 leading-relaxed">
+                  {t('signInTitle')}
+                </p>
+              </div>
+              <div className="space-y-2 text-white/40 text-sm">
+                <p className="uppercase tracking-widest text-white/30">Cinema</p>
+                <div className="h-px w-16 bg-white/10"></div>
+                <p>{t('manageProfile')}</p>
+              </div>
+            </div>
+
+            <div className="p-8 md:p-10">
+              <div className="mb-8">
+                <h1 className="text-3xl font-semibold text-white tracking-tight mb-2">
+                  {t('signIn')}
+                </h1>
+                <p className="text-white/50 text-sm">
+                  {t('signInSubtitle') || t('signInTitle')}
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                    {t('email')}
+                  </label>
+                  <div className="relative">
+                    <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      placeholder={t('email')}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                    {t('password')}
+                  </label>
+                  <div className="relative">
+                    <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      placeholder={t('password')}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
+                    >
+                      {showPassword ? <FiEyeOff /> : <FiEye />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/30">{t('secureLogin') || 'Secure login area'}</span>
+                  <Link
+                    to="/forgot-password"
+                    className="text-white/60 hover:text-white transition-colors"
+                  >
+                    {t('forgotPassword')}
+                  </Link>
+                </div>
+
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="w-full rounded-xl bg-white text-black py-3 font-semibold tracking-wide transition-colors duration-300 hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2 text-sm">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                        className="h-4 w-4 rounded-full border-2 border-black border-t-transparent"
+                      />
+                      {t('signingIn')}
+                    </span>
+                  ) : (
+                    t('signIn')
+                  )}
+                </motion.button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-white/50 text-sm">
+                  {t('noAccount')}{' '}
+                  <Link
+                    to="/sign-up"
+                    className="text-white hover:text-white/80 font-medium"
+                  >
+                    {t('createAccount')}
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </motion.div>
   );
 };
