@@ -4,10 +4,10 @@ using Movies.Application.Interfaces;
 using Movies.Application.Models;
 using Movies.Contracts.Requests;
 using Movies.Contracts.Responses;
+using Movies.Api.Mapping;
 
 [ApiController]
 [Route("api/actors")]
-[Authorize(Roles = "admin")]
 public class ActorsController : ControllerBase
 {
     private readonly IActorRepository _actorRepository;
@@ -18,6 +18,7 @@ public class ActorsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Create([FromBody] CreateActorRequest request)
     {
         var actor = new Actor
@@ -40,6 +41,7 @@ public class ActorsController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateActorRequest request)
     {
         var actor = new Actor
@@ -66,12 +68,41 @@ public class ActorsController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var actors = await _actorRepository.GetAllAsync();
-        // Маппим на ActorResponse
-        var response = actors.Select(a => new ActorResponse
+        // Убираем дубликаты по ID и маппим на ActorResponse
+        var uniqueActors = actors
+            .GroupBy(a => a.Id)
+            .Select(g => g.First())
+            .Select(a => new ActorResponse
+            {
+                Id = a.Id,
+                Name = a.Name,
+                DateOfBirth = a.DateOfBirth,
+                Biography = a.Biography
+            })
+            .OrderBy(a => a.Name);
+        return Ok(uniqueActors);
+    }
+
+    [HttpGet("{id:guid}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetById([FromRoute] Guid id)
+    {
+        var actor = await _actorRepository.GetByIdAsync(id);
+        if (actor == null) return NotFound();
+
+        var movies = await _actorRepository.GetMoviesByActorIdAsync(id);
+        var series = await _actorRepository.GetSeriesByActorIdAsync(id);
+
+        var response = new ActorDetailResponse
         {
-            Id = a.Id,
-            Name = a.Name
-        });
+            Id = actor.Id,
+            Name = actor.Name,
+            DateOfBirth = actor.DateOfBirth,
+            Biography = actor.Biography,
+            Movies = movies.Select(m => m.MapToResponse()),
+            Series = series.Select(s => s.MapToResponse())
+        };
+
         return Ok(response);
     }
 }

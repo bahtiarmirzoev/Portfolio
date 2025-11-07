@@ -21,16 +21,29 @@ const Favorites = () => {
   const loadFavorites = async () => {
     try {
       setLoading(true);
-      const movieIds = await favoritesService.getFavorites(page, 10);
+      const response = await favoritesService.getFavorites(page, 10);
       
-      if (movieIds.length === 0) {
+      // Проверяем структуру ответа
+      let favoriteItems = [];
+      if (Array.isArray(response)) {
+        favoriteItems = response;
+      } else if (response?.items) {
+        favoriteItems = response.items;
+      } else if (response?.data) {
+        favoriteItems = response.data;
+      }
+      
+      if (!favoriteItems || favoriteItems.length === 0) {
         setHasMore(false);
         setLoading(false);
         return;
       }
 
       // Загружаем детали фильмов
-      const moviesPromises = movieIds.map(id => moviesService.getById(id));
+      const moviesPromises = favoriteItems.map(item => {
+        const movieId = item.movieId || item.id || item;
+        return moviesService.getById(movieId);
+      });
       const movies = await Promise.all(moviesPromises);
       
       if (page === 1) {
@@ -41,8 +54,9 @@ const Favorites = () => {
       
       setHasMore(movies.length === 10);
     } catch (error) {
-      toast.error(t('errorLoadingFavorites'));
-      console.error(error);
+      console.error('Error loading favorites:', error);
+      toast.error(error.response?.data?.message || t('errorLoadingFavorites'));
+      setFavorites([]);
     } finally {
       setLoading(false);
     }

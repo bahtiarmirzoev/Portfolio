@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { FiUser, FiHeart, FiMessageSquare, FiStar, FiLogOut, FiMenu, FiX, FiShield } from 'react-icons/fi';
+import { FiUser, FiHeart, FiMessageSquare, FiStar, FiLogOut, FiMenu, FiX, FiShield, FiCheck } from 'react-icons/fi';
 import Favorites from './Favorites';
 import Comments from './Comments';
 import Ratings from './Ratings';
@@ -13,8 +13,22 @@ const Profile = () => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('favorites');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { signOut, isTrusted } = useAuth();
+  const { signOut, isTrusted, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  // Если не авторизован, перенаправляем
+  if (!authLoading && !isAuthenticated) {
+    navigate('/sign-in');
+    return null;
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
+  }
 
   const handleSignOut = async () => {
     await signOut();

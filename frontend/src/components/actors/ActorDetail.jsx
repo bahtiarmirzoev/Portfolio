@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { actorsService } from '../../services/actorsService';
-import { moviesService } from '../../services/moviesService';
-import { seriesService } from '../../services/seriesService';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { FiUser, FiArrowLeft, FiFilm, FiTv, FiStar } from 'react-icons/fi';
+import { FiUser, FiArrowLeft, FiFilm, FiTv, FiStar, FiCalendar } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const ActorDetail = () => {
@@ -16,7 +14,7 @@ const ActorDetail = () => {
   const [movies, setMovies] = useState([]);
   const [series, setSeries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('movies'); // 'movies' or 'series'
+  const [activeTab, setActiveTab] = useState('movies');
 
   useEffect(() => {
     loadActorData();
@@ -25,47 +23,37 @@ const ActorDetail = () => {
   const loadActorData = async () => {
     try {
       setLoading(true);
+      const data = await actorsService.getById(id);
       
-      // Загружаем актера
-      const actors = await actorsService.getAll();
-      const foundActor = actors.find(a => a.id === id);
-      
-      if (!foundActor) {
+      if (!data) {
         toast.error('Актер не найден');
         navigate('/actors');
         return;
       }
       
-      setActor(foundActor);
-      
-      // Загружаем фильмы с этим актером
-      try {
-        const moviesResponse = await moviesService.getAll({ actor: foundActor.name, take: 50 });
-        const moviesData = moviesResponse?.items || moviesResponse || [];
-        setMovies(moviesData.filter(movie => 
-          movie.actors?.some(a => a.id === id || a.name === foundActor.name)
-        ));
-      } catch (error) {
-        console.error('Error loading movies:', error);
-        setMovies([]);
-      }
-      
-      // Загружаем сериалы с этим актером
-      try {
-        const seriesResponse = await seriesService.getAll({ actor: foundActor.name, take: 50 });
-        const seriesData = seriesResponse?.items || seriesResponse || [];
-        setSeries(seriesData.filter(s => 
-          s.actors?.some(a => a.id === id || a.name === foundActor.name)
-        ));
-      } catch (error) {
-        console.error('Error loading series:', error);
-        setSeries([]);
-      }
+      setActor(data);
+      setMovies(data.movies || []);
+      setSeries(data.series || []);
     } catch (error) {
       toast.error('Ошибка при загрузке данных актера');
       console.error(error);
+      navigate('/actors');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ru-RU', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch {
+      return dateString;
     }
   };
 
@@ -126,11 +114,35 @@ const ActorDetail = () => {
                 {actor.name}
               </motion.h1>
               
+              {actor.dateOfBirth && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex items-center gap-2 text-white/60 mb-4 justify-center md:justify-start"
+                >
+                  <FiCalendar size={18} />
+                  <span className="text-lg">{formatDate(actor.dateOfBirth)}</span>
+                </motion.div>
+              )}
+
+              {actor.biography && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="mb-6"
+                >
+                  <h3 className="text-white/80 text-lg font-semibold mb-2">Биография</h3>
+                  <p className="text-white/70 leading-relaxed">{actor.biography}</p>
+                </motion.div>
+              )}
+              
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="flex flex-wrap gap-4 justify-center md:justify-start mb-6 text-white/60"
+                transition={{ delay: 0.7 }}
+                className="flex flex-wrap gap-4 justify-center md:justify-start text-white/60"
               >
                 <span className="text-lg">
                   {t('moviesCount')}: <span className="text-white font-semibold">{movies.length}</span>
@@ -317,4 +329,3 @@ const ActorDetail = () => {
 };
 
 export default ActorDetail;
-
