@@ -55,6 +55,8 @@ const translations = {
     sortYear: 'По году',
     sortRating: 'По рейтингу',
     sortTitle: 'По названию',
+    sortByDate: 'По дате рождения',
+    more: 'еще',
     gridView: 'Сетка',
     listView: 'Список',
     loadMore: 'Загрузить еще',
@@ -107,6 +109,9 @@ const translations = {
     seriesCount: 'Сериалов',
     noActorMovies: 'Нет фильмов с участием этого актера',
     noActorSeries: 'Нет сериалов с участием этого актера',
+    selectActor: 'Выберите актера, чтобы увидеть подробности',
+    tipExploreActor: 'Совет: откройте проект актера, чтобы увидеть больше информации.',
+    errorLoadingActorDetails: 'Ошибка при загрузке информации об актере',
     
     // Common
     year: 'Год',
@@ -219,7 +224,9 @@ const translations = {
     sortDefault: 'Default',
     sortYear: 'By Year',
     sortRating: 'By Rating',
-    sortTitle: 'By Title',
+    sortTitle: 'By Name',
+    sortByDate: 'By Date of Birth',
+    more: 'more',
     gridView: 'Grid',
     listView: 'List',
     loadMore: 'Load More',
@@ -272,6 +279,9 @@ const translations = {
     seriesCount: 'Series',
     noActorMovies: 'No movies with this actor',
     noActorSeries: 'No series with this actor',
+    selectActor: 'Select an actor to see details',
+    tipExploreActor: 'Tip: open any of the actor’s projects to discover more details.',
+    errorLoadingActorDetails: 'Failed to load actor details',
     
     // Common
     year: 'Year',
@@ -385,6 +395,8 @@ const translations = {
     sortYear: 'İlə görə',
     sortRating: 'Reytinqə görə',
     sortTitle: 'Ada görə',
+    sortByDate: 'Doğum tarixinə görə',
+    more: 'daha',
     gridView: 'Şəbəkə',
     listView: 'Siyahı',
     loadMore: 'Daha çox yüklə',
@@ -437,6 +449,9 @@ const translations = {
     seriesCount: 'Serial',
     noActorMovies: 'Bu aktyorun iştirak etdiyi film yoxdur',
     noActorSeries: 'Bu aktyorun iştirak etdiyi serial yoxdur',
+    selectActor: 'Məlumat üçün aktyoru seçin',
+    tipExploreActor: 'İpucu: daha çox məlumat üçün aktyorun layihələrindən birini açın.',
+    errorLoadingActorDetails: 'Aktyor məlumatlarını yükləmək alınmadı',
     
     // Common
     year: 'İl',
