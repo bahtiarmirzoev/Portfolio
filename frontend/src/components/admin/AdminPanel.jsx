@@ -115,8 +115,8 @@ const AdminPanel = () => {
   const loadActors = async () => {
     try {
       setLoading(true);
-      const data = await actorsService.getAll();
-      setActors(Array.isArray(data) ? data : []);
+      const { items } = await actorsService.getAll({ pageSize: 200 });
+      setActors(Array.isArray(items) ? items : []);
     } catch (error) {
       toast.error('Ошибка загрузки актеров');
       console.error(error);

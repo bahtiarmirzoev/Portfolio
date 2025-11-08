@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { actorsService } from '../../services/actorsService';
@@ -28,55 +28,135 @@ const ActorsList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState('list');
   const [selectedActorId, setSelectedActorId] = useState(null);
   const [selectedActor, setSelectedActor] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
 
-  useEffect(() => {
-    const loadActors = async () => {
-      try {
-        setLoading(true);
-        const data = await actorsService.getAll(sortBy, sortOrder);
-        
-        if (!data || !Array.isArray(data)) {
-          console.error('Invalid data format:', data);
-          setActors([]);
-          return;
-        }
+  const pageSize = 200;
+  const [page, setPage] = useState(1);
+  const [totalActors, setTotalActors] = useState(0);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const isSearching = Boolean(debouncedSearch);
 
-        const uniqueActors = Array.from(
-          new Map(data.map((actor) => [actor.id, actor])).values()
-        );
+  const loadActors = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        setActors(uniqueActors);
-        if (uniqueActors.length > 0 && !selectedActorId) {
-          setSelectedActorId(uniqueActors[0].id);
-        }
-      } catch (error) {
-        console.error('Error loading actors:', error);
-        console.error('Error details:', error.response?.data || error.message);
-        setError(error.message || 'Ошибка при загрузке актеров');
-        toast.error(t?.('errorLoadingActors') || 'Ошибка при загрузке актеров');
-        setActors([]);
-      } finally {
-        setLoading(false);
+      let items = [];
+      let total = 0;
+
+      if (isSearching) {
+        const result = await actorsService.search({
+          name: debouncedSearch,
+          page,
+          pageSize,
+        });
+        items = result.items || [];
+        total = result.total ?? items.length;
+      } else {
+        const result = await actorsService.getAll({
+          page,
+          pageSize,
+          sortBy,
+          sortOrder,
+        });
+        items = result.items || [];
+        total = result.total ?? items.length;
       }
-    };
 
+      const uniqueActors = Array.from(new Map(items.map((actor) => [actor.id, actor])).values());
+
+      setActors(uniqueActors);
+      setTotalActors(total ?? uniqueActors.length);
+
+      if (uniqueActors.length === 0) {
+        setSelectedActorId(null);
+        setSelectedActor(null);
+        return;
+      }
+
+      setSelectedActorId((prev) => {
+        if (prev && uniqueActors.some((actor) => actor.id === prev)) {
+          return prev;
+        }
+        return uniqueActors[0].id;
+      });
+    } catch (error) {
+      console.error('Error loading actors:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      const message = error.response?.data?.message || error.message || 'Ошибка при загрузке актеров';
+      setError(message);
+      toast.error(t?.('errorLoadingActors') || message);
+      setActors([]);
+      setSelectedActorId(null);
+      setSelectedActor(null);
+      setTotalActors(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [debouncedSearch, isSearching, page, pageSize, sortBy, sortOrder, t]);
+
+  useEffect(() => {
     loadActors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortBy, sortOrder]);
+  }, [loadActors]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, sortBy, sortOrder]);
+
+  const heroStats = useMemo(() => {
+    const stats = [
+      {
+        label: t?.('total') || 'Всего',
+        value: totalActors ?? 0,
+        caption: t?.('actors') || 'Actors',
+      },
+    ];
+
+    if (selectedActor) {
+      stats.push(
+        {
+          label: t?.('actorMovies') || 'Фильмы',
+          value: selectedActor.movies?.length ?? 0,
+          caption: selectedActor.name,
+        },
+        {
+          label: t?.('actorSeries') || 'Сериалы',
+          value: selectedActor.series?.length ?? 0,
+          caption: selectedActor.name,
+        }
+      );
+    }
+
+    return stats;
+  }, [selectedActor, t, totalActors]);
 
   const filteredActors = useMemo(() => {
+    if (isSearching) {
+      return actors;
+    }
+
     if (!searchQuery.trim()) {
       return actors;
     }
 
     const query = searchQuery.toLowerCase();
     return actors.filter((actor) => actor.name.toLowerCase().includes(query));
-  }, [actors, searchQuery]);
+  }, [actors, searchQuery, isSearching]);
+
+  const visibleActorsCount = filteredActors.length;
+  const displayedCount = isSearching ? totalActors || visibleActorsCount : visibleActorsCount;
 
   useEffect(() => {
     if (filteredActors.length === 0) {
@@ -109,7 +189,7 @@ const ActorsList = () => {
       } catch (error) {
         if (!isCancelled) {
           console.error('Error loading actor details:', error);
-          toast.error(t('errorLoadingActorDetails') || 'Ошибка при загрузке информации об актере');
+          toast.error(t?.('errorLoadingActorDetails') || 'Ошибка при загрузке информации об актере');
         }
       } finally {
         if (!isCancelled) {
@@ -130,29 +210,52 @@ const ActorsList = () => {
     setSelectedActorId(id);
   };
 
-  const handleSort = (field) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(field);
-      setSortOrder('asc');
-    }
+  const handleSortSelect = (option) => {
+    setSortBy(option.sortBy);
+    setSortOrder(option.sortOrder);
     setShowSortMenu(false);
+    setPage(1);
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return null;
 
     try {
-      return new Intl.DateTimeFormat('ru-RU', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }).format(new Date(dateString));
-    } catch (error) {
-      return dateString;
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (e) {
+      console.error("Error parsing date:", dateString, e);
+      return dateString; // Fallback to original string if parsing fails
     }
   };
+
+  const detailHighlights = useMemo(() => {
+    if (!selectedActor) return [];
+
+    const highlights = [];
+
+    if (selectedActor.dateOfBirth) {
+      highlights.push({
+        icon: FiCalendar,
+        label: t?.('dateOfBirth') || 'Дата рождения',
+        value: formatDate(selectedActor.dateOfBirth),
+      });
+    }
+
+    highlights.push({
+      icon: FiFilm,
+      label: t?.('actorMovies') || 'Фильмы',
+      value: selectedActor.movies?.length ?? 0,
+    });
+
+    highlights.push({
+      icon: FiTv,
+      label: t?.('actorSeries') || 'Сериалы',
+      value: selectedActor.series?.length ?? 0,
+    });
+
+    return highlights;
+  }, [selectedActor, t]);
 
   const getInitials = (name) => {
     return name
@@ -167,7 +270,7 @@ const ActorsList = () => {
     if (!items || items.length === 0) {
       return (
         <p className="text-sm text-white/40">
-          {type === 'movies' ? t('noActorMovies') : t('noActorSeries')}
+          {type === 'movies' ? t?.('noActorMovies') || 'Нет фильмов' : t?.('noActorSeries') || 'Нет сериалов'}
         </p>
       );
     }
@@ -198,7 +301,7 @@ const ActorsList = () => {
         ))}
         {items.length > 6 && (
           <div className="flex items-center justify-center rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/50">
-            +{items.length - 6} {t('more') || 'еще'}
+            +{items.length - 6} {t?.('more') || 'еще'}
           </div>
         )}
       </div>
@@ -206,9 +309,15 @@ const ActorsList = () => {
   };
 
   const sortOptions = [
-    { value: 'name', label: t('sortTitle') || 'По имени' },
-    { value: 'dateofbirth', label: t('sortByDate') || 'По дате рождения' },
+    { id: 'name-asc', sortBy: 'name', sortOrder: 'asc', label: t?.('sortNameAsc') || 'Имя (А–Я)' },
+    { id: 'name-desc', sortBy: 'name', sortOrder: 'desc', label: t?.('sortNameDesc') || 'Имя (Я–А)' },
+    { id: 'date-desc', sortBy: 'dateofbirth', sortOrder: 'desc', label: t?.('sortDateDesc') || 'Дата рождения (новые)' },
+    { id: 'date-asc', sortBy: 'dateofbirth', sortOrder: 'asc', label: t?.('sortDateAsc') || 'Дата рождения (старые)' },
   ];
+
+  const activeSort =
+    sortOptions.find((option) => option.sortBy === sortBy && option.sortOrder === sortOrder) || sortOptions[0];
+  const SortDirectionIcon = activeSort.sortOrder === 'asc' ? FiArrowUp : FiArrowDown;
 
   return (
     <motion.div
@@ -224,116 +333,117 @@ const ActorsList = () => {
       </div>
 
       <div className="relative mx-auto max-w-7xl">
-        <div className="mb-10 space-y-6">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div className="space-y-2">
-              <motion.h1
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
-                className="text-5xl font-semibold text-white tracking-tight"
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] px-6 py-8 shadow-[0_0_80px_rgba(255,255,255,0.05)] backdrop-blur-3xl md:px-10 md:py-12"
+        >
+          <motion.div
+            className="pointer-events-none absolute -right-28 top-0 h-72 w-72 rounded-full bg-gradient-to-br from-white/20 via-transparent to-transparent blur-[120px]"
+            animate={{
+              x: [0, 20, 0],
+              y: [0, -15, 0],
+            }}
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="pointer-events-none absolute -left-10 bottom-0 h-60 w-60 rounded-full bg-gradient-to-tr from-white/15 via-transparent to-transparent blur-[120px]"
+            animate={{
+              x: [0, -15, 0],
+              y: [0, 10, 0],
+            }}
+            transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
+          />
+
+          <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-2xl space-y-6">
+              <div className="space-y-3">
+                <motion.span
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.6 }}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1 text-xs uppercase tracking-[0.3em] text-white/50"
+                >
+                  {t?.('catalog') || 'Каталог'}
+                </motion.span>
+                <motion.h1
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.7 }}
+                  className="text-4xl font-semibold text-white tracking-tight sm:text-5xl"
+                >
+                  {t?.('actors') || 'Актеры'}
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.7 }}
+                  className="text-white/60 text-base sm:text-lg"
+                >
+                  {isSearching
+                    ? `${t?.('searchResults') || 'Найдено'}: ${totalActors}`
+                    : `${t?.('actorsCatalog') || 'Каталог актеров'} • ${displayedCount} ${
+                        t?.('total')?.toLowerCase() || 'всего'
+                      }`}
+                </motion.p>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.7 }}
+                className="flex flex-wrap items-center gap-3"
               >
-                {t?.('actors') || 'Актеры'}
-              </motion.h1>
-              <p className="text-white/50">
-                {t?.('actorsCatalog') || 'Каталог актеров'} • {filteredActors?.length || 0} {t?.('total')?.toLowerCase() || 'всего'}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="relative flex-1 md:flex-initial md:w-80">
-                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-black/40 px-11 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
-                  placeholder={t?.('searchActors') || 'Поиск актеров...'}
-                />
-              </div>
-
-              <div className="relative">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowSortMenu(!showSortMenu)}
-                  className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/70 transition-colors hover:border-white/30 hover:text-white"
-                >
-                  {sortOrder === 'asc' ? (
-                    <FiArrowUp />
-                  ) : (
-                    <FiArrowDown />
-                  )}
-                  <span className="hidden sm:inline">
-                    {sortOptions.find((opt) => opt.value === sortBy)?.label}
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-1 text-xs uppercase tracking-[0.3em] text-white/50">
+                  {viewMode === 'grid' ? t?.('gridView') || 'Сетка' : t?.('listView') || 'Список'}
+                </span>
+                {debouncedSearch && (
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1 text-xs text-white/70">
+                    <FiSearch className="opacity-70" />
+                    {debouncedSearch}
                   </span>
-                  <FiChevronDown
-                    className={`transition-transform ${showSortMenu ? 'rotate-180' : ''}`}
-                  />
-                </motion.button>
-
-                <AnimatePresence>
-                  {showSortMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-white/10 bg-black/80 p-2 backdrop-blur-2xl"
-                    >
-                      {sortOptions.map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => handleSort(option.value)}
-                          className={`w-full rounded-xl px-4 py-2 text-left text-sm transition-colors ${
-                            sortBy === option.value
-                              ? 'bg-white text-black'
-                              : 'text-white/70 hover:bg-white/10 hover:text-white'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span>{option.label}</span>
-                            {sortBy === option.value && (
-                              <span className="text-xs">
-                                {sortOrder === 'asc' ? '↑' : '↓'}
-                              </span>
-                            )}
-                          </div>
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <div className="flex items-center gap-1 rounded-2xl border border-white/10 bg-black/40 p-1">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setViewMode('grid')}
-                  className={`rounded-xl p-2 transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-white text-black'
-                      : 'text-white/60 hover:text-white'
-                  }`}
-                >
-                  <FiGrid size={18} />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setViewMode('list')}
-                  className={`rounded-xl p-2 transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-white text-black'
-                      : 'text-white/60 hover:text-white'
-                  }`}
-                >
-                  <FiList size={18} />
-                </motion.button>
-              </div>
+                )}
+                {selectedActor && (
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1 text-xs text-white/70">
+                    <FiUser className="opacity-70" />
+                    {selectedActor.name}
+                  </span>
+                )}
+              </motion.div>
             </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.7 }}
+              className="grid w-full max-w-md grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {heroStats.map((stat, idx) => (
+                <motion.div
+                  key={stat.label}
+                  whileHover={{ translateY: -6, scale: 1.02 }}
+                  className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 px-4 py-5"
+                >
+                  <span className="text-xs uppercase tracking-[0.3em] text-white/40">
+                    {stat.label}
+                  </span>
+                  <div className="mt-2 text-3xl font-semibold text-white">
+                    {stat.value}
+                  </div>
+                  {stat.caption && (
+                    <p className="mt-1 text-xs text-white/40 truncate">{stat.caption}</p>
+                  )}
+                  <motion.span
+                    className="pointer-events-none absolute -right-8 -top-16 h-24 w-24 rounded-full bg-white/10"
+                    animate={{ rotate: [0, 180, 360] }}
+                    transition={{ duration: 10 + idx * 2, repeat: Infinity, ease: 'linear' }}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {error ? (
           <div className="rounded-3xl border border-red-500/50 bg-red-500/10 p-16 text-center backdrop-blur-2xl">
@@ -342,7 +452,7 @@ const ActorsList = () => {
             <button
               onClick={() => {
                 setError(null);
-                window.location.reload();
+                loadActors();
               }}
               className="mt-4 px-4 py-2 bg-white text-black rounded-lg hover:bg-white/90"
             >
@@ -360,64 +470,112 @@ const ActorsList = () => {
             <h2 className="text-2xl font-semibold text-white mb-2">{t?.('notFound') || 'Актеры не найдены'}</h2>
             <p className="text-white/60">{t?.('tryDifferentSearch') || 'Попробуйте изменить параметры поиска'}</p>
           </div>
-        ) : !filteredActors || filteredActors.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-16 text-center backdrop-blur-2xl">
-            <FiUser className="mx-auto mb-4 text-6xl text-white/20" />
-            <h2 className="text-2xl font-semibold text-white mb-2">{t?.('notFound') || 'Не найдено'}</h2>
-            <p className="text-white/60">{t?.('tryDifferentSearch') || 'Попробуйте изменить параметры поиска'}</p>
-          </div>
         ) : (
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.9fr)]">
             <aside className="space-y-6">
               <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-2xl">
                 <div className="mb-4 text-sm font-semibold uppercase tracking-[0.3em] text-white/40">
-                  {t('actors')}
+                  {t?.('actors') || 'Актеры'}
                 </div>
-                <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-2">
-                  {filteredActors.map((actor) => {
+                <div
+                  className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'space-y-3'} max-h-[70vh] overflow-y-auto pr-2`}
+                >
+                  {filteredActors.map((actor, index) => {
                     const isActive = actor.id === selectedActorId;
+                    const birthYearValue = actor.dateOfBirth
+                      ? new Date(actor.dateOfBirth).getFullYear()
+                      : null;
+                    const safeBirthYear =
+                      birthYearValue !== null && !Number.isNaN(birthYearValue) ? birthYearValue : null;
+
                     return (
                       <motion.button
                         key={actor.id}
-                        whileHover={{ x: 6 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.03, duration: 0.4 }}
+                        whileHover={{ scale: 1.02, rotate: -0.25 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => handleSelectActor(actor.id)}
-                        className={`w-full rounded-2xl border p-4 text-left transition-all ${
+                        className={`group relative overflow-hidden rounded-2xl border text-left transition-all duration-300 ${
                           isActive
-                            ? 'border-white bg-white text-black shadow-xl'
+                            ? 'border-white/70 bg-white text-black shadow-2xl shadow-white/20'
                             : 'border-white/10 bg-black/40 text-white/80 hover:border-white/30 hover:bg-black/60'
-                        }`}
+                        } ${viewMode === 'grid' ? 'p-5 flex flex-col gap-4' : 'p-4 flex items-center gap-4'}`}
                       >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border text-sm font-semibold ${
+                        <motion.span
+                          className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100"
+                          animate={isActive ? { opacity: [0.25, 0.45, 0.25] } : undefined}
+                          transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+                          style={{
+                            background:
+                              'radial-gradient(120% 120% at 0% 0%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%)',
+                          }}
+                        />
+                        <div
+                          className={`relative z-10 flex ${
+                            viewMode === 'grid' ? 'flex-col items-start gap-4' : 'items-center gap-4'
+                          }`}
+                        >
+                          <motion.div
+                            layoutId={`actor-avatar-${actor.id}`}
+                            className={`flex h-12 w-12 items-center justify-center rounded-xl border text-sm font-semibold shadow-inner ${
                               isActive
                                 ? 'border-black bg-black/10 text-black'
                                 : 'border-white/20 bg-white/10 text-white'
                             }`}
+                            whileHover={{ rotate: viewMode === 'grid' ? -2 : 0 }}
                           >
                             {getInitials(actor.name)}
-                          </div>
-                          <div className="min-w-0 flex-1">
+                          </motion.div>
+                          <div
+                            className={`${
+                              viewMode === 'grid'
+                                ? 'w-full space-y-2'
+                                : 'min-w-0 flex-1 space-y-1'
+                            }`}
+                          >
                             <div
-                              className={`truncate text-sm font-semibold ${
+                              className={`font-semibold tracking-tight ${
                                 isActive ? 'text-black' : 'text-white'
-                              }`}
+                              } ${viewMode === 'grid' ? 'text-lg' : 'truncate text-sm'}`}
                             >
                               {actor.name}
                             </div>
-                            {actor.dateOfBirth && (
-                              <div
-                                className={`mt-1 text-xs ${
-                                  isActive ? 'text-black/60' : 'text-white/40'
-                                }`}
-                              >
-                                {new Date(actor.dateOfBirth).getFullYear()}
-                              </div>
-                            )}
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-white/45">
+                              {safeBirthYear !== null && (
+                                <span className="inline-flex items-center gap-1">
+                                  <FiCalendar className="opacity-60" />
+                                  {safeBirthYear}
+                                </span>
+                              )}
+                              {actor.biography && (
+                                <span className="inline-flex items-center gap-1">
+                                  <FiBookOpen className="opacity-50" />
+                                  <span
+                                    className={`${isActive ? 'text-black/60' : 'text-white/45'} text-xs leading-relaxed`}
+                                    style={{
+                                      display: '-webkit-box',
+                                      WebkitLineClamp: viewMode === 'grid' ? 2 : 1,
+                                      WebkitBoxOrient: 'vertical',
+                                      overflow: 'hidden',
+                                    }}
+                                  >
+                                    {actor.biography}
+                                  </span>
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <FiChevronRight
-                            className={`flex-shrink-0 ${isActive ? 'text-black/50' : 'text-white/30'}`}
-                          />
+                          {viewMode === 'list' && (
+                            <FiChevronRight
+                              className={`ml-auto transition-transform ${
+                                isActive
+                                  ? 'text-black/50 translate-x-1'
+                                  : 'text-white/30 group-hover:translate-x-1'
+                              }`}
+                            />
+                          )}
                         </div>
                       </motion.button>
                     );
@@ -449,59 +607,118 @@ const ActorsList = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.5 }}
-                    className="rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur-2xl"
+                    className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.05] p-8 md:p-12 backdrop-blur-3xl shadow-[0_0_90px_rgba(255,255,255,0.08)]"
                   >
-                    <div className="space-y-8">
-                      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="space-y-4">
-                          <h1 className="text-4xl font-semibold text-white tracking-tight lg:text-5xl">
-                            {selectedActor.name}
-                          </h1>
-                          {selectedActor.dateOfBirth && (
-                            <div className="flex items-center gap-2 text-sm text-white/50">
-                              <FiCalendar />
-                              <span>{formatDate(selectedActor.dateOfBirth)}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-3">
-                          <div className="rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-center">
-                            <p className="text-xs uppercase tracking-[0.3em] text-white/30">
-                              {t('movies')}
-                            </p>
-                            <p className="mt-1 text-lg font-semibold text-white">
-                              {selectedActor.movies?.length ?? 0}
-                            </p>
-                          </div>
-                          <div className="rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-center">
-                            <p className="text-xs uppercase tracking-[0.3em] text-white/30">
-                              {t('series')}
-                            </p>
-                            <p className="mt-1 text-lg font-semibold text-white">
-                              {selectedActor.series?.length ?? 0}
-                            </p>
-                          </div>
-                          <Link
-                            to={`/actors/${selectedActor.id}`}
-                            className="rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-center text-sm text-white/70 transition-colors hover:border-white/30 hover:text-white"
+                    <motion.div
+                      className="pointer-events-none absolute -left-28 -top-32 h-72 w-72 rounded-full bg-gradient-to-br from-white/12 via-transparent to-transparent blur-[140px]"
+                      animate={{ rotate: [0, 15, 0] }}
+                      transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                    <motion.div
+                      className="pointer-events-none absolute right-[-10%] bottom-[-20%] h-80 w-80 rounded-full bg-gradient-to-tl from-white/10 via-transparent to-transparent blur-[160px]"
+                      animate={{ rotate: [0, -20, 0] }}
+                      transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+                    />
+
+                    <div className="relative z-10 space-y-10">
+                      <div className="flex flex-col gap-8 xl:flex-row xl:items-start xl:justify-between">
+                        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+                          <motion.div
+                            layoutId={`actor-avatar-${selectedActor.id}`}
+                            className="flex h-20 w-20 items-center justify-center rounded-3xl border border-white/20 bg-gradient-to-br from-white/15 via-transparent to-white/5 text-3xl font-semibold text-white shadow-[0_0_30px_rgba(255,255,255,0.12)]"
+                            whileHover={{ rotate: 2 }}
                           >
-                            <p className="text-xs uppercase tracking-[0.3em] text-white/30">
-                              {t('profile')}
-                            </p>
-                            <p className="mt-1 font-medium">{t('goTo')}</p>
-                          </Link>
+                            {getInitials(selectedActor.name)}
+                          </motion.div>
+                          <div className="space-y-3 text-white">
+                            <h1 className="text-3xl font-semibold sm:text-4xl lg:text-5xl">
+                              {selectedActor.name}
+                            </h1>
+                            {selectedActor.dateOfBirth && (
+                              <div className="flex items-center gap-2 text-sm text-white/60">
+                                <FiCalendar className="opacity-70" />
+                                <span>{formatDate(selectedActor.dateOfBirth)}</span>
+                              </div>
+                            )}
+                            {selectedActor.biography && (
+                              <p
+                                className="max-w-xl text-sm text-white/50"
+                                style={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden',
+                                }}
+                              >
+                                {selectedActor.biography}
+                              </p>
+                            )}
+                            <div className="flex flex-wrap gap-3">
+                              <Link
+                                to={`/actors/${selectedActor.id}`}
+                                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.3em] text-white/80 transition-colors hover:border-white/40 hover:text-white"
+                              >
+                                <FiChevronRight />
+                                {t?.('goTo') || 'Перейти'}
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid w-full max-w-sm grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                          {detailHighlights.map(({ icon: Icon, label, value }) => {
+                            const isNumeric = typeof value === 'number';
+                            return (
+                              <motion.div
+                                key={label}
+                                whileHover={{ translateY: -6, scale: 1.02 }}
+                                className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 px-4 py-5"
+                              >
+                                <Icon className="text-white/60" />
+                                <div
+                                  className={`mt-2 font-semibold text-white ${
+                                    isNumeric ? 'text-2xl' : 'text-lg'
+                                  }`}
+                                >
+                                  {value ?? '—'}
+                                </div>
+                                <p className="mt-1 text-xs text-white/40 truncate">{label}</p>
+                                <motion.span
+                                  className="pointer-events-none absolute -right-6 -top-10 h-16 w-16 rounded-full bg-white/10"
+                                  animate={{ rotate: [0, 360] }}
+                                  transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
+                                />
+                              </motion.div>
+                            );
+                          })}
                         </div>
                       </div>
 
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-white/40">
-                          <FiBookOpen className="text-base" />
-                          Биография
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/35 px-6 py-6"
+                      >
+                        <motion.span
+                          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0"
+                          animate={{ opacity: [0.2, 0.35, 0.2] }}
+                          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+                        />
+                        <div className="relative z-10 flex items-start gap-4">
+                          <div className="rounded-2xl border border-white/10 bg-white/10 p-3 text-white/80">
+                            <FiBookOpen className="text-lg" />
+                          </div>
+                          <div className="space-y-3 text-white">
+                            <h2 className="text-sm uppercase tracking-[0.3em] text-white/50">
+                              {t?.('biography') || 'Биография'}
+                            </h2>
+                            <p className="text-white/75 leading-relaxed">
+                              {selectedActor.biography || t?.('actorNotFound') || 'Информация не найдена'}
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-white/70 leading-relaxed">
-                          {selectedActor.biography || t('actorNotFound')}
-                        </p>
-                      </div>
+                      </motion.div>
                     </div>
                   </motion.section>
                 ) : (
@@ -512,7 +729,7 @@ const ActorsList = () => {
                     exit={{ opacity: 0, y: -20 }}
                     className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center text-white/50 backdrop-blur-2xl"
                   >
-                    {t('selectActor') || 'Выберите актера, чтобы увидеть подробности.'}
+                    {t?.('selectActor') || 'Выберите актера, чтобы увидеть подробности.'}
                   </motion.section>
                 )}
               </AnimatePresence>
@@ -522,7 +739,7 @@ const ActorsList = () => {
                   <section className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-2xl">
                     <div className="mb-6 flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-white/40">
                       <FiFilm className="text-base" />
-                      {t('actorMovies')}
+                      {t?.('actorMovies') || 'Фильмы'}
                     </div>
                     {renderWorks(selectedActor.movies, 'movies')}
                   </section>
@@ -530,7 +747,7 @@ const ActorsList = () => {
                   <section className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-2xl">
                     <div className="mb-6 flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-white/40">
                       <FiTv className="text-base" />
-                      {t('actorSeries')}
+                      {t?.('actorSeries') || 'Сериалы'}
                     </div>
                     {renderWorks(selectedActor.series, 'series')}
                   </section>
