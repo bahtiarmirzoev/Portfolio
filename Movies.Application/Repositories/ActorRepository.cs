@@ -61,6 +61,64 @@ public class ActorRepository : IActorRepository
         return await connection.QueryAsync<Actor>(sql);
     }
 
+    public async Task<(IEnumerable<Actor> actors, int totalCount)> GetAllPagedAsync(
+        string? sortBy, 
+        string? sortOrder, 
+        int page, 
+        int pageSize, 
+        string? search, 
+        CancellationToken token = default)
+    {
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        
+        var orderBy = GetOrderByClause(sortBy);
+        var order = sortOrder?.ToLower() == "desc" ? "DESC" : "ASC";
+        
+        var whereClause = string.IsNullOrWhiteSpace(search) 
+            ? "" 
+            : "WHERE LOWER(name) LIKE LOWER(@SearchPattern)";
+        
+        var searchPattern = string.IsNullOrWhiteSpace(search) 
+            ? null 
+            : $"%{search}%";
+        
+        // Получаем общее количество
+        var countSql = $"""
+                            SELECT COUNT(*) FROM actors 
+                            {whereClause}
+                        """;
+        
+        var totalCount = await connection.ExecuteScalarAsync<int>(countSql, new { SearchPattern = searchPattern });
+        
+        // Получаем данные с пагинацией
+        var sql = $"""
+                       SELECT * FROM actors 
+                       {whereClause}
+                       ORDER BY {orderBy} {order}
+                       LIMIT @PageSize OFFSET @Offset
+                   """;
+        
+        var offset = (page - 1) * pageSize;
+        
+        var actors = await connection.QueryAsync<Actor>(sql, new 
+        { 
+            SearchPattern = searchPattern,
+            PageSize = pageSize,
+            Offset = offset
+        });
+        
+        return (actors, totalCount);
+    }
+    private static string GetOrderByClause(string? sortBy)
+    {
+        return sortBy?.ToLower() switch
+        {
+            "name" => "name",
+            "dateofbirth" => "dateofbirth",
+            _ => "name"
+        };
+    }
+
     public async Task<bool> CreateAsync(Actor actor, CancellationToken token = default)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();

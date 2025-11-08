@@ -8,6 +8,13 @@ public interface IActorRepository
     Task<IEnumerable<Actor>> GetByMovieIdAsync(Guid movieId, CancellationToken token = default);
     Task<IEnumerable<Actor>> GetAllAsync(CancellationToken token = default);
     Task<IEnumerable<Actor>> GetAllAsync(string? sortBy, string? sortOrder, CancellationToken token = default);
+    Task<(IEnumerable<Actor> actors, int totalCount)> GetAllPagedAsync(
+        string? sortBy, 
+        string? sortOrder, 
+        int page, 
+        int pageSize, 
+        string? search, 
+        CancellationToken token = default);
     Task<bool> CreateAsync(Actor actor, CancellationToken token = default);
     Task<bool> UpdateAsync(Actor actor, CancellationToken token = default);
     Task<bool> DeleteAsync(Guid id, CancellationToken token = default);
