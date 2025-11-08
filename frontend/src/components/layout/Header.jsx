@@ -15,7 +15,9 @@ import {
   FiLogIn,
   FiUserPlus,
   FiCheck,
-  FiShield
+  FiShield,
+  FiMoreHorizontal,
+  FiSettings
 } from 'react-icons/fi';
 
 const Header = () => {
@@ -50,6 +52,12 @@ const Header = () => {
     { code: 'az', name: 'Azərbaycan', flag: '🇦🇿' },
   ];
 
+  const ctaLinks = [
+    { label: t('movies'), to: '/movies', description: t('catalog') },
+    { label: t('series'), to: '/series', description: t('ongoingSeries') || t('series') },
+    { label: t('actors'), to: '/actors', description: t('actorsCatalog') || t('actors') },
+  ];
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
@@ -73,201 +81,158 @@ const Header = () => {
     <motion.header
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      className="sticky top-0 z-50 glass-strong border-b border-white/20 backdrop-blur-2xl shadow-lg"
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+      className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-3xl shadow-[0_10px_60px_rgba(0,0,0,0.4)]"
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
+      <div className="mx-auto max-w-7xl px-4 md:px-8">
+        <div className="flex h-20 items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-3">
             <motion.div
               whileHover={{ rotate: 360, scale: 1.1 }}
-              transition={{ duration: 0.6, type: "spring" }}
-              className="w-12 h-12 bg-gradient-to-br from-white to-white/80 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow"
+              transition={{ duration: 0.6, type: 'spring' }}
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-gradient-to-br from-white/80 via-white to-white/70 text-black shadow-[0_0_40px_rgba(255,255,255,0.35)]"
             >
-              <FiFilm className="text-black text-2xl" />
+              <FiFilm size={22} />
             </motion.div>
-            <motion.span 
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-3xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent hidden sm:block group-hover:from-white group-hover:to-white transition-all"
-            >
-              Cinema
-            </motion.span>
+            <div className="hidden sm:flex flex-col leading-tight">
+              <span className="text-lg font-semibold text-white/80">Cinema</span>
+              <span className="text-xs text-white/40">Unlimited stories</span>
+            </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-4">
+          <nav className="hidden items-center gap-2 lg:flex">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.to);
               return (
-                <motion.div
-                  key={link.to}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <motion.div key={link.to} whileHover={{ translateY: -3 }}>
                   <Link
                     to={link.to}
-                    className={`relative flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 font-medium ${
+                    className={`relative flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-medium transition-all ${
                       active
-                        ? 'bg-white text-black shadow-lg'
+                        ? 'bg-white text-black shadow-[0_0_35px_rgba(255,255,255,0.25)]'
                         : 'text-white/70 hover:text-white hover:bg-white/10'
                     }`}
                   >
-                    {active && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute inset-0 bg-white rounded-xl"
-                        initial={false}
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
-                    <Icon 
-                      size={18} 
-                      className={`relative z-10 ${active ? 'text-black' : ''}`}
-                    />
-                    <span className="relative z-10">{link.label}</span>
+                    <Icon size={17} />
+                    <span>{link.label}</span>
                   </Link>
                 </motion.div>
               );
             })}
           </nav>
 
-          {/* Language Selector */}
-          <div className="hidden md:block relative" ref={languageMenuRef}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setLanguageMenuOpen(!languageMenuOpen)}
-              className="btn-secondary flex items-center gap-2 px-4 py-2.5"
-            >
-              <motion.div
-                animate={{ rotate: languageMenuOpen ? 360 : 0 }}
-                transition={{ duration: 0.3 }}
+          <div className="hidden items-center gap-3 lg:flex">
+            <div className="relative" ref={languageMenuRef}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setLanguageMenuOpen(!languageMenuOpen)}
+                className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white/80"
               >
-                <FiGlobe size={18} />
-              </motion.div>
-              <span className="text-lg">{languages.find(l => l.code === language)?.flag}</span>
-              <motion.div
-                animate={{ rotate: languageMenuOpen ? 180 : 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <FiChevronDown size={14} />
-              </motion.div>
-            </motion.button>
-            
-            <AnimatePresence>
-              {languageMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="absolute top-full right-0 mt-2 glass rounded-xl p-2 min-w-[150px] shadow-2xl z-50"
-                >
-                  {languages.map((lang) => (
-                    <motion.button
-                      key={lang.code}
-                      whileHover={{ x: 5 }}
-                      onClick={() => {
-                        setLanguage(lang.code);
-                        setLanguageMenuOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                        language === lang.code
-                          ? 'bg-white text-black font-semibold'
-                          : 'text-white/70 hover:text-white hover:bg-white/10'
-                      }`}
-                    >
-                      <span className="text-xl">{lang.flag}</span>
-                      <span>{lang.name}</span>
-                    </motion.button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Auth Buttons */}
-          <div className="hidden md:flex items-center gap-4">
-            {isAuthenticated ? (
-              <>
-                {isAdmin && (
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link
-                      to="/admin"
-                      className="btn-secondary flex items-center gap-2 px-5 py-2.5 relative bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/30"
-                    >
-                      <FiShield size={18} />
-                      <span>Админ</span>
-                    </Link>
+                <FiGlobe size={16} />
+                <span>{languages.find((l) => l.code === language)?.flag}</span>
+                <motion.span animate={{ rotate: languageMenuOpen ? 180 : 0 }}>
+                  <FiChevronDown size={12} />
+                </motion.span>
+              </motion.button>
+              <AnimatePresence>
+                {languageMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+                    className="absolute right-0 top-full mt-2 w-40 overflow-hidden rounded-2xl border border-white/15 bg-black/70 p-2 backdrop-blur-2xl"
+                  >
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          setLanguage(lang.code);
+                          setLanguageMenuOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm transition-all ${
+                          language === lang.code
+                            ? 'bg-white text-black shadow-lg'
+                            : 'text-white/70 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        <span className="text-lg">{lang.flag}</span>
+                        <span>{lang.name}</span>
+                      </button>
+                    ))}
                   </motion.div>
                 )}
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              </AnimatePresence>
+            </div>
+
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                {isAdmin && (
                   <Link
-                    to="/profile"
-                    className="btn-secondary flex items-center gap-2 px-5 py-2.5 relative"
+                    to="/admin"
+                    className="flex items-center gap-2 rounded-2xl border border-red-500/40 bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100"
                   >
-                    <FiUser size={18} />
-                    <span>{t('profile')}</span>
-                    {isTrusted && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-black shadow-lg"
-                      >
-                        <FiCheck className="text-white text-xs" />
-                      </motion.div>
-                    )}
+                    <FiShield size={15} />
+                    Admin
                   </Link>
-                </motion.div>
+                )}
+                <Link
+                  to="/profile"
+                  className="relative flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2 text-sm text-white/80 transition-colors hover:border-white/30 hover:text-white"
+                >
+                  <FiUser size={16} />
+                  {t('profile')}
+                  {isTrusted && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-black bg-gradient-to-br from-blue-500 to-purple-600 text-[10px] text-white"
+                    >
+                      <FiCheck />
+                    </motion.span>
+                  )}
+                </Link>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleSignOut}
-                  className="btn-secondary flex items-center gap-2 px-5 py-2.5"
+                  className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white px-4 py-2 text-sm font-semibold text-black shadow-lg hover:bg-white/90"
                 >
-                  <FiLogOut size={18} /> {t('signOut')}
+                  <FiLogOut size={16} />
+                  {t('signOut')}
                 </motion.button>
-              </>
+              </div>
             ) : (
-              <>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link 
-                    to="/sign-in" 
-                    className="btn-secondary flex items-center gap-2 px-4 py-2.5 min-w-[100px] justify-center"
-                  >
-                    <FiLogIn size={18} />
-                    <span>{t('signInShort')}</span>
-                  </Link>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link 
-                    to="/sign-up" 
-                    className="btn-primary flex items-center gap-2 px-4 py-2.5 min-w-[100px] justify-center"
-                  >
-                    <FiUserPlus size={18} />
-                    <span>{t('signUpShort')}</span>
-                  </Link>
-                </motion.div>
-              </>
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/sign-in"
+                  className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white/80 transition-colors hover:border-white/30 hover:text-white"
+                >
+                  <FiLogIn size={16} />
+                  {t('signInShort')}
+                </Link>
+                <Link
+                  to="/sign-up"
+                  className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white px-4 py-2 text-sm font-semibold text-black shadow-lg hover:bg-white/90"
+                >
+                  <FiUserPlus size={16} />
+                  {t('signUpShort')}
+                </Link>
+              </div>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-white p-2"
+            className="flex items-center rounded-2xl border border-white/15 bg-white/5 p-2 text-white transition-colors hover:border-white/30 hover:text-white lg:hidden"
           >
-            {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-          </motion.button>
+            {mobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -275,108 +240,71 @@ const Header = () => {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden overflow-hidden border-t border-white/10"
+            className="overflow-hidden border-t border-white/10 bg-black/60 backdrop-blur-2xl lg:hidden"
           >
-            <div className="px-4 py-4 space-y-2">
-              {/* Mobile Navigation */}
-              {navLinks.map((link, index) => {
-                const Icon = link.icon;
-                return (
-                  <motion.div
-                    key={link.to}
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Link
-                      to={link.to}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                        isActive(link.to)
-                          ? 'bg-white text-black font-semibold'
-                          : 'text-white/70 hover:text-white hover:bg-white/10'
-                      }`}
+            <div className="space-y-4 px-4 py-5">
+              <div className="flex flex-col gap-2">
+                {navLinks.map((link, index) => {
+                  const Icon = link.icon;
+                  return (
+                    <motion.div
+                      key={link.to}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.1 }}
                     >
-                      <Icon size={20} />
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                );
-              })}
-
-              {/* Mobile Language Selector */}
-              <div className="pt-4 border-t border-white/10">
-                <div className="px-4 py-2 mb-2">
-                  <p className="text-white/60 text-sm mb-2 flex items-center gap-2">
-                    <FiGlobe size={16} />
-                    {t('catalog')}
-                  </p>
-                  <div className="flex gap-2">
-                    {languages.map((lang) => (
-                      <motion.button
-                        key={lang.code}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => {
-                          setLanguage(lang.code);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`flex-1 px-3 py-2 rounded-lg transition-all flex items-center justify-center gap-2 ${
-                          language === lang.code
+                      <Link
+                        to={link.to}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 rounded-2xl px-4 py-3 transition-all ${
+                          isActive(link.to)
                             ? 'bg-white text-black font-semibold'
                             : 'text-white/70 hover:text-white hover:bg-white/10'
                         }`}
                       >
-                        <motion.span
-                          animate={language === lang.code ? { scale: [1, 1.2, 1] } : {}}
-                          transition={{ repeat: Infinity, duration: 1 }}
-                          className="text-lg"
-                        >
-                          {lang.flag}
-                        </motion.span>
-                        <span className="text-sm">{lang.name}</span>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
+                        <Icon size={18} />
+                        {link.label}
+                      </Link>
+                    </motion.div>
+                  );
+                })}
               </div>
 
-              {/* Mobile Auth */}
-              <div className="pt-4 border-t border-white/10 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      setLanguage(lang.code);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex-1 rounded-2xl px-4 py-3 text-sm transition-all ${
+                      language === lang.code
+                        ? 'bg-white text-black font-semibold'
+                        : 'border border-white/15 bg-white/5 text-white/70 hover:text-white'
+                    }`}
+                  >
+                    <span className="text-lg">{lang.flag}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-2 border-t border-white/10 pt-4">
                 {isAuthenticated ? (
                   <>
-                    {isAdmin && (
-                      <Link
-                        to="/admin"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30"
-                      >
-                        <FiShield size={20} />
-                        <span>Админ</span>
-                      </Link>
-                    )}
                     <Link
                       to="/profile"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all relative"
+                      className="flex items-center gap-3 rounded-2xl px-4 py-3 text-white/70 hover:text-white hover:bg-white/10"
                     >
-                      <FiUser size={20} />
-                      <span>{t('profile')}</span>
-                      {isTrusted && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-black shadow-lg"
-                        >
-                          <FiCheck className="text-white text-xs" />
-                        </motion.div>
-                      )}
+                      <FiUser size={18} />
+                      {t('profile')}
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                      className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-white/70 hover:text-white hover:bg-white/10"
                     >
-                      <FiLogOut size={20} />
+                      <FiLogOut size={18} />
                       {t('signOut')}
                     </button>
                   </>
@@ -385,7 +313,7 @@ const Header = () => {
                     <Link
                       to="/sign-in"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center justify-center gap-2 w-full text-center btn-secondary"
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white/80"
                     >
                       <FiLogIn size={18} />
                       {t('signInShort')}
@@ -393,7 +321,7 @@ const Header = () => {
                     <Link
                       to="/sign-up"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center justify-center gap-2 w-full text-center btn-primary"
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-black"
                     >
                       <FiUserPlus size={18} />
                       {t('signUpShort')}

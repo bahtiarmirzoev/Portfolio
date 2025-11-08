@@ -19,27 +19,38 @@ const Ratings = () => {
   const loadUserRatings = async () => {
     try {
       setLoading(true);
-      // Получаем все фильмы и их рейтинги
-      // В реальном приложении лучше иметь эндпоинт для получения рейтингов пользователя
-      const movies = await moviesService.getAll({ take: 100 });
-      const allRatings = [];
 
-      for (const movie of movies.items || []) {
-        try {
-          const rating = await ratingsService.getMovieRating(movie.id);
-          if (rating && rating.value) {
-            allRatings.push({
-              movie: movie,
-              value: rating.value,
-              averageRating: rating.averageRating,
-            });
+      const response = await moviesService.getAll({ skip: 0, take: 500 });
+      const movieItems = Array.isArray(response)
+        ? response
+        : response?.items || response?.data || [];
+
+      const ratingsData = await Promise.all(
+        movieItems.map(async (movie) => {
+          try {
+            const myRating = await ratingsService.getMyRating(movie.id);
+            if (!myRating || myRating.value === null || myRating.value === undefined) {
+              return null;
+            }
+
+            let averageRating = myRating.averageRating;
+            if (averageRating === undefined) {
+              const overall = await ratingsService.getMovieRating(movie.id);
+              averageRating = overall?.averageRating ?? overall?.value ?? null;
+            }
+
+            return {
+              movie,
+              value: myRating.value,
+              averageRating,
+            };
+          } catch (error) {
+            return null;
           }
-        } catch (error) {
-          // Пропускаем фильмы без рейтингов
-        }
-      }
+        })
+      );
 
-      setRatings(allRatings);
+      setRatings(ratingsData.filter(Boolean));
     } catch (error) {
       toast.error(t('errorLoadingRatings'));
       console.error(error);

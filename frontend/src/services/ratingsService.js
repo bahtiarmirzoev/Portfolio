@@ -6,6 +6,11 @@ export const ratingsService = {
     return response.data;
   },
 
+  async getMyRating(movieId) {
+    const response = await api.get(`/movies/${movieId}/ratings/my`);
+    return response.data;
+  },
+
   async rateMovie(movieId, value) {
     const response = await api.post(`/movies/${movieId}/ratings`, { value });
     return response.data;
