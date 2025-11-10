@@ -22,4 +22,5 @@ public interface IActorRepository
     Task<bool> RemoveActorFromMovieAsync(Guid movieId, Guid actorId, CancellationToken token = default);
     Task<IEnumerable<Movie>> GetMoviesByActorIdAsync(Guid actorId, CancellationToken token = default);
     Task<IEnumerable<Series>> GetSeriesByActorIdAsync(Guid actorId, CancellationToken token = default);
+    Task<Actor?> GetByNameAsync(string name, CancellationToken token = default);
 }

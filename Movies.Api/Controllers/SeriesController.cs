@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mapping;
 using Movies.Application.Services;
+using Movies.Application.Interfaces;
 using Movies.Contracts.Requests;
 
 namespace Movies.Api.Controllers;
@@ -11,19 +12,22 @@ namespace Movies.Api.Controllers;
 public class SeriesController : ControllerBase
 {
     private readonly ISeriesService _seriesService;
+    private readonly IActorRepository _actorRepository;
 
-    public SeriesController(ISeriesService seriesService)
+    public SeriesController(ISeriesService seriesService, IActorRepository actorRepository)
     {
         _seriesService = seriesService;
+        _actorRepository = actorRepository;
     }
 
     [HttpPost]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> Create([FromBody] CreateSeriesRequest request)
     {
-        var series = request.MapToSeries();
+        var series = await request.MapToSeriesAsync(_actorRepository);
         await _seriesService.CreateSeriesAsync(series);
-        return CreatedAtAction(nameof(Get), new { idOrSlug = series.Id }, series);
+        var response = series.MapToResponse();
+        return CreatedAtAction(nameof(Get), new { idOrSlug = series.Id }, response);
     }
 
     [HttpGet("{idOrSlug}")]
@@ -45,7 +49,7 @@ public class SeriesController : ControllerBase
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateSeriesRequest request)
     {
-        var series = request.MapToSeries(id);
+        var series = await request.MapToSeriesAsync(id, _actorRepository);
         var updatedSeries = await _seriesService.UpdateSeriesAsync(series);
         if (updatedSeries is null)
             return NotFound();

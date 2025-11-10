@@ -18,9 +18,19 @@ public class ActorRepository : IActorRepository
     public async Task<Actor?> GetByIdAsync(Guid id, CancellationToken token = default)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
-        return await connection.QuerySingleOrDefaultAsync<Actor>(
-            "SELECT * FROM actors WHERE id = @Id", 
+        var result = await connection.QuerySingleOrDefaultAsync<dynamic>(
+            "SELECT id, name, dateofbirth, biography FROM actors WHERE id = @Id", 
             new { Id = id });
+        
+        if (result == null) return null;
+        
+        return new Actor
+        {
+            Id = result.id,
+            Name = result.name,
+            DateOfBirth = result.dateofbirth != null ? DateOnly.FromDateTime((DateTime)result.dateofbirth) : null,
+            Biography = result.biography
+        };
     }
 
     public async Task<IEnumerable<Actor>> GetByMovieIdAsync(Guid movieId, CancellationToken token = default)
@@ -28,20 +38,36 @@ public class ActorRepository : IActorRepository
         using var connection = await _connectionFactory.CreateConnectionAsync();
         
         const string sql = """
-            SELECT a.*, ma.character_name, ma."order"
+            SELECT a.id, a.name, a.dateofbirth, a.biography, ma.character_name, ma."order"
             FROM actors a
             INNER JOIN movie_actors ma ON a.id = ma.actorid
             WHERE ma.movieid = @MovieId
             ORDER BY ma."order"
         """;
         
-        return await connection.QueryAsync<Actor>(sql, new { MovieId = movieId });
+        var results = await connection.QueryAsync<dynamic>(sql, new { MovieId = movieId });
+        
+        return results.Select(r => new Actor
+        {
+            Id = r.id,
+            Name = r.name,
+            DateOfBirth = r.dateofbirth != null ? DateOnly.FromDateTime((DateTime)r.dateofbirth) : null,
+            Biography = r.biography
+        });
     }
 
     public async Task<IEnumerable<Actor>> GetAllAsync(CancellationToken token = default)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
-        return await connection.QueryAsync<Actor>("SELECT * FROM actors ORDER BY name");
+        var results = await connection.QueryAsync<dynamic>("SELECT id, name, dateofbirth, biography FROM actors ORDER BY name");
+        
+        return results.Select(r => new Actor
+        {
+            Id = r.id,
+            Name = r.name,
+            DateOfBirth = r.dateofbirth != null ? DateOnly.FromDateTime((DateTime)r.dateofbirth) : null,
+            Biography = r.biography
+        });
     }
 
     public async Task<IEnumerable<Actor>> GetAllAsync(string? sortBy, string? sortOrder, CancellationToken token = default)
@@ -57,8 +83,16 @@ public class ActorRepository : IActorRepository
         
         var order = sortOrder?.ToLower() == "desc" ? "DESC" : "ASC";
         
-        var sql = $"SELECT * FROM actors ORDER BY {orderBy} {order}";
-        return await connection.QueryAsync<Actor>(sql);
+        var sql = $"SELECT id, name, dateofbirth, biography FROM actors ORDER BY {orderBy} {order}";
+        var results = await connection.QueryAsync<dynamic>(sql);
+        
+        return results.Select(r => new Actor
+        {
+            Id = r.id,
+            Name = r.name,
+            DateOfBirth = r.dateofbirth != null ? DateOnly.FromDateTime((DateTime)r.dateofbirth) : null,
+            Biography = r.biography
+        });
     }
 
     public async Task<(IEnumerable<Actor> actors, int totalCount)> GetAllPagedAsync(
@@ -92,7 +126,7 @@ public class ActorRepository : IActorRepository
         
         // Получаем данные с пагинацией
         var sql = $"""
-                       SELECT * FROM actors 
+                       SELECT id, name, dateofbirth, biography FROM actors 
                        {whereClause}
                        ORDER BY {orderBy} {order}
                        LIMIT @PageSize OFFSET @Offset
@@ -100,11 +134,19 @@ public class ActorRepository : IActorRepository
         
         var offset = (page - 1) * pageSize;
         
-        var actors = await connection.QueryAsync<Actor>(sql, new 
+        var results = await connection.QueryAsync<dynamic>(sql, new 
         { 
             SearchPattern = searchPattern,
             PageSize = pageSize,
             Offset = offset
+        });
+        
+        var actors = results.Select(r => new Actor
+        {
+            Id = r.id,
+            Name = r.name,
+            DateOfBirth = r.dateofbirth != null ? DateOnly.FromDateTime((DateTime)r.dateofbirth) : null,
+            Biography = r.biography
         });
         
         return (actors, totalCount);
@@ -124,7 +166,13 @@ public class ActorRepository : IActorRepository
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
             "INSERT INTO actors (id, name, dateofbirth, biography) VALUES (@Id, @Name, @DateOfBirth, @Biography)",
-            actor);
+            new 
+            { 
+                Id = actor.Id, 
+                Name = actor.Name, 
+                DateOfBirth = actor.DateOfBirth.HasValue ? actor.DateOfBirth.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
+                Biography = actor.Biography ?? (string?)null
+            });
         return result > 0;
     }
 
@@ -133,7 +181,13 @@ public class ActorRepository : IActorRepository
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
             "UPDATE actors SET name = @Name, dateofbirth = @DateOfBirth, biography = @Biography WHERE id = @Id",
-            actor);
+            new 
+            { 
+                Id = actor.Id, 
+                Name = actor.Name, 
+                DateOfBirth = actor.DateOfBirth.HasValue ? actor.DateOfBirth.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
+                Biography = actor.Biography ?? (string?)null
+            });
         return result > 0;
     }
 
@@ -227,5 +281,23 @@ public class ActorRepository : IActorRepository
         }
         
         return series;
+    }
+
+    public async Task<Actor?> GetByNameAsync(string name, CancellationToken token = default)
+    {
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        var result = await connection.QuerySingleOrDefaultAsync<dynamic>(
+            "SELECT id, name, dateofbirth, biography FROM actors WHERE LOWER(TRIM(name)) = LOWER(TRIM(@Name))", 
+            new { Name = name });
+        
+        if (result == null) return null;
+        
+        return new Actor
+        {
+            Id = result.id,
+            Name = result.name,
+            DateOfBirth = result.dateofbirth != null ? DateOnly.FromDateTime((DateTime)result.dateofbirth) : null,
+            Biography = result.biography
+        };
     }
 }

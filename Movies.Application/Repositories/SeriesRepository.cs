@@ -2,6 +2,7 @@ using Dapper;
 using Movies.Application.Database;
 using Movies.Application.Interfaces;
 using Movies.Application.Models;
+using System.Linq;
 
 namespace Movies.Application.Repositories;
 
@@ -93,13 +94,17 @@ public class SeriesRepository : ISeriesRepository
         series.AverageRating = avgRating;
 
         // Загружаем актеров
-        var actors = await connection.QueryAsync<Actor>(@"
+        var actorResults = await connection.QueryAsync<dynamic>(@"
             SELECT a.id, a.name
             FROM actors a 
             INNER JOIN series_actors sa ON a.id = sa.actorid 
             WHERE sa.seriesid = @id
         ", new { id });
-        series.Actors = actors.ToList();
+        series.Actors = actorResults.Select(r => new Actor
+        {
+            Id = r.id,
+            Name = r.name
+        }).ToList();
 
         return series;
     }
@@ -130,13 +135,17 @@ public class SeriesRepository : ISeriesRepository
         series.AverageRating = avgRating;
 
         // Загружаем актеров
-        var actors = await connection.QueryAsync<Actor>(@"
+        var actorResults = await connection.QueryAsync<dynamic>(@"
             SELECT a.id, a.name
             FROM actors a 
             INNER JOIN series_actors sa ON a.id = sa.actorid 
             WHERE sa.seriesid = @id
         ", new { id = series.Id });
-        series.Actors = actors.ToList();
+        series.Actors = actorResults.Select(r => new Actor
+        {
+            Id = r.id,
+            Name = r.name
+        }).ToList();
 
         return series;
     }
@@ -167,13 +176,17 @@ public class SeriesRepository : ISeriesRepository
             series.AverageRating = avgRating;
 
             // Загружаем актеров
-            var actors = await connection.QueryAsync<Actor>(@"
+            var actorResults = await connection.QueryAsync<dynamic>(@"
                 SELECT a.id, a.name
                 FROM actors a 
                 INNER JOIN series_actors sa ON a.id = sa.actorid 
                 WHERE sa.seriesid = @id
             ", new { id = series.Id });
-            series.Actors = actors.ToList();
+            series.Actors = actorResults.Select(r => new Actor
+            {
+                Id = r.id,
+                Name = r.name
+            }).ToList();
         }
 
         return seriesList;
@@ -275,13 +288,17 @@ public class SeriesRepository : ISeriesRepository
             series.AverageRating = avgRating;
 
             // Загружаем актеров
-            var actors = await connection.QueryAsync<Actor>(@"
+            var actorResults = await connection.QueryAsync<dynamic>(@"
                 SELECT a.id, a.name
                 FROM actors a 
                 INNER JOIN series_actors sa ON a.id = sa.actorid 
                 WHERE sa.seriesid = @id
             ", new { id = series.Id });
-            series.Actors = actors.ToList();
+            series.Actors = actorResults.Select(r => new Actor
+            {
+                Id = r.id,
+                Name = r.name
+            }).ToList();
         }
 
         return (seriesList, totalCount);
@@ -321,13 +338,17 @@ public class SeriesRepository : ISeriesRepository
             series.AverageRating = avgRating;
 
             // Загружаем актеров
-            var actors = await connection.QueryAsync<Actor>(@"
+            var actorResults = await connection.QueryAsync<dynamic>(@"
                 SELECT a.id, a.name
                 FROM actors a 
                 INNER JOIN series_actors sa ON a.id = sa.actorid 
                 WHERE sa.seriesid = @id
             ", new { id = series.Id });
-            series.Actors = actors.ToList();
+            series.Actors = actorResults.Select(r => new Actor
+            {
+                Id = r.id,
+                Name = r.name
+            }).ToList();
         }
 
         return (seriesList, totalCount);
@@ -412,13 +433,17 @@ public class SeriesRepository : ISeriesRepository
             series.AverageRating = avgRating;
 
             // Загружаем актеров
-            var actors = await connection.QueryAsync<Actor>(@"
+            var actorResults = await connection.QueryAsync<dynamic>(@"
                 SELECT a.id, a.name
                 FROM actors a 
                 INNER JOIN series_actors sa ON a.id = sa.actorid 
                 WHERE sa.seriesid = @id
             ", new { id = series.Id });
-            series.Actors = actors.ToList();
+            series.Actors = actorResults.Select(r => new Actor
+            {
+                Id = r.id,
+                Name = r.name
+            }).ToList();
         }
 
         return (seriesList, totalCount);
@@ -456,13 +481,17 @@ public class SeriesRepository : ISeriesRepository
             series.AverageRating = avgRating;
 
             // Загружаем актеров
-            var actors = await connection.QueryAsync<Actor>(@"
+            var actorResults = await connection.QueryAsync<dynamic>(@"
                 SELECT a.id, a.name
                 FROM actors a 
                 INNER JOIN series_actors sa ON a.id = sa.actorid 
                 WHERE sa.seriesid = @id
             ", new { id = series.Id });
-            series.Actors = actors.ToList();
+            series.Actors = actorResults.Select(r => new Actor
+            {
+                Id = r.id,
+                Name = r.name
+            }).ToList();
         }
 
         return (seriesList, totalCount);

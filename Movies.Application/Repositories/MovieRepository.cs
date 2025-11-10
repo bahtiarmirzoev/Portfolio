@@ -2,6 +2,7 @@ using Dapper;
 using Movies.Application.Database;
 using Movies.Application.Interfaces;
 using Movies.Application.Models;
+using System.Linq;
 
 namespace Movies.Application.Repositories;
 
@@ -85,13 +86,17 @@ public class MovieRepository : IMovieRepository
         ", new { id });
         movie.AverageRating = avgRating ?? 0;
 
-        var actors = await connection.QueryAsync<Actor>(@"
+        var actorResults = await connection.QueryAsync<dynamic>(@"
             SELECT a.id, a.name
             FROM actors a 
             INNER JOIN movie_actors ma ON a.id = ma.actorid 
             WHERE ma.movieid = @id
         ", new { id });
-        movie.Actors = actors.ToList();
+        movie.Actors = actorResults.Select(r => new Actor
+        {
+            Id = r.id,
+            Name = r.name
+        }).ToList();
 
         return movie;
     }
@@ -115,13 +120,17 @@ public class MovieRepository : IMovieRepository
         ", new { id = movie.Id });
         movie.AverageRating = avgRating ?? 0;
 
-        var actors = await connection.QueryAsync<Actor>(@"
+        var actorResults = await connection.QueryAsync<dynamic>(@"
             SELECT a.id, a.name
             FROM actors a 
             INNER JOIN movie_actors ma ON a.id = ma.actorid 
             WHERE ma.movieid = @id
         ", new { id = movie.Id });
-        movie.Actors = actors.ToList();
+        movie.Actors = actorResults.Select(r => new Actor
+        {
+            Id = r.id,
+            Name = r.name
+        }).ToList();
 
         return movie;
     }
@@ -144,13 +153,17 @@ public class MovieRepository : IMovieRepository
             ", new { id = movie.Id });
             movie.AverageRating = avgRating ?? 0;
 
-            var actors = await connection.QueryAsync<Actor>(@"
+            var actorResults = await connection.QueryAsync<dynamic>(@"
                 SELECT a.id, a.name
                 FROM actors a 
                 INNER JOIN movie_actors ma ON a.id = ma.actorid 
                 WHERE ma.movieid = @id
             ", new { id = movie.Id });
-            movie.Actors = actors.ToList();
+            movie.Actors = actorResults.Select(r => new Actor
+            {
+                Id = r.id,
+                Name = r.name
+            }).ToList();
         }
 
         return movies;
@@ -234,13 +247,17 @@ public class MovieRepository : IMovieRepository
             ", new { id = movie.Id });
             movie.AverageRating = avgRating ?? 0;
 
-            var actors = await connection.QueryAsync<Actor>(@"
+            var actorResults = await connection.QueryAsync<dynamic>(@"
                 SELECT a.id, a.name
                 FROM actors a 
                 INNER JOIN movie_actors ma ON a.id = ma.actorid 
                 WHERE ma.movieid = @id
             ", new { id = movie.Id });
-            movie.Actors = actors.ToList();
+            movie.Actors = actorResults.Select(r => new Actor
+            {
+                Id = r.id,
+                Name = r.name
+            }).ToList();
         }
 
         return (movies, totalCount);
@@ -269,13 +286,17 @@ public class MovieRepository : IMovieRepository
             ", new { id = movie.Id });
             movie.AverageRating = avgRating ?? 0;
 
-            var actors = await connection.QueryAsync<Actor>(@"
+            var actorResults = await connection.QueryAsync<dynamic>(@"
                 SELECT a.id, a.name
                 FROM actors a 
                 INNER JOIN movie_actors ma ON a.id = ma.actorid 
                 WHERE ma.movieid = @id
             ", new { id = movie.Id });
-            movie.Actors = actors.ToList();
+            movie.Actors = actorResults.Select(r => new Actor
+            {
+                Id = r.id,
+                Name = r.name
+            }).ToList();
         }
 
         return (movies, totalCount);
@@ -354,13 +375,17 @@ public class MovieRepository : IMovieRepository
             ", new { id = movie.Id });
             movie.AverageRating = avgRating ?? 0;
 
-            var actors = await connection.QueryAsync<Actor>(@"
+            var actorResults = await connection.QueryAsync<dynamic>(@"
                 SELECT a.id, a.name
                 FROM actors a 
                 INNER JOIN movie_actors ma ON a.id = ma.actorid 
                 WHERE ma.movieid = @id
             ", new { id = movie.Id });
-            movie.Actors = actors.ToList();
+            movie.Actors = actorResults.Select(r => new Actor
+            {
+                Id = r.id,
+                Name = r.name
+            }).ToList();
         }
 
         return (movies, totalCount);

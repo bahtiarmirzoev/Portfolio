@@ -25,10 +25,14 @@ public class ActorsController : ControllerBase
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                return BadRequest("Actor name is required");
+            }
+
             // Проверка на существующего актера с таким же именем
-            var existingActors = await _actorRepository.GetAllAsync(token);
-            if (existingActors.Any(a => 
-                    a.Name.Equals(request.Name.Trim(), StringComparison.OrdinalIgnoreCase)))
+            var existingActor = await _actorRepository.GetByNameAsync(request.Name.Trim(), token);
+            if (existingActor != null)
             {
                 return Conflict($"Actor with name '{request.Name}' already exists");
             }
@@ -38,7 +42,7 @@ public class ActorsController : ControllerBase
                 Id = Guid.NewGuid(),
                 Name = request.Name.Trim(),
                 DateOfBirth = request.DateOfBirth,
-                Biography = request.Biography
+                Biography = string.IsNullOrWhiteSpace(request.Biography) ? null : request.Biography.Trim()
             };
 
             var result = await _actorRepository.CreateAsync(actor, token);
@@ -55,8 +59,8 @@ public class ActorsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating actor: {Name}", request.Name);
-            return StatusCode(500, "An error occurred while creating the actor");
+            _logger.LogError(ex, "Error creating actor: {Name}. Exception: {Exception}", request.Name, ex);
+            return StatusCode(500, new { message = "An error occurred while creating the actor", error = ex.Message });
         }
     }
     

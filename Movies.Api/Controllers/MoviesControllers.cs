@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mapping;
 using Movies.Application.Services;
+using Movies.Application.Interfaces;
 using Movies.Contracts.Requests;
 using Movies.Contracts.Responses;
 
@@ -10,19 +11,22 @@ using Movies.Contracts.Responses;
 public class MoviesController : ControllerBase
 {
     private readonly IMovieService _movieService;
+    private readonly IActorRepository _actorRepository;
 
-    public MoviesController(IMovieService movieService)
+    public MoviesController(IMovieService movieService, IActorRepository actorRepository)
     {
         _movieService = movieService;
+        _actorRepository = actorRepository;
     }
 
     [HttpPost]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> Create([FromBody] CreateMovieRequest request)
     {
-        var movie = request.MapToMovie();
+        var movie = await request.MapToMovieAsync(_actorRepository);
         await _movieService.CreateMovieAsync(movie);
-        return CreatedAtAction(nameof(Get), new { idOrSlug = movie.Id }, movie);
+        var response = movie.MapToResponse();
+        return CreatedAtAction(nameof(Get), new { idOrSlug = movie.Id }, response);
     }
 
     [HttpGet("{idOrSlug}")]
@@ -44,7 +48,7 @@ public class MoviesController : ControllerBase
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateMovieRequest request)
     {
-        var movie = request.MapToMovie(id);
+        var movie = await request.MapToMovieAsync(id, _actorRepository);
         var updatedMovie = await _movieService.UpdateMovieAsync(movie);
         if (updatedMovie is null)
             return NotFound();

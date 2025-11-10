@@ -128,7 +128,7 @@ const AdminPanel = () => {
   const handleCreateMovie = async () => {
     try {
       setLoading(true);
-      await adminService.createMovie({
+      const response = await adminService.createMovie({
         ...movieForm,
         genres: movieForm.genres.filter(g => g.trim()),
         actors: movieForm.actors.filter(a => a.trim())
@@ -136,10 +136,11 @@ const AdminPanel = () => {
       toast.success('Фильм создан успешно!');
       setShowCreateModal(false);
       resetMovieForm();
-      loadMovies();
+      await loadMovies();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Ошибка создания фильма');
-      console.error(error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Ошибка создания фильма';
+      toast.error(errorMessage);
+      console.error('Error creating movie:', error);
     } finally {
       setLoading(false);
     }
@@ -148,7 +149,7 @@ const AdminPanel = () => {
   const handleUpdateMovie = async () => {
     try {
       setLoading(true);
-      await adminService.updateMovie(editingItem.id, {
+      const response = await adminService.updateMovie(editingItem.id, {
         ...movieForm,
         genres: movieForm.genres.filter(g => g.trim()),
         actors: movieForm.actors.filter(a => a.trim())
@@ -157,10 +158,11 @@ const AdminPanel = () => {
       setShowEditModal(false);
       setEditingItem(null);
       resetMovieForm();
-      loadMovies();
+      await loadMovies();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Ошибка обновления фильма');
-      console.error(error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Ошибка обновления фильма';
+      toast.error(errorMessage);
+      console.error('Error updating movie:', error);
     } finally {
       setLoading(false);
     }
@@ -173,10 +175,11 @@ const AdminPanel = () => {
       setLoading(true);
       await adminService.deleteMovie(id);
       toast.success('Фильм удален успешно!');
-      loadMovies();
+      await loadMovies();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Ошибка удаления фильма');
-      console.error(error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Ошибка удаления фильма';
+      toast.error(errorMessage);
+      console.error('Error deleting movie:', error);
     } finally {
       setLoading(false);
     }
@@ -193,10 +196,11 @@ const AdminPanel = () => {
       toast.success('Сериал создан успешно!');
       setShowCreateModal(false);
       resetSeriesForm();
-      loadSeries();
+      await loadSeries();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Ошибка создания сериала');
-      console.error(error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Ошибка создания сериала';
+      toast.error(errorMessage);
+      console.error('Error creating series:', error);
     } finally {
       setLoading(false);
     }
@@ -214,10 +218,11 @@ const AdminPanel = () => {
       setShowEditModal(false);
       setEditingItem(null);
       resetSeriesForm();
-      loadSeries();
+      await loadSeries();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Ошибка обновления сериала');
-      console.error(error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Ошибка обновления сериала';
+      toast.error(errorMessage);
+      console.error('Error updating series:', error);
     } finally {
       setLoading(false);
     }
@@ -230,10 +235,11 @@ const AdminPanel = () => {
       setLoading(true);
       await adminService.deleteSeries(id);
       toast.success('Сериал удален успешно!');
-      loadSeries();
+      await loadSeries();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Ошибка удаления сериала');
-      console.error(error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Ошибка удаления сериала';
+      toast.error(errorMessage);
+      console.error('Error deleting series:', error);
     } finally {
       setLoading(false);
     }
@@ -242,17 +248,26 @@ const AdminPanel = () => {
   const handleCreateActor = async () => {
     try {
       setLoading(true);
-      await adminService.createActor({
-        ...actorForm,
-        dateOfBirth: actorForm.dateOfBirth || null
-      });
+      const payload = {
+        name: actorForm.name.trim(),
+        dateOfBirth: actorForm.dateOfBirth && actorForm.dateOfBirth.trim() !== '' 
+          ? actorForm.dateOfBirth 
+          : null,
+        biography: actorForm.biography && actorForm.biography.trim() !== '' 
+          ? actorForm.biography.trim() 
+          : null
+      };
+      
+      await adminService.createActor(payload);
       toast.success('Актер создан успешно!');
       setShowCreateModal(false);
       resetActorForm();
-      loadActors();
+      await loadActors();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Ошибка создания актера');
-      console.error(error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Ошибка создания актера';
+      toast.error(errorMessage);
+      console.error('Error creating actor:', error);
+      console.error('Error details:', error.response?.data);
     } finally {
       setLoading(false);
     }
@@ -261,18 +276,27 @@ const AdminPanel = () => {
   const handleUpdateActor = async () => {
     try {
       setLoading(true);
-      await adminService.updateActor(editingItem.id, {
-        ...actorForm,
-        dateOfBirth: actorForm.dateOfBirth || null
-      });
+      const payload = {
+        name: actorForm.name.trim(),
+        dateOfBirth: actorForm.dateOfBirth && actorForm.dateOfBirth.trim() !== '' 
+          ? actorForm.dateOfBirth 
+          : null,
+        biography: actorForm.biography && actorForm.biography.trim() !== '' 
+          ? actorForm.biography.trim() 
+          : null
+      };
+      
+      await adminService.updateActor(editingItem.id, payload);
       toast.success('Актер обновлен успешно!');
       setShowEditModal(false);
       setEditingItem(null);
       resetActorForm();
-      loadActors();
+      await loadActors();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Ошибка обновления актера');
-      console.error(error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Ошибка обновления актера';
+      toast.error(errorMessage);
+      console.error('Error updating actor:', error);
+      console.error('Error details:', error.response?.data);
     } finally {
       setLoading(false);
     }
