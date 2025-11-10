@@ -81,7 +81,7 @@ const SignIn = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
-                    {t('email')}
+                    {t('username')}
                   </label>
                   <div className="relative">
                     <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
@@ -90,8 +90,8 @@ const SignIn = () => {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
-                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
-                      placeholder={t('email')}
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0 transition-all"
+                      placeholder={t('username')}
                     />
                   </div>
                 </div>
@@ -107,7 +107,7 @@ const SignIn = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0 transition-all"
                       placeholder={t('password')}
                     />
                     <button
@@ -124,7 +124,7 @@ const SignIn = () => {
                   <span className="text-white/30">{t('secureLogin') || 'Secure login area'}</span>
                   <Link
                     to="/forgot-password"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-white/60 hover:text-white transition-colors underline-offset-2 hover:underline"
                   >
                     {t('forgotPassword')}
                   </Link>
@@ -132,10 +132,10 @@ const SignIn = () => {
 
                 <motion.button
                   type="submit"
-                  disabled={loading}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  className="w-full rounded-xl bg-white text-black py-3 font-semibold tracking-wide transition-colors duration-300 hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={loading || !username || !password}
+                  whileHover={{ scale: loading || !username || !password ? 1 : 1.02 }}
+                  whileTap={{ scale: loading || !username || !password ? 1 : 0.98 }}
+                  className="w-full rounded-xl bg-white text-black py-3.5 font-semibold tracking-wide transition-all duration-300 hover:bg-white/90 hover:shadow-lg hover:shadow-white/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2 text-sm">

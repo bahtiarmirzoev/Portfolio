@@ -109,7 +109,7 @@ const SignUp = () => {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0 transition-all"
                       placeholder={t('firstName')}
                     />
                   </div>
@@ -140,7 +140,7 @@ const SignUp = () => {
                       value={formData.username}
                       onChange={handleChange}
                       required
-                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0 transition-all"
                       placeholder={t('username')}
                     />
                   </div>
@@ -158,7 +158,7 @@ const SignUp = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0 transition-all"
                       placeholder={t('email')}
                     />
                   </div>
@@ -177,7 +177,7 @@ const SignUp = () => {
                       onChange={handleChange}
                       required
                       minLength={8}
-                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0 transition-all"
                       placeholder={t('password')}
                     />
                     <button
@@ -202,7 +202,7 @@ const SignUp = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       required
-                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0 transition-all"
                       placeholder={t('confirmPassword')}
                     />
                     <button
@@ -217,10 +217,10 @@ const SignUp = () => {
 
                 <motion.button
                   type="submit"
-                  disabled={loading}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  className="w-full rounded-xl bg-white text-black py-3 font-semibold tracking-wide transition-colors duration-300 hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={loading || !formData.username || !formData.email || !formData.password || !formData.confirmPassword}
+                  whileHover={{ scale: loading || !formData.username || !formData.email || !formData.password || !formData.confirmPassword ? 1 : 1.02 }}
+                  whileTap={{ scale: loading || !formData.username || !formData.email || !formData.password || !formData.confirmPassword ? 1 : 0.98 }}
+                  className="w-full rounded-xl bg-white text-black py-3.5 font-semibold tracking-wide transition-all duration-300 hover:bg-white/90 hover:shadow-lg hover:shadow-white/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2 text-sm">
