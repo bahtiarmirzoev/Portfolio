@@ -145,11 +145,30 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByEmailAsync(string email)
     {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return null;
+        }
+
+        // Нормализуем email: приводим к нижнему регистру и убираем пробелы
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        
         using var connection = await _dbConnectionFactory.CreateConnectionAsync();
     
-        return await connection.QuerySingleOrDefaultAsync<User>(
-            "SELECT * FROM users WHERE email = @Email",
-            new { Email = email });
+        var user = await connection.QuerySingleOrDefaultAsync<User>(
+            "SELECT * FROM users WHERE LOWER(TRIM(email)) = @Email",
+            new { Email = normalizedEmail });
+        
+        if (user is null) return null;
+
+        // Загружаем роли пользователя
+        var roles = await connection.QueryAsync<Role>(new CommandDefinition("""
+                                                                            select * from roles where id = (select roleid from userrole where userid = @Id)
+                                                                            """, new { id = user.Id }));
+
+        user.Roles = roles.ToList();
+
+        return user;
     }
     
     public async Task<bool> UpdatePasswordAsync(Guid userId, string newPasswordHash)

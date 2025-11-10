@@ -45,6 +45,12 @@ public class AuthService : IAuthService
             return false;
         }
 
+        // Нормализуем email: приводим к нижнему регистру и убираем пробелы
+        if (!string.IsNullOrWhiteSpace(user.Email))
+        {
+            user.Email = user.Email.Trim().ToLowerInvariant();
+        }
+
         // Хешируем пароль перед сохранением пользователя
         user.PasswordHash = PasswordHasher.Generate(user.PasswordHash);
 
@@ -150,35 +156,81 @@ public class AuthService : IAuthService
 
     public async Task<ForgotPasswordResult> ForgotPasswordAsync(string email)
     {
-        var user = await _userRepository.GetByEmailAsync(email);
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            _logger.LogWarning("Forgot password request with empty email");
+            return ForgotPasswordResult.Error("Email is required");
+        }
+
+        // Нормализуем email из запроса
+        var normalizedRequestEmail = email.Trim().ToLowerInvariant();
+        
+        _logger.LogInformation("🔍 Forgot password request for email: {Email} (normalized: {NormalizedEmail})", 
+            email, normalizedRequestEmail);
+
+        // Ищем пользователя по email в базе данных
+        var user = await _userRepository.GetByEmailAsync(normalizedRequestEmail);
         if (user == null)
         {
             // 🔐 Security: Не раскрываем существование email
             await Task.Delay(Random.Shared.Next(500, 1500));
-            _logger.LogInformation("Forgot password request for non-existent email: {Email}", email);
+            _logger.LogInformation("❌ Forgot password request for non-existent email: {Email}", normalizedRequestEmail);
             return ForgotPasswordResult.SuccessResult();
         }
 
+        // ✅ ВАЖНО: Проверяем, что email пользователя в базе данных совпадает с запрошенным email
+        var normalizedUserEmail = user.Email?.Trim().ToLowerInvariant();
+        if (normalizedUserEmail != normalizedRequestEmail)
+        {
+            _logger.LogWarning("⚠️ Email mismatch: Requested={RequestedEmail}, UserEmail={UserEmail}", 
+                normalizedRequestEmail, normalizedUserEmail);
+            // 🔐 Security: Не раскрываем существование email
+            await Task.Delay(Random.Shared.Next(500, 1500));
+            return ForgotPasswordResult.SuccessResult();
+        }
+
+        _logger.LogInformation("✅ User found: Id={UserId}, Email={UserEmail}", user.Id, user.Email);
+
+        // ✅ Отправляем OTP ТОЛЬКО на email, который зарегистрирован в аккаунте пользователя
         var otpResult = await _otpService.GenerateAndSendOtpAsync(user.Id, user.Email);
         
         if (otpResult.IsError)
         {
-            _logger.LogWarning("Failed to generate OTP for user {UserId}: {Error}", user.Id, otpResult.ErrorMessage);
+            _logger.LogWarning("❌ Failed to generate OTP for user {UserId}: {Error}", user.Id, otpResult.ErrorMessage);
             return ForgotPasswordResult.Error(otpResult.ErrorMessage);
         }
 
-        _logger.LogInformation("✅ OTP sent for password reset to {Email}", user.Email);
+        _logger.LogInformation("✅ OTP sent for password reset to registered email: {Email}", user.Email);
         return ForgotPasswordResult.SuccessResult();
     }
 
     public async Task<ResetPasswordResult> ResetPasswordAsync(string email, string otpCode, string newPassword)
 {
-    _logger.LogInformation("🔧 RESET PASSWORD STARTED: Email={Email}", email);
+    if (string.IsNullOrWhiteSpace(email))
+    {
+        _logger.LogWarning("Reset password request with empty email");
+        return ResetPasswordResult.InvalidOtp();
+    }
+
+    // Нормализуем email из запроса
+    var normalizedEmail = email.Trim().ToLowerInvariant();
     
-    var user = await _userRepository.GetByEmailAsync(email);
+    _logger.LogInformation("🔧 RESET PASSWORD STARTED: Email={Email} (normalized: {NormalizedEmail})", email, normalizedEmail);
+    
+    // Ищем пользователя по нормализованному email
+    var user = await _userRepository.GetByEmailAsync(normalizedEmail);
     if (user == null)
     {
-        _logger.LogWarning("❌ User not found for email: {Email}", email);
+        _logger.LogWarning("❌ User not found for email: {Email}", normalizedEmail);
+        return ResetPasswordResult.InvalidOtp();
+    }
+    
+    // ✅ Проверяем, что email пользователя в базе данных совпадает с запрошенным email
+    var normalizedUserEmail = user.Email?.Trim().ToLowerInvariant();
+    if (normalizedUserEmail != normalizedEmail)
+    {
+        _logger.LogWarning("⚠️ Email mismatch during reset: Requested={RequestedEmail}, UserEmail={UserEmail}", 
+            normalizedEmail, normalizedUserEmail);
         return ResetPasswordResult.InvalidOtp();
     }
     
@@ -212,7 +264,7 @@ public class AuthService : IAuthService
     _logger.LogInformation("✅ Password updated successfully for user {UserId}", user.Id);
 
     // Проверим что пароль действительно обновился
-    var updatedUser = await _userRepository.GetByEmailAsync(email);
+    var updatedUser = await _userRepository.GetByEmailAsync(normalizedEmail);
     if (updatedUser != null)
     {
         _logger.LogInformation("🔍 Verification: New password hash in DB: {NewHash}", updatedUser.PasswordHash);
