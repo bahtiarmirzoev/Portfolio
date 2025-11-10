@@ -37,13 +37,26 @@ public class RatingsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "user,trusted_user")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetMovieRating(
         [FromRoute] Guid movieId,
         CancellationToken token = default)
     {
         var rating = await _ratingService.GetMovieRatingAsync(movieId, token);
-        return Ok(rating);
+        return Ok(new { AverageRating = rating });
+    }
+
+    [HttpGet("my")]
+    [Authorize(Roles = "user,trusted_user,admin")]
+    public async Task<IActionResult> GetMyRating(
+        [FromRoute] Guid movieId,
+        CancellationToken token = default)
+    {
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var rating = await _ratingService.GetUserRatingAsync(userId.Value, movieId, token);
+        return Ok(new { MyRating = rating, Value = rating });
     }
 
     private Guid? GetUserId()

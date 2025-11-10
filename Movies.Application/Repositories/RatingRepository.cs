@@ -3,6 +3,7 @@ using Movies.Application.Database;
 using Movies.Application.Interfaces;
 using Movies.Application.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Movies.Application.Repositories
@@ -52,6 +53,19 @@ namespace Movies.Application.Repositories
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             return await connection.QueryFirstOrDefaultAsync<int?>(sql, new { UserId = userId, MovieId = movieId });
+        }
+
+        public async Task<IEnumerable<Rating>> GetUserRatingsAsync(Guid userId)
+        {
+            const string sql = """
+                select id, userid, movieid, value, createdat
+                from ratings 
+                where userid = @UserId
+                order by createdat desc;
+            """;
+
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            return await connection.QueryAsync<Rating>(sql, new { UserId = userId });
         }
     }
 }

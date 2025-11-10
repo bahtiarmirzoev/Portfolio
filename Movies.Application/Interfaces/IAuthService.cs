@@ -12,5 +12,7 @@ namespace Movies.Application.Interfaces
         Task SignOut(string accessToken, string refreshToken);
         Task<ForgotPasswordResult> ForgotPasswordAsync(string email);
         Task<ResetPasswordResult> ResetPasswordAsync(string email, string otpCode, string newPassword);
+        Task<User?> GetUserByIdAsync(Guid userId);
+        Task<ChangePasswordResult> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
     }
 }

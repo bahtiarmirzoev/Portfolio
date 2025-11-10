@@ -104,4 +104,29 @@ namespace Movies.Application.Models
         InvalidPassword,
         Other
     }
+
+    public class ChangePasswordResult : Result
+    {
+        public ChangePasswordErrorType? ErrorType { get; }
+        public List<string>? PasswordErrors { get; }
+
+        private ChangePasswordResult(bool success, ChangePasswordErrorType? errorType = null, List<string>? passwordErrors = null, string? errorMessage = null) 
+            : base(success, errorMessage)
+        {
+            ErrorType = errorType;
+            PasswordErrors = passwordErrors;
+        }
+
+        public static ChangePasswordResult SuccessResult() => new ChangePasswordResult(true);
+        public static ChangePasswordResult InvalidCurrentPassword() => new ChangePasswordResult(false, ChangePasswordErrorType.InvalidCurrentPassword, errorMessage: "Current password is incorrect");
+        public static ChangePasswordResult InvalidPassword(List<string> errors) => new ChangePasswordResult(false, ChangePasswordErrorType.InvalidPassword, passwordErrors: errors);
+        public static ChangePasswordResult Error(string message) => new ChangePasswordResult(false, ChangePasswordErrorType.Other, errorMessage: message);
+    }
+
+    public enum ChangePasswordErrorType
+    {
+        InvalidCurrentPassword,
+        InvalidPassword,
+        Other
+    }
 }

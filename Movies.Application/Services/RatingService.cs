@@ -1,6 +1,7 @@
 using Movies.Application.Interfaces;
 using Movies.Application.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,6 +35,16 @@ namespace Movies.Application.Services
         public async Task<double?> GetMovieRatingAsync(Guid movieId, CancellationToken cancellationToken = default)
         {
             return await _ratingRepository.GetMovieAverageRatingAsync(movieId);
+        }
+
+        public async Task<int?> GetUserRatingAsync(Guid userId, Guid movieId, CancellationToken cancellationToken = default)
+        {
+            return await _ratingRepository.GetUserRatingAsync(userId, movieId);
+        }
+
+        public async Task<IEnumerable<Rating>> GetUserRatingsAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            return await _ratingRepository.GetUserRatingsAsync(userId);
         }
     }
 }

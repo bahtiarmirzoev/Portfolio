@@ -7,11 +7,12 @@ using Microsoft.Extensions.Logging;
 using Movies.Api.Mapping;
 using Movies.Application.Interfaces;
 using Movies.Application.Models;
+using System.Security.Claims;
 
 namespace Movies.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -140,6 +141,68 @@ namespace Movies.Api.Controllers
         public IActionResult Check()
         {
             return Ok("Token is valid ✅");
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst("userId") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                {
+                    _logger.LogWarning("User ID claim not found in token");
+                    return Unauthorized(new { error = "User ID not found in token" });
+                }
+
+                var user = await _authService.GetUserByIdAsync(userId);
+                if (user == null)
+                {
+                    _logger.LogWarning("User not found for ID: {UserId}", userId);
+                    return NotFound(new { error = "User not found" });
+                }
+
+                return Ok(new
+                {
+                    id = user.Id,
+                    username = user.Username,
+                    email = user.Email,
+                    firstName = user.FirstName,
+                    lastName = user.LastName,
+                    isEmailConfirmed = user.IsEmailConfirmed
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting current user");
+                return StatusCode(500, new { error = "Internal server error" });
+            }
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ErrorResponse("Invalid request data"));
+            }
+
+            var userIdClaim = User.FindFirst("userId");
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _authService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
+            
+            if (result.IsError)
+            {
+                return BadRequest(new ErrorResponse(result.ErrorMessage ?? "Failed to change password"));
+            }
+
+            return Ok(new MessageResponse("Password changed successfully."));
         }
     }
 

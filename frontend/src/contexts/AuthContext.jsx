@@ -50,6 +50,14 @@ export const AuthProvider = ({ children }) => {
       await authService.checkAuth();
       setIsAuthenticated(true);
       updateUserRoles(accessToken);
+      
+      // Загружаем данные пользователя
+      try {
+        const userData = await authService.getCurrentUser();
+        setUser(userData);
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+      }
     } catch (error) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
@@ -57,6 +65,7 @@ export const AuthProvider = ({ children }) => {
       setIsTrusted(false);
       setIsAdmin(false);
       setUserRoles([]);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -69,6 +78,15 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('refreshToken', tokenData.refreshToken);
       setIsAuthenticated(true);
       updateUserRoles(tokenData.accessToken);
+      
+      // Загружаем данные пользователя
+      try {
+        const userData = await authService.getCurrentUser();
+        setUser(userData);
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+      }
+      
       toast.success('Вход выполнен успешно!');
       return { success: true };
     } catch (error) {
@@ -152,6 +170,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const changePassword = async (currentPassword, newPassword) => {
+    try {
+      await authService.changePassword(currentPassword, newPassword);
+      toast.success('Пароль успешно изменен!');
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.error || error.response?.data?.message || 'Ошибка при изменении пароля';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
+  const loadUser = async () => {
+    try {
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      console.error('Failed to load user:', error);
+      return null;
+    }
+  };
+
   const value = {
     user,
     isAuthenticated,
@@ -165,6 +206,8 @@ export const AuthProvider = ({ children }) => {
     forgotPassword,
     resetPassword,
     refreshUserRoles,
+    changePassword,
+    loadUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

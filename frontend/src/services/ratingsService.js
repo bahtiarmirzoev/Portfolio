@@ -15,5 +15,10 @@ export const ratingsService = {
     const response = await api.post(`/movies/${movieId}/ratings`, { value });
     return response.data;
   },
+
+  async getMyRatings() {
+    const response = await api.get('/ratings/my');
+    return response.data;
+  },
 };
 

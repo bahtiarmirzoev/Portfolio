@@ -62,5 +62,18 @@ export const authService = {
     const response = await api.get('/auth/check');
     return response.data;
   },
+
+  async getCurrentUser() {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
+
+  async changePassword(currentPassword, newPassword) {
+    const response = await api.post('/auth/change-password', {
+      currentPassword,
+      newPassword,
+    });
+    return response.data;
+  },
 };
 

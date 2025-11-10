@@ -298,5 +298,50 @@ public class AuthService : IAuthService
             _logger.LogWarning(ex, "Failed to send password changed email to {Email}", email);
         }
     }
-    
+
+    public async Task<User?> GetUserByIdAsync(Guid userId)
+    {
+        return await _userRepository.GetByIdAsync(userId);
+    }
+
+    public async Task<ChangePasswordResult> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
+    {
+        if (string.IsNullOrWhiteSpace(currentPassword) || string.IsNullOrWhiteSpace(newPassword))
+        {
+            return ChangePasswordResult.Error("Password cannot be empty");
+        }
+
+        if (newPassword.Length < 8)
+        {
+            return ChangePasswordResult.InvalidPassword(new List<string> { "Password must be at least 8 characters long" });
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return ChangePasswordResult.Error("User not found");
+        }
+
+        // Проверяем текущий пароль
+        var isCurrentPasswordValid = PasswordHasher.Verify(currentPassword, user.PasswordHash);
+        if (!isCurrentPasswordValid)
+        {
+            _logger.LogWarning("Invalid current password for user {UserId}", userId);
+            return ChangePasswordResult.InvalidCurrentPassword();
+        }
+
+        // Генерируем новый хеш пароля
+        var newPasswordHash = PasswordHasher.Generate(newPassword);
+        
+        // Обновляем пароль
+        var updated = await _userRepository.UpdatePasswordAsync(userId, newPasswordHash);
+        if (!updated)
+        {
+            _logger.LogError("Failed to update password for user {UserId}", userId);
+            return ChangePasswordResult.Error("Failed to update password");
+        }
+
+        _logger.LogInformation("Password changed successfully for user {UserId}", userId);
+        return ChangePasswordResult.SuccessResult();
+    }
 }

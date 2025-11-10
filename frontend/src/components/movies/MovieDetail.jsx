@@ -66,13 +66,14 @@ const MovieDetail = () => {
 
   const loadUserRating = async () => {
     try {
-      const ratingData = await ratingsService.getMovieRating(id);
-      if (ratingData && ratingData.value) {
-        setUserRating(ratingData.value);
-        setRating(ratingData.value);
+      const ratingData = await ratingsService.getMyRating(id);
+      const ratingValue = ratingData?.value ?? ratingData?.MyRating ?? ratingData?.myRating;
+      if (ratingValue) {
+        setUserRating(ratingValue);
+        setRating(ratingValue);
       }
     } catch (error) {
-      // Игнорируем ошибку
+      // Игнорируем ошибку, если пользователь не авторизован или нет рейтинга
     }
   };
 
@@ -147,9 +148,11 @@ const MovieDetail = () => {
     try {
       await ratingsService.rateMovie(id, rating);
       setUserRating(rating);
+      // Перезагружаем рейтинг после сохранения
+      await loadUserRating();
       toast.success(t('ratingSaved'));
     } catch (error) {
-      toast.error(t('ratingError'));
+      toast.error(error.response?.data?.message || t('ratingError'));
     }
   };
 
