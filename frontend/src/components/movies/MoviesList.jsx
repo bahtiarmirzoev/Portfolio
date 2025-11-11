@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { moviesService } from '../../services/moviesService';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { FiFilm, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiClock, FiCheck } from 'react-icons/fi';
+import { FiFilm, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiClock, FiCheck, FiPlay } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const MoviesList = () => {
@@ -34,8 +34,10 @@ const MoviesList = () => {
   ];
 
   const activeSort = sortOptions.find((option) => option.value === sortBy) || sortOptions[0];
+  const SortDirectionIcon =
+    activeSort.value === 'year' || activeSort.value === 'rating' ? FiArrowDown : FiArrowUp;
 
-  const filterChips = [
+  const activeFilterChips = [
     searchQuery && { key: 'search', label: t('search'), value: searchQuery },
     filters.genre && { key: 'genre', label: t('genre'), value: filters.genre },
     filters.yearFrom && { key: 'yearFrom', label: t('yearFrom'), value: filters.yearFrom },
@@ -63,14 +65,14 @@ const MoviesList = () => {
       caption: t('movies') || 'Movies',
     },
     {
-      label: t('filters') || 'Фильтры',
-      value: filterChips.length,
-      caption: t('search') || 'Search',
-    },
-    {
       label: t('sortBy') || 'Сортировка',
       value: activeSort.label,
       caption: '',
+    },
+    {
+      label: t('filters') || 'Фильтры',
+      value: activeFilterChips.length,
+      caption: t('active') || 'Active',
     },
   ];
 
@@ -130,8 +132,12 @@ const MoviesList = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     setPage(1);
-    setSearchParams({ search: searchQuery });
-    loadMovies();
+
+    const params = {};
+    if (searchQuery.trim()) {
+      params.search = searchQuery.trim();
+    }
+    setSearchParams(params);
   };
 
   const handleFilterChange = (key, value) => {
@@ -148,6 +154,7 @@ const MoviesList = () => {
     });
     setSearchQuery('');
     setPage(1);
+    setSearchParams({});
   };
 
   return (
@@ -228,7 +235,10 @@ const MoviesList = () => {
             </div>
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <form onSubmit={handleSearch} className="relative flex-1">
+              <form
+                onSubmit={handleSearch}
+                className="relative flex-1"
+              >
                 <FiSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/50" />
                 <input
                   type="text"
@@ -254,7 +264,9 @@ const MoviesList = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setViewMode('grid')}
                     className={`rounded-xl px-3 py-2 transition-colors ${
-                      viewMode === 'grid' ? 'bg-white text-black shadow-lg' : 'text-white/60 hover:text-white'
+                      viewMode === 'grid'
+                        ? 'bg-white text-black shadow-lg'
+                        : 'text-white/60 hover:text-white'
                     }`}
                   >
                     <FiGrid size={18} />
@@ -264,7 +276,9 @@ const MoviesList = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setViewMode('list')}
                     className={`rounded-xl px-3 py-2 transition-colors ${
-                      viewMode === 'list' ? 'bg-white text-black shadow-lg' : 'text-white/60 hover:text-white'
+                      viewMode === 'list'
+                        ? 'bg-white text-black shadow-lg'
+                        : 'text-white/60 hover:text-white'
                     }`}
                   >
                     <FiList size={18} />
@@ -278,7 +292,7 @@ const MoviesList = () => {
                     onClick={() => setShowSortMenu(!showSortMenu)}
                     className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/70 transition-colors hover:border-white/30 hover:text-white"
                   >
-                    {(activeSort.value === 'year' || activeSort.value === 'rating') ? <FiArrowDown /> : <FiArrowUp />}
+                    <SortDirectionIcon />
                     <span>{activeSort.label}</span>
                     <FiChevronDown className={`transition-transform ${showSortMenu ? 'rotate-180' : ''}`} />
                   </motion.button>
@@ -332,14 +346,14 @@ const MoviesList = () => {
               </div>
             </div>
 
-            {filterChips.length > 0 && (
+            {activeFilterChips.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
                 className="flex flex-wrap items-center gap-2"
               >
-                {filterChips.map((chip) => (
+                {activeFilterChips.map((chip) => (
                   <motion.button
                     key={`${chip.key}-${chip.value}`}
                     whileHover={{ scale: 1.05 }}
@@ -468,7 +482,12 @@ const MoviesList = () => {
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
             />
-            <FiFilm className="mx-auto text-6xl text-white/20 mb-4" />
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
+              <FiFilm className="mx-auto text-6xl text-white/20 mb-4" />
+            </motion.div>
             <h2 className="text-2xl font-bold text-white mb-2">{t('notFound')}</h2>
             <p className="text-white/60">{t('tryDifferentSearch')}</p>
           </motion.div>
@@ -507,11 +526,20 @@ const MoviesList = () => {
                         </div>
                         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                         {movie.averageRating && (
-                          <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/70 px-3 py-1 text-sm text-white">
-                            <FiStar className="text-yellow-400" />
+                          <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/70 px-3 py-1 text-sm text-white backdrop-blur-sm">
+                            <FiStar className="text-yellow-400 fill-yellow-400" />
                             {movie.averageRating.toFixed(1)}
                           </div>
                         )}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          whileHover={{ opacity: 1, y: 0 }}
+                          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        >
+                          <div className="rounded-full bg-white/20 backdrop-blur-sm p-4">
+                            <FiPlay className="text-white text-2xl" />
+                          </div>
+                        </motion.div>
                       </div>
 
                       <div className="space-y-3">
@@ -527,7 +555,7 @@ const MoviesList = () => {
                           >
                             {movie.title}
                           </h3>
-                          <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/60">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/60 flex-shrink-0">
                             <FiCalendar className="opacity-70" />
                             {movie.year}
                           </span>
@@ -535,13 +563,7 @@ const MoviesList = () => {
 
                         {movie.description && (
                           <p
-                            className="text-sm text-white/60"
-                            style={{
-                              display: '-webkit-box',
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                            }}
+                            className="text-sm text-white/60 line-clamp-3"
                           >
                             {movie.description}
                           </p>
@@ -599,8 +621,8 @@ const MoviesList = () => {
                               {movie.title}
                             </h3>
                             {movie.averageRating && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-sm text-white">
-                                <FiStar className="text-yellow-400" />
+                              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-sm text-white backdrop-blur-sm">
+                                <FiStar className="text-yellow-400 fill-yellow-400" />
                                 {movie.averageRating.toFixed(1)}
                               </span>
                             )}
@@ -618,15 +640,7 @@ const MoviesList = () => {
                             )}
                           </div>
                           {movie.description && (
-                            <p
-                              className="text-sm text-white/60"
-                              style={{
-                                display: '-webkit-box',
-                                WebkitLineClamp: 3,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
-                              }}
-                            >
+                            <p className="text-sm text-white/60 line-clamp-3">
                               {movie.description}
                             </p>
                           )}
