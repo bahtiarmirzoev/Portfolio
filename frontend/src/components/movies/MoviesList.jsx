@@ -167,118 +167,124 @@ const MoviesList = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.section
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] px-6 py-8 shadow-[0_0_80px_rgba(255,255,255,0.05)] backdrop-blur-3xl md:px-10 md:py-12"
+          className="relative mb-12"
         >
-          <motion.span
-            className="pointer-events-none absolute -right-24 top-[-10%] h-72 w-72 rounded-full bg-gradient-to-br from-white/20 via-transparent to-transparent blur-[120px]"
-            animate={{ x: [0, 18, 0], y: [0, -12, 0] }}
-            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.span
-            className="pointer-events-none absolute -left-16 bottom-[-20%] h-72 w-72 rounded-full bg-gradient-to-tl from-white/15 via-transparent to-transparent blur-[120px]"
-            animate={{ x: [0, -12, 0], y: [0, 10, 0] }}
-            transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-          />
-
-          <div className="relative z-10 space-y-10">
-            <div className="flex flex-col gap-8 xl:flex-row xl:items-start xl:justify-between">
-              <div className="space-y-4">
-                <motion.span
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
+          {/* Title Section */}
+          <div className="relative mb-8 pb-8 border-b border-white/10">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+              <div className="space-y-3">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1, duration: 0.6 }}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1 text-xs uppercase tracking-[0.3em] text-white/50"
+                  className="flex items-center gap-3"
                 >
-                  {t('catalog')}
-                </motion.span>
+                  <div className="h-1 w-12 bg-white"></div>
+                  <span className="text-xs uppercase tracking-[0.5em] text-white/40 font-medium">
+                    {t('catalog') || 'CATALOG'}
+                  </span>
+                </motion.div>
                 <motion.h1
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2, duration: 0.7 }}
-                  className="text-4xl font-semibold text-white tracking-tight sm:text-5xl"
+                  className="text-6xl md:text-7xl font-bold text-white tracking-tight"
+                  style={{
+                    background: 'linear-gradient(to right, #ffffff, #ffffff, rgba(255,255,255,0.7))',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
                 >
-                  {t('movies')}
+                  {t('movies') || 'MOVIES'}
                 </motion.h1>
                 <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3, duration: 0.7 }}
-                  className="text-white/60 text-base sm:text-lg"
+                  className="text-white/50 text-lg font-light"
                 >
-                  {(t('moviesDesc') || t('catalog')) ?? 'Каталог фильмов'}
+                  {(t('moviesDesc') || t('catalog')) ?? 'Explore our collection'}
                 </motion.p>
               </div>
 
-              <div className="grid w-full max-w-md grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Stats Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="flex flex-wrap items-center gap-6 md:gap-8"
+              >
                 {heroStats.map((stat, idx) => (
-                  <motion.div
-                    key={`${stat.label}-${idx}`}
-                    whileHover={{ translateY: -6, scale: 1.02 }}
-                    className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 px-4 py-5"
-                  >
-                    <div className="text-xs uppercase tracking-[0.3em] text-white/40">{stat.label}</div>
-                    <div className="mt-2 text-2xl font-semibold text-white">{stat.value}</div>
+                  <div key={`${stat.label}-${idx}`} className="text-center md:text-right">
+                    <div className="text-3xl md:text-4xl font-bold text-white mb-1">
+                      {stat.value}
+                    </div>
+                    <div className="text-xs uppercase tracking-wider text-white/40">
+                      {stat.label}
+                    </div>
                     {stat.caption && (
-                      <p className="mt-1 text-xs text-white/40 truncate">{stat.caption}</p>
+                      <div className="text-xs text-white/30 mt-1">{stat.caption}</div>
                     )}
-                    <motion.span
-                      className="pointer-events-none absolute -right-6 -top-10 h-16 w-16 rounded-full bg-white/10"
-                      animate={{ rotate: [0, 360] }}
-                      transition={{ duration: 14 + idx * 2, repeat: Infinity, ease: 'linear' }}
-                    />
-                  </motion.div>
+                  </div>
                 ))}
-              </div>
+              </motion.div>
             </div>
+          </div>
 
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Controls Section */}
+          <div className="space-y-4">
+            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
               <form
                 onSubmit={handleSearch}
-                className="relative flex-1"
+                className="relative flex-1 w-full lg:max-w-2xl"
               >
-                <FiSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/50" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-black/40 px-12 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
-                  placeholder={t('searchPlaceholder')}
-                />
-                <motion.button
-                  type="submit"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.96 }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-black shadow-lg hover:bg-white/90"
-                >
-                  {t('search')}
-                </motion.button>
+                <div className="relative">
+                  <FiSearch className="absolute left-0 top-1/2 -translate-y-1/2 ml-4 text-white/40" size={20} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-transparent border-0 border-b-2 border-white/20 pb-3 pl-12 pr-32 text-white placeholder-white/30 focus:border-white focus:outline-none focus:ring-0 text-lg"
+                    placeholder={t('searchPlaceholder') || 'Search movies...'}
+                  />
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 px-6 py-2 bg-white text-black font-semibold text-sm hover:bg-white/90 transition-colors"
+                  >
+                    {t('search') || 'SEARCH'}
+                  </motion.button>
+                </div>
               </form>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1 rounded-2xl border border-white/10 bg-black/30 p-1">
+              <div className="flex items-center gap-2 lg:ml-auto">
+                <div className="flex items-center border border-white/20 bg-white/5">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setViewMode('grid')}
-                    className={`rounded-xl px-3 py-2 transition-colors ${
+                    className={`px-4 py-2 transition-colors ${
                       viewMode === 'grid'
-                        ? 'bg-white text-black shadow-lg'
-                        : 'text-white/60 hover:text-white'
+                        ? 'bg-white text-black'
+                        : 'text-white/60 hover:text-white hover:bg-white/10'
                     }`}
                   >
                     <FiGrid size={18} />
                   </motion.button>
+                  <div className="h-6 w-px bg-white/20"></div>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setViewMode('list')}
-                    className={`rounded-xl px-3 py-2 transition-colors ${
+                    className={`px-4 py-2 transition-colors ${
                       viewMode === 'list'
-                        ? 'bg-white text-black shadow-lg'
-                        : 'text-white/60 hover:text-white'
+                        ? 'bg-white text-black'
+                        : 'text-white/60 hover:text-white hover:bg-white/10'
                     }`}
                   >
                     <FiList size={18} />
@@ -290,11 +296,11 @@ const MoviesList = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setShowSortMenu(!showSortMenu)}
-                    className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/70 transition-colors hover:border-white/30 hover:text-white"
+                    className="flex items-center gap-2 border border-white/20 bg-white/5 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors"
                   >
-                    <SortDirectionIcon />
-                    <span>{activeSort.label}</span>
-                    <FiChevronDown className={`transition-transform ${showSortMenu ? 'rotate-180' : ''}`} />
+                    <SortDirectionIcon size={16} />
+                    <span className="hidden sm:inline">{activeSort.label}</span>
+                    <FiChevronDown className={`transition-transform text-xs ${showSortMenu ? 'rotate-180' : ''}`} />
                   </motion.button>
 
                   <AnimatePresence>
@@ -303,7 +309,7 @@ const MoviesList = () => {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-white/10 bg-black/80 p-2 backdrop-blur-2xl"
+                        className="absolute right-0 top-full z-50 mt-2 w-56 border border-white/20 bg-black/95 backdrop-blur-xl p-1"
                       >
                         {sortOptions.map((option) => {
                           const isActive = option.value === sortBy;
@@ -315,9 +321,9 @@ const MoviesList = () => {
                                 setPage(1);
                                 setShowSortMenu(false);
                               }}
-                              className={`w-full rounded-xl px-4 py-2 text-left text-sm transition-colors ${
+                              className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                                 isActive
-                                  ? 'bg-white text-black shadow-lg'
+                                  ? 'bg-white text-black'
                                   : 'text-white/70 hover:bg-white/10 hover:text-white'
                               }`}
                             >
@@ -337,11 +343,12 @@ const MoviesList = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm transition-colors ${
-                    showFilters ? 'bg-white text-black shadow-lg' : 'bg-black/40 text-white/70 hover:text-white'
+                  className={`flex items-center gap-2 border border-white/20 px-4 py-2 text-sm transition-colors ${
+                    showFilters ? 'bg-white text-black' : 'bg-white/5 text-white/70 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <FiFilter /> {t('filters')}
+                  <FiFilter size={16} /> 
+                  <span className="hidden sm:inline">{t('filters')}</span>
                 </motion.button>
               </div>
             </div>
@@ -351,19 +358,20 @@ const MoviesList = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="flex flex-wrap items-center gap-2"
+                className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10"
               >
+                <span className="text-xs uppercase tracking-wider text-white/40">Active:</span>
                 {activeFilterChips.map((chip) => (
                   <motion.button
                     key={`${chip.key}-${chip.value}`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => removeFilterChip(chip.key)}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/70 hover:border-white/40 hover:text-white"
+                    className="inline-flex items-center gap-2 border border-white/20 bg-white/5 px-3 py-1 text-xs text-white/70 hover:border-white/40 hover:text-white hover:bg-white/10 transition-colors"
                   >
-                    <span className="font-semibold text-white/80">{chip.label}:</span>
+                    <span className="font-medium">{chip.label}:</span>
                     <span>{chip.value}</span>
-                    <FiX className="text-white/50" />
+                    <FiX className="text-white/50" size={12} />
                   </motion.button>
                 ))}
               </motion.div>
@@ -379,46 +387,46 @@ const MoviesList = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.5 }}
-              className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 md:p-8 backdrop-blur-2xl"
+              className="border-t border-white/10 pt-8"
             >
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
                 <div className="space-y-2">
-                  <span className="text-xs uppercase tracking-[0.3em] text-white/40">{t('genre')}</span>
+                  <label className="text-xs uppercase tracking-wider text-white/40 block">{t('genre')}</label>
                   <input
                     type="text"
                     value={filters.genre}
                     onChange={(e) => handleFilterChange('genre', e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                    className="w-full bg-transparent border-0 border-b-2 border-white/20 pb-2 px-2 text-white placeholder-white/30 focus:border-white focus:outline-none focus:ring-0"
                     placeholder="Drama, Comedy..."
                   />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs uppercase tracking-[0.3em] text-white/40">{t('yearFrom')}</span>
+                  <label className="text-xs uppercase tracking-wider text-white/40 block">{t('yearFrom')}</label>
                   <input
                     type="number"
                     value={filters.yearFrom}
                     onChange={(e) => handleFilterChange('yearFrom', e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                    className="w-full bg-transparent border-0 border-b-2 border-white/20 pb-2 px-2 text-white placeholder-white/30 focus:border-white focus:outline-none focus:ring-0"
                     placeholder="2000"
                   />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs uppercase tracking-[0.3em] text-white/40">{t('yearTo')}</span>
+                  <label className="text-xs uppercase tracking-wider text-white/40 block">{t('yearTo')}</label>
                   <input
                     type="number"
                     value={filters.yearTo}
                     onChange={(e) => handleFilterChange('yearTo', e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                    className="w-full bg-transparent border-0 border-b-2 border-white/20 pb-2 px-2 text-white placeholder-white/30 focus:border-white focus:outline-none focus:ring-0"
                     placeholder="2024"
                   />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs uppercase tracking-[0.3em] text-white/40">{t('actor')}</span>
+                  <label className="text-xs uppercase tracking-wider text-white/40 block">{t('actor')}</label>
                   <input
                     type="text"
                     value={filters.actor}
                     onChange={(e) => handleFilterChange('actor', e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-0"
+                    className="w-full bg-transparent border-0 border-b-2 border-white/20 pb-2 px-2 text-white placeholder-white/30 focus:border-white focus:outline-none focus:ring-0"
                     placeholder="Имя актёра"
                   />
                 </div>
@@ -428,9 +436,9 @@ const MoviesList = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={clearFilters}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/70 transition-colors hover:border-white/30 hover:text-white"
+                  className="inline-flex items-center gap-2 border border-white/20 bg-white/5 px-4 py-2 text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white hover:bg-white/10"
                 >
-                  <FiX /> {t('resetFilters') || 'Очистить'}
+                  <FiX size={16} /> {t('resetFilters') || 'Очистить'}
                 </motion.button>
               </div>
             </motion.section>
