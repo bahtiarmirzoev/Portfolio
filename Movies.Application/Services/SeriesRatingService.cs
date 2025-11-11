@@ -37,4 +37,9 @@ public class SeriesRatingService : ISeriesRatingService
     {
         return await _ratingRepository.GetUserRatingAsync(userId, seriesId);
     }
+
+    public async Task<IEnumerable<SeriesRating>> GetUserRatingsAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _ratingRepository.GetUserRatingsAsync(userId);
+    }
 }

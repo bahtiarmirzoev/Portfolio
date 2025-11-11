@@ -52,4 +52,17 @@ public class SeriesRatingRepository : ISeriesRatingRepository
         using var connection = await _dbConnectionFactory.CreateConnectionAsync();
         return await connection.QueryFirstOrDefaultAsync<int?>(sql, new { UserId = userId, SeriesId = seriesId });
     }
+
+    public async Task<IEnumerable<SeriesRating>> GetUserRatingsAsync(Guid userId)
+    {
+        const string sql = """
+                               SELECT * 
+                               FROM series_ratings 
+                               WHERE userid = @UserId
+                               ORDER BY createdat DESC;
+                           """;
+
+        using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+        return await connection.QueryAsync<SeriesRating>(sql, new { UserId = userId });
+    }
 }

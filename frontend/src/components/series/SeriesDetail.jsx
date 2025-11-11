@@ -4,9 +4,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { seriesService } from '../../services/seriesService';
 import { seriesCommentsService } from '../../services/seriesCommentsService';
 import { seriesRatingsService } from '../../services/seriesRatingsService';
+import { favoritesService } from '../../services/favoritesService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { FiTv, FiArrowLeft, FiPlay, FiCalendar, FiStar, FiMessageSquare } from 'react-icons/fi';
+import { FiTv, FiArrowLeft, FiPlay, FiCalendar, FiStar, FiMessageSquare, FiHeart } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -22,11 +23,13 @@ const SeriesDetail = () => {
   const [rating, setRating] = useState(0);
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [commentText, setCommentText] = useState('');
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     loadSeries();
     if (isAuthenticated) {
       loadUserRating();
+      checkFavorite();
     }
     loadComments();
   }, [id, isAuthenticated]);
@@ -53,6 +56,16 @@ const SeriesDetail = () => {
       }
     } catch (error) {
       // Игнорируем ошибку
+    }
+  };
+
+  const checkFavorite = async () => {
+    try {
+      const favorites = await favoritesService.getFavoriteSeries(1, 100);
+      const favoriteIds = Array.isArray(favorites) ? favorites : [];
+      setIsFavorite(favoriteIds.some(favId => favId === id || favId.toString() === id));
+    } catch (error) {
+      // Игнорируем ошибку, если не авторизован
     }
   };
 
@@ -99,13 +112,35 @@ const SeriesDetail = () => {
     }
 
     try {
-      await seriesCommentsService.createComment(id, commentText);
+      await seriesCommentsService.createComment(id, commentText.trim());
       setCommentText('');
       setShowCommentForm(false);
-      loadComments();
+      await loadComments();
       toast.success(t('commentAdded'));
     } catch (error) {
       toast.error(t('commentError'));
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!isAuthenticated) {
+      toast.error(t('loginToRate'));
+      navigate('/sign-in');
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        await favoritesService.removeSeriesFromFavorites(id);
+        setIsFavorite(false);
+        toast.success(t('removeFromFavorites'));
+      } else {
+        await favoritesService.addSeriesToFavorites(id);
+        setIsFavorite(true);
+        toast.success(t('addToFavorites'));
+      }
+    } catch (error) {
+      toast.error(t('errorToggleFavorite'));
     }
   };
 
@@ -260,18 +295,40 @@ const SeriesDetail = () => {
               )}
 
               {/* Actions */}
-              {series.trailerUrl && (
-                <motion.a
-                  href={series.trailerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="btn-secondary flex items-center gap-2 inline-block mb-4"
-                >
-                  <FiPlay /> {t('trailer')}
-                </motion.a>
-              )}
+              <div className="flex flex-wrap gap-4">
+                {series.trailerUrl && (
+                  <motion.a
+                    href={series.trailerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="btn-secondary flex items-center gap-2"
+                  >
+                    <FiPlay /> {t('trailer')}
+                  </motion.a>
+                )}
+                {isAuthenticated && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleToggleFavorite}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl border-2 transition-all ${
+                      isFavorite
+                        ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30'
+                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                    }`}
+                  >
+                    <motion.div
+                      animate={isFavorite ? { scale: [1, 1.2, 1] } : {}}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <FiHeart className={isFavorite ? 'fill-current' : ''} />
+                    </motion.div>
+                    {isFavorite ? t('removeFromFavorites') : t('addToFavorites')}
+                  </motion.button>
+                )}
+              </div>
             </div>
           </div>
         </motion.div>

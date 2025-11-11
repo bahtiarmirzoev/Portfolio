@@ -25,5 +25,10 @@ export const seriesCommentsService = {
     const response = await api.delete(`/series/${seriesId}/comments/${commentId}`);
     return response.data;
   },
+
+  async getMyComments() {
+    const response = await api.get('/series/comments/my');
+    return response.data;
+  },
 };
 

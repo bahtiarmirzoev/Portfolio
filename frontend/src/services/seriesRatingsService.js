@@ -11,6 +11,11 @@ export const seriesRatingsService = {
     return response.data;
   },
 
+  async getMyRatings() {
+    const response = await api.get('/series/ratings/my/all');
+    return response.data;
+  },
+
   async rateSeries(seriesId, value) {
     const response = await api.post(`/series/${seriesId}/ratings`, { value });
     return response.data;

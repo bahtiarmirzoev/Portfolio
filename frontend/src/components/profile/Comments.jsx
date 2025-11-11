@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { commentsService } from '../../services/commentsService';
+import { seriesCommentsService } from '../../services/seriesCommentsService';
 import { moviesService } from '../../services/moviesService';
+import { seriesService } from '../../services/seriesService';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { FiMessageSquare, FiEdit2, FiTrash2, FiSave, FiX } from 'react-icons/fi';
+import { FiMessageSquare, FiEdit2, FiTrash2, FiSave, FiX, FiFilm, FiTv } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const Comments = () => {
@@ -13,36 +15,64 @@ const Comments = () => {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState('');
+  const [activeTab, setActiveTab] = useState('all'); // 'all', 'movies', 'series'
 
   useEffect(() => {
     loadUserComments();
-  }, []);
+  }, [activeTab]);
 
   const loadUserComments = async () => {
     try {
       setLoading(true);
-      // Получаем все фильмы и их комментарии
-      // В реальном приложении лучше иметь эндпоинт для получения комментариев пользователя
-      const movies = await moviesService.getAll({ take: 100 });
       const allComments = [];
 
-      for (const movie of movies.items || []) {
+      // Загружаем комментарии к фильмам
+      if (activeTab === 'all' || activeTab === 'movies') {
         try {
-          const movieComments = await commentsService.getMovieComments(movie.id);
-          const userComments = movieComments.map(comment => ({
-            ...comment,
-            movie: movie,
-          }));
-          allComments.push(...userComments);
+          // Пока используем старый метод, так как нет эндпоинта для всех комментариев пользователя
+          const movies = await moviesService.getAll({ take: 100 });
+          for (const movie of movies.items || []) {
+            try {
+              const movieComments = await commentsService.getMovieComments(movie.id);
+              const userComments = movieComments.map(comment => ({
+                ...comment,
+                movie: movie,
+                type: 'movie',
+              }));
+              allComments.push(...userComments);
+            } catch (error) {
+              // Пропускаем фильмы без комментариев
+            }
+          }
         } catch (error) {
-          // Пропускаем фильмы без комментариев
+          console.error('Error loading movie comments:', error);
         }
       }
 
-      // Фильтруем комментарии текущего пользователя
-      // В реальном приложении это должно делаться на бэкенде через отдельный эндпоинт
-      // Пока показываем все комментарии, так как нет способа получить userId из токена на фронтенде
-      // В продакшене нужен эндпоинт GET /api/users/me/comments
+      // Загружаем комментарии к сериалам
+      if (activeTab === 'all' || activeTab === 'series') {
+        try {
+          const seriesComments = await seriesCommentsService.getMyComments();
+          const seriesCommentsWithDetails = await Promise.all(
+            (seriesComments || []).map(async (comment) => {
+              try {
+                const series = await seriesService.getById(comment.seriesId);
+                return {
+                  ...comment,
+                  series: series,
+                  type: 'series',
+                };
+              } catch (error) {
+                return null;
+              }
+            })
+          );
+          allComments.push(...seriesCommentsWithDetails.filter(Boolean));
+        } catch (error) {
+          console.error('Error loading series comments:', error);
+        }
+      }
+
       setComments(allComments);
     } catch (error) {
       toast.error(t('errorLoadingComments'));
@@ -57,11 +87,16 @@ const Comments = () => {
     setEditContent(comment.content);
   };
 
-  const handleSave = async (movieId, commentId) => {
+  const handleSave = async (comment) => {
     try {
-      const updated = await commentsService.updateComment(movieId, commentId, editContent);
+      let updated;
+      if (comment.type === 'movie') {
+        updated = await commentsService.updateComment(comment.movieId, comment.id, editContent);
+      } else {
+        updated = await seriesCommentsService.updateComment(comment.seriesId, comment.id, editContent);
+      }
       setComments(prev =>
-        prev.map(c => c.id === commentId ? { ...c, ...updated } : c)
+        prev.map(c => c.id === comment.id ? { ...c, ...updated } : c)
       );
       setEditingId(null);
       setEditContent('');
@@ -71,12 +106,16 @@ const Comments = () => {
     }
   };
 
-  const handleDelete = async (movieId, commentId) => {
+  const handleDelete = async (comment) => {
     if (!window.confirm(t('delete') + '?')) return;
 
     try {
-      await commentsService.deleteComment(movieId, commentId);
-      setComments(prev => prev.filter(c => c.id !== commentId));
+      if (comment.type === 'movie') {
+        await commentsService.deleteComment(comment.movieId, comment.id);
+      } else {
+        await seriesCommentsService.deleteComment(comment.seriesId, comment.id);
+      }
+      setComments(prev => prev.filter(c => c.id !== comment.id));
       toast.success(t('commentDeleted'));
     } catch (error) {
       toast.error(t('commentError'));
@@ -125,7 +164,7 @@ const Comments = () => {
         transition={{ duration: 0.6 }}
         className="glass rounded-2xl p-6"
       >
-        <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+        <h2 className="text-3xl font-bold text-white mb-4 flex items-center gap-3">
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
@@ -134,11 +173,51 @@ const Comments = () => {
           </motion.div>
           {t('myComments')}
         </h2>
-        <p className="text-white/60">{t('total')}: {comments.length}</p>
+        
+        {/* Tabs */}
+        <div className="flex gap-2 mb-4">
+          {['all', 'movies', 'series'].map((tab) => {
+            const count = tab === 'all' 
+              ? comments.length 
+              : comments.filter(c => c.type === tab.slice(0, -1)).length;
+            return (
+              <motion.button
+                key={tab}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setComments([]);
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-4 py-2 rounded-lg transition-all ${
+                  activeTab === tab
+                    ? 'bg-white text-black font-semibold'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                {tab === 'all' ? t('all') : tab === 'movies' ? t('movies') : t('series')}
+                {` (${count})`}
+              </motion.button>
+            );
+          })}
+        </div>
+        
+        <p className="text-white/60">
+          {activeTab === 'all' && `${t('total')}: ${comments.length}`}
+          {activeTab === 'movies' && `${t('movies')}: ${comments.filter(c => c.type === 'movie').length}`}
+          {activeTab === 'series' && `${t('series')}: ${comments.filter(c => c.type === 'series').length}`}
+        </p>
       </motion.div>
 
       <div className="space-y-4">
-        {comments.map((comment, index) => (
+        {comments
+          .filter(comment => {
+            if (activeTab === 'all') return true;
+            if (activeTab === 'movies') return comment.type === 'movie';
+            if (activeTab === 'series') return comment.type === 'series';
+            return true;
+          })
+          .map((comment, index) => (
           <motion.div
             key={comment.id}
             initial={{ opacity: 0, x: -30 }}
@@ -149,10 +228,17 @@ const Comments = () => {
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <Link to={`/movies/${comment.movieId}`}>
-                  <h3 className="text-lg font-semibold text-white mb-1 hover:text-white/80 transition-colors">
-                    {comment.movie?.title || t('movie')}
-                  </h3>
+                <Link to={comment.type === 'movie' ? `/movies/${comment.movieId}` : `/series/${comment.seriesId}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    {comment.type === 'movie' ? (
+                      <FiFilm className="text-white/40" size={16} />
+                    ) : (
+                      <FiTv className="text-white/40" size={16} />
+                    )}
+                    <h3 className="text-lg font-semibold text-white hover:text-white/80 transition-colors">
+                      {comment.type === 'movie' ? (comment.movie?.title || t('movie')) : (comment.series?.title || t('series'))}
+                    </h3>
+                  </div>
                 </Link>
                 <p className="text-white/40 text-sm">
                   {new Date(comment.createdAt).toLocaleDateString('ru-RU')}
@@ -175,7 +261,7 @@ const Comments = () => {
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => handleDelete(comment.movieId, comment.id)}
+                      onClick={() => handleDelete(comment)}
                       className="text-white/60 hover:text-red-400 transition-colors p-2"
                     >
                       <FiTrash2 size={18} />
@@ -203,7 +289,7 @@ const Comments = () => {
                     <motion.button
                       whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => handleSave(comment.movieId, comment.id)}
+                      onClick={() => handleSave(comment)}
                       className="btn-primary flex items-center gap-2"
                     >
                       <FiSave /> {t('save')}

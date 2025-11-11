@@ -1,3 +1,5 @@
+using Movies.Application.Models;
+
 namespace Movies.Application.Interfaces;
 
 public interface ISeriesRatingService
@@ -5,4 +7,5 @@ public interface ISeriesRatingService
     Task<bool> RateSeriesAsync(Guid seriesId, Guid userId, int value, CancellationToken cancellationToken = default);
     Task<double?> GetSeriesRatingAsync(Guid seriesId, CancellationToken cancellationToken = default);
     Task<int?> GetUserSeriesRatingAsync(Guid seriesId, Guid userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<SeriesRating>> GetUserRatingsAsync(Guid userId, CancellationToken cancellationToken = default);
 }

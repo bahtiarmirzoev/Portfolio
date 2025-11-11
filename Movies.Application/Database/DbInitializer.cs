@@ -243,6 +243,25 @@ public class DbInitializer
             CREATE INDEX IF NOT EXISTS idx_favorite_movieid ON favoritemovies(movieid);
             """);
 
+        // Таблица избранных сериалов
+        await connection.ExecuteAsync("""
+            CREATE TABLE IF NOT EXISTS favoriteseries (
+                id UUID PRIMARY KEY,
+                userid UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                seriesid UUID NOT NULL REFERENCES series(id) ON DELETE CASCADE,
+                createdat TIMESTAMP NOT NULL DEFAULT now(),
+                CONSTRAINT uq_favorite_series UNIQUE (userid, seriesid)
+            );
+            """);
+
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_favorite_series_userid ON favoriteseries(userid);
+            """);
+
+        await connection.ExecuteAsync("""
+            CREATE INDEX IF NOT EXISTS idx_favorite_series_seriesid ON favoriteseries(seriesid);
+            """);
+
         // Таблица рейтингов для фильмов
         await connection.ExecuteAsync("""
             CREATE TABLE IF NOT EXISTS ratings (

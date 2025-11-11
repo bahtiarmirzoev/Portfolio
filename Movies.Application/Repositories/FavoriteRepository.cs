@@ -15,6 +15,7 @@ namespace Movies.Application.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
+        // Movies
         public async Task<bool> AddToFavoritesAsync(FavoriteMovie favorite)
         {
             const string sql = """
@@ -63,6 +64,57 @@ namespace Movies.Application.Repositories
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             return await connection.ExecuteScalarAsync<bool>(sql, new { UserId = userId, MovieId = movieId });
+        }
+
+        // Series
+        public async Task<bool> AddSeriesToFavoritesAsync(FavoriteSeries favorite)
+        {
+            const string sql = """
+                insert into favoriteseries (id, userid, seriesid )
+                values (@Id, @UserId, @SeriesId )
+                on conflict ("userid", "seriesid") do nothing;
+            """;
+
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var affectedRows = await connection.ExecuteAsync(sql, favorite);
+            return affectedRows > 0;
+        }
+
+        public async Task<bool> RemoveSeriesFromFavoritesAsync(Guid userId, Guid seriesId)
+        {
+            const string sql = """
+                delete from "favoriteseries"
+                where "userid" = @UserId and "seriesid" = @SeriesId;
+            """;
+
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var affectedRows = await connection.ExecuteAsync(sql, new { UserId = userId, SeriesId = seriesId });
+            return affectedRows > 0;
+        }
+
+        public async Task<IEnumerable<FavoriteSeries>> GetUserFavoriteSeriesAsync(Guid userId)
+        {
+            const string sql = """
+                select * from "favoriteseries"
+                where "userid" = @UserId
+                order by "createdat" desc;
+            """;
+
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            return await connection.QueryAsync<FavoriteSeries>(sql, new { UserId = userId });
+        }
+
+        public async Task<bool> IsSeriesInFavoritesAsync(Guid userId, Guid seriesId)
+        {
+            const string sql = """
+                select exists(
+                    select 1 from "favoriteseries"
+                    where "userid" = @UserId and "seriesid" = @SeriesId
+                );
+            """;
+
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            return await connection.ExecuteScalarAsync<bool>(sql, new { UserId = userId, SeriesId = seriesId });
         }
     }
 }
