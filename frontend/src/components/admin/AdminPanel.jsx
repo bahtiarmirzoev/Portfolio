@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useLanguageStore } from '../../stores/languageStore';
 import { adminService } from '../../services/adminService';
 import { moviesService } from '../../services/moviesService';
 import { seriesService } from '../../services/seriesService';
@@ -22,8 +22,8 @@ import {
 import toast from 'react-hot-toast';
 
 const AdminPanel = () => {
-  const { isAdmin } = useAuth();
-  const { t } = useLanguage();
+  const { isAdmin } = useAuthStore();
+  const { t } = useLanguageStore();
   const [activeTab, setActiveTab] = useState('movies');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);

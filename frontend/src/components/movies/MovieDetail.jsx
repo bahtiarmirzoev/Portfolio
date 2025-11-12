@@ -5,16 +5,16 @@ import { moviesService } from '../../services/moviesService';
 import { commentsService } from '../../services/commentsService';
 import { favoritesService } from '../../services/favoritesService';
 import { ratingsService } from '../../services/ratingsService';
-import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useLanguageStore } from '../../stores/languageStore';
 import { FiFilm, FiHeart, FiStar, FiMessageSquare, FiArrowLeft, FiPlay } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const { t } = useLanguage();
+  const { isAuthenticated } = useAuthStore();
+  const { t } = useLanguageStore();
   const [movie, setMovie] = useState(null);
   const [comments, setComments] = useState([]);
   const [similarMovies, setSimilarMovies] = useState([]);

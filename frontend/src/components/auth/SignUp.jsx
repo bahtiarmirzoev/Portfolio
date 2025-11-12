@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useLanguageStore } from '../../stores/languageStore';
 import { useNavigate, Link } from 'react-router-dom';
 import { FiUser, FiLock, FiMail, FiEye, FiEyeOff, FiUserPlus } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const SignUp = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguageStore();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -19,7 +19,7 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp } = useAuthStore();
   const navigate = useNavigate();
 
   const handleChange = (e) => {

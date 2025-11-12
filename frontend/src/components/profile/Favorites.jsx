@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 import { favoritesService } from '../../services/favoritesService';
 import { moviesService } from '../../services/moviesService';
 import { seriesService } from '../../services/seriesService';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useLanguageStore } from '../../stores/languageStore';
 import { FiHeart, FiTrash2, FiFilm, FiStar, FiTv } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const Favorites = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguageStore();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);

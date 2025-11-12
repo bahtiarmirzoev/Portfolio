@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { actorsService } from '../../services/actorsService';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useLanguageStore } from '../../stores/languageStore';
 import { FiArrowLeft, FiCalendar, FiFilm, FiTv, FiBookOpen } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const ActorDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t } = useLanguageStore();
   const [actor, setActor] = useState(null);
   const [loading, setLoading] = useState(true);
 

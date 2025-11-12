@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useLanguageStore } from '../../stores/languageStore';
 import { useNavigate, Link } from 'react-router-dom';
 import { FiMail, FiArrowLeft } from 'react-icons/fi';
 
 const ForgotPassword = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguageStore();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const { forgotPassword } = useAuth();
+  const { forgotPassword } = useAuthStore();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {

@@ -5,12 +5,12 @@ import { commentsService } from '../../services/commentsService';
 import { seriesCommentsService } from '../../services/seriesCommentsService';
 import { moviesService } from '../../services/moviesService';
 import { seriesService } from '../../services/seriesService';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useLanguageStore } from '../../stores/languageStore';
 import { FiMessageSquare, FiEdit2, FiTrash2, FiSave, FiX, FiFilm, FiTv } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const Comments = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguageStore();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);

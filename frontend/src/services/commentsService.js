@@ -25,5 +25,10 @@ export const commentsService = {
     const response = await api.delete(`/movies/${movieId}/comments/${commentId}`);
     return response.data;
   },
+
+  async getMyComments() {
+    const response = await api.get('/movies/comments/my');
+    return response.data;
+  },
 };
 

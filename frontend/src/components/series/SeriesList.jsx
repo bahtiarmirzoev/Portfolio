@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { seriesService } from '../../services/seriesService';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useLanguageStore } from '../../stores/languageStore';
 import { FiTv, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiPlay, FiLayers, FiCheck } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const SeriesList = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguageStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [series, setSeries] = useState([]);
   const [loading, setLoading] = useState(true);

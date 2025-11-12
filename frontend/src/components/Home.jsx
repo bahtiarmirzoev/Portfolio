@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useLanguageStore } from '../../stores/languageStore';
 import { FiFilm, FiTv, FiHeart, FiTrendingUp, FiStar, FiArrowRight, FiZap, FiMessageSquare, FiPlay } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { moviesService } from '../services/moviesService';
 import { seriesService } from '../services/seriesService';
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
-  const { t } = useLanguage();
+  const { isAuthenticated } = useAuthStore();
+  const { t } = useLanguageStore();
   const [featuredMovies, setFeaturedMovies] = useState([]);
   const [trendingSeries, setTrendingSeries] = useState([]);
   const [loading, setLoading] = useState(true);

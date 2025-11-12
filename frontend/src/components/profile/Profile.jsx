@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useLanguageStore } from '../../stores/languageStore';
 import { useNavigate } from 'react-router-dom';
 import { FiUser, FiHeart, FiMessageSquare, FiStar, FiLogOut, FiMenu, FiX, FiShield, FiCheck, FiArrowRight, FiSettings, FiGrid, FiList } from 'react-icons/fi';
 import Favorites from './Favorites';
@@ -11,10 +11,10 @@ import TrustedUser from './TrustedUser';
 import Settings from './Settings';
 
 const Profile = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguageStore();
   const [activeTab, setActiveTab] = useState('favorites');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { signOut, isTrusted, user } = useAuth();
+  const { signOut, isTrusted, user } = useAuthStore();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {

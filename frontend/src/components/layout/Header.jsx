@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useLanguageStore } from '../../stores/languageStore';
 import { 
   FiFilm, 
   FiTv, 
@@ -21,8 +21,8 @@ import {
 } from 'react-icons/fi';
 
 const Header = () => {
-  const { isAuthenticated, signOut, isTrusted, isAdmin } = useAuth();
-  const { language, setLanguage, t } = useLanguage();
+  const { isAuthenticated, signOut, isTrusted, isAdmin } = useAuthStore();
+  const { language, setLanguage, t } = useLanguageStore();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

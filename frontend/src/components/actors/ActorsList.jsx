@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { actorsService } from '../../services/actorsService';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useLanguageStore } from '../../stores/languageStore';
 import {
   FiUser,
   FiSearch,
@@ -26,7 +26,7 @@ import {
 import toast from 'react-hot-toast';
 
 const ActorsList = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguageStore();
   const [actors, setActors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

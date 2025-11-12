@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useLanguageStore } from '../../stores/languageStore';
 import { otpService } from '../../services/otpService';
 import { authService } from '../../services/authService';
 import { decodeJWT } from '../../utils/jwt';
@@ -9,8 +9,8 @@ import { FiCheck, FiMail, FiKey, FiShield, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const TrustedUser = () => {
-  const { t } = useLanguage();
-  const { isTrusted, refreshUserRoles } = useAuth();
+  const { t } = useLanguageStore();
+  const { isTrusted, refreshUserRoles } = useAuthStore();
   const [otpCode, setOtpCode] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);

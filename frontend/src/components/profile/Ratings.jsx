@@ -5,12 +5,12 @@ import { ratingsService } from '../../services/ratingsService';
 import { seriesRatingsService } from '../../services/seriesRatingsService';
 import { moviesService } from '../../services/moviesService';
 import { seriesService } from '../../services/seriesService';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useLanguageStore } from '../../stores/languageStore';
 import { FiStar, FiFilm, FiTv } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const Ratings = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguageStore();
   const [ratings, setRatings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'movies', 'series'

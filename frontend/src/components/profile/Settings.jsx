@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useLanguageStore } from '../../stores/languageStore';
 import { FiSettings, FiGlobe, FiLock, FiUser, FiMail, FiSave, FiEye, FiEyeOff } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { authService } from '../../services/authService';
 
 const Settings = () => {
-  const { t, language, setLanguage } = useLanguage();
-  const { user, changePassword, loadUser } = useAuth();
+  const { t, language, setLanguage } = useLanguageStore();
+  const { user, changePassword, loadUser } = useAuthStore();
   const [activeSection, setActiveSection] = useState('general');
   const [loading, setLoading] = useState(false);
   const [userLoading, setUserLoading] = useState(true);
