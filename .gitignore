@@ -442,3 +442,8 @@ logs/
 temp/
 tmp/
 
+bin/
+obj/
+
+# Ignore sensitive configs
+Movies.Api/appsettings*.json
