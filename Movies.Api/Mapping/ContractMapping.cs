@@ -8,8 +8,10 @@ namespace Movies.Api.Mapping;
 
 public static class ContractMapping
 {
-    public static async Task<Movie> MapToMovieAsync(this CreateMovieRequest request, IActorRepository actorRepository)
+    public static Task<Movie> MapToMovieAsync(this CreateMovieRequest request, IActorRepository actorRepository)
     {
+        // Актеры будут созданы автоматически в репозитории при сохранении фильма
+        // Здесь просто создаем объекты Actor с именами для передачи в репозиторий
         var actors = new List<Actor>();
         if (request.Actors != null && request.Actors.Any())
         {
@@ -17,26 +19,18 @@ public static class ContractMapping
             {
                 if (string.IsNullOrWhiteSpace(actorName)) continue;
                 
-                var existingActor = await actorRepository.GetByNameAsync(actorName.Trim());
-                if (existingActor != null)
+                // Создаем временный объект Actor с именем
+                // Репозиторий проверит существование по имени и создаст актера, если его нет
+                var actor = new Actor
                 {
-                    actors.Add(existingActor);
-                }
-                else
-                {
-                    // Создаем нового актера, если не найден
-                    var newActor = new Actor
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = actorName.Trim()
-                    };
-                    await actorRepository.CreateAsync(newActor);
-                    actors.Add(newActor);
-                }
+                    Id = Guid.NewGuid(), // Временный ID, будет заменен на существующий или использован для нового
+                    Name = actorName.Trim()
+                };
+                actors.Add(actor);
             }
         }
 
-        return new Movie
+        return Task.FromResult(new Movie
         {
             Id = Guid.NewGuid(),
             Title = request.Title,
@@ -46,11 +40,13 @@ public static class ContractMapping
             TrailerUrl = request.TrailerUrl,
             Genres = request.Genres.ToList(),
             Actors = actors
-        };
+        });
     }
 
-    public static async Task<Movie> MapToMovieAsync(this UpdateMovieRequest request, Guid id, IActorRepository actorRepository)
+    public static Task<Movie> MapToMovieAsync(this UpdateMovieRequest request, Guid id, IActorRepository actorRepository)
     {
+        // Актеры будут созданы автоматически в репозитории при обновлении фильма
+        // Здесь просто создаем объекты Actor с именами для передачи в репозиторий
         var actors = new List<Actor>();
         if (request.Actors != null && request.Actors.Any())
         {
@@ -58,26 +54,18 @@ public static class ContractMapping
             {
                 if (string.IsNullOrWhiteSpace(actorName)) continue;
                 
-                var existingActor = await actorRepository.GetByNameAsync(actorName.Trim());
-                if (existingActor != null)
+                // Создаем временный объект Actor с именем
+                // Репозиторий проверит существование по имени и создаст актера, если его нет
+                var actor = new Actor
                 {
-                    actors.Add(existingActor);
-                }
-                else
-                {
-                    // Создаем нового актера, если не найден
-                    var newActor = new Actor
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = actorName.Trim()
-                    };
-                    await actorRepository.CreateAsync(newActor);
-                    actors.Add(newActor);
-                }
+                    Id = Guid.NewGuid(), // Временный ID, будет заменен на существующий или использован для нового
+                    Name = actorName.Trim()
+                };
+                actors.Add(actor);
             }
         }
 
-        return new Movie
+        return Task.FromResult(new Movie
         {
             Id = id,
             Title = request.Title,
@@ -87,7 +75,7 @@ public static class ContractMapping
             TrailerUrl = request.TrailerUrl,
             Genres = request.Genres.ToList(),
             Actors = actors
-        };
+        });
     }
 
     public static MovieResponse MapToResponse(this Movie movie)

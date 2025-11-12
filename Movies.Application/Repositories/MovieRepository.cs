@@ -41,25 +41,42 @@ public class MovieRepository : IMovieRepository
         {
             foreach (var actor in movie.Actors)
             {
-                var actorExists = await connection.ExecuteScalarAsync<bool>(
-                    "SELECT COUNT(1) FROM actors WHERE id = @Id", 
-                    new { actor.Id }, transaction);
+                // Проверяем существование актера по имени (case-insensitive)
+                var existingActorId = await connection.QuerySingleOrDefaultAsync<Guid?>(
+                    "SELECT id FROM actors WHERE LOWER(TRIM(name)) = LOWER(TRIM(@Name))", 
+                    new { Name = actor.Name }, transaction);
             
-                if (!actorExists)
+                Guid actorIdToUse;
+                if (existingActorId.HasValue)
                 {
+                    // Используем существующего актера
+                    actorIdToUse = existingActorId.Value;
+                }
+                else
+                {
+                    // Создаем нового актера только с именем (без даты рождения и биографии)
+                    actorIdToUse = actor.Id;
                     await connection.ExecuteAsync("""
-                        INSERT INTO actors (id, name)
-                        VALUES (@Id, @Name)
-                    """, new { actor.Id, actor.Name }, transaction);
+                        INSERT INTO actors (id, name, dateofbirth, biography)
+                        VALUES (@Id, @Name, NULL, NULL)
+                    """, new { Id = actorIdToUse, Name = actor.Name.Trim() }, transaction);
                 }
 
-                await connection.ExecuteAsync("""
-                    INSERT INTO movie_actors (movieid, actorid)
-                    VALUES (@MovieId, @ActorId)
-                """, new { 
-                    MovieId = movie.Id, 
-                    ActorId = actor.Id
-                }, transaction);
+                // Проверяем, не существует ли уже связь
+                var linkExists = await connection.ExecuteScalarAsync<bool>(
+                    "SELECT COUNT(1) FROM movie_actors WHERE movieid = @MovieId AND actorid = @ActorId",
+                    new { MovieId = movie.Id, ActorId = actorIdToUse }, transaction);
+
+                if (!linkExists)
+                {
+                    await connection.ExecuteAsync("""
+                        INSERT INTO movie_actors (movieid, actorid)
+                        VALUES (@MovieId, @ActorId)
+                    """, new { 
+                        MovieId = movie.Id, 
+                        ActorId = actorIdToUse
+                    }, transaction);
+                }
             }
         }
 
@@ -185,13 +202,42 @@ public class MovieRepository : IMovieRepository
 
         foreach (var actor in movie.Actors)
         {
-            await connection.ExecuteAsync("""
-                INSERT INTO movie_actors (movieid, actorid)
-                VALUES (@MovieId, @ActorId)
-            """, new { 
-                MovieId = movie.Id, 
-                ActorId = actor.Id
-            }, transaction);
+            // Проверяем существование актера по имени (case-insensitive)
+            var existingActorId = await connection.QuerySingleOrDefaultAsync<Guid?>(
+                "SELECT id FROM actors WHERE LOWER(TRIM(name)) = LOWER(TRIM(@Name))", 
+                new { Name = actor.Name }, transaction);
+        
+            Guid actorIdToUse;
+            if (existingActorId.HasValue)
+            {
+                // Используем существующего актера
+                actorIdToUse = existingActorId.Value;
+            }
+            else
+            {
+                // Создаем нового актера только с именем (без даты рождения и биографии)
+                actorIdToUse = actor.Id;
+                await connection.ExecuteAsync("""
+                    INSERT INTO actors (id, name, dateofbirth, biography)
+                    VALUES (@Id, @Name, NULL, NULL)
+                """, new { Id = actorIdToUse, Name = actor.Name.Trim() }, transaction);
+            }
+
+            // Проверяем, не существует ли уже связь
+            var linkExists = await connection.ExecuteScalarAsync<bool>(
+                "SELECT COUNT(1) FROM movie_actors WHERE movieid = @MovieId AND actorid = @ActorId",
+                new { MovieId = movie.Id, ActorId = actorIdToUse }, transaction);
+
+            if (!linkExists)
+            {
+                await connection.ExecuteAsync("""
+                    INSERT INTO movie_actors (movieid, actorid)
+                    VALUES (@MovieId, @ActorId)
+                """, new { 
+                    MovieId = movie.Id, 
+                    ActorId = actorIdToUse
+                }, transaction);
+            }
         }
 
         // 🆕 Добавляем PosterUrl и TrailerUrl в UPDATE

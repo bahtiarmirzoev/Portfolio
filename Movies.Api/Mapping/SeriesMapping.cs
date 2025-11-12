@@ -8,8 +8,10 @@ namespace Movies.Api.Mapping;
 
 public static class SeriesMapping
 {
-    public static async Task<Series> MapToSeriesAsync(this CreateSeriesRequest request, IActorRepository actorRepository)
+    public static Task<Series> MapToSeriesAsync(this CreateSeriesRequest request, IActorRepository actorRepository)
     {
+        // Актеры будут созданы автоматически в репозитории при сохранении сериала
+        // Здесь просто создаем объекты Actor с именами для передачи в репозиторий
         var actors = new List<Actor>();
         if (request.Actors != null && request.Actors.Any())
         {
@@ -17,26 +19,18 @@ public static class SeriesMapping
             {
                 if (string.IsNullOrWhiteSpace(actorName)) continue;
                 
-                var existingActor = await actorRepository.GetByNameAsync(actorName.Trim());
-                if (existingActor != null)
+                // Создаем временный объект Actor с именем
+                // Репозиторий проверит существование по имени и создаст актера, если его нет
+                var actor = new Actor
                 {
-                    actors.Add(existingActor);
-                }
-                else
-                {
-                    // Создаем нового актера, если не найден
-                    var newActor = new Actor
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = actorName.Trim()
-                    };
-                    await actorRepository.CreateAsync(newActor);
-                    actors.Add(newActor);
-                }
+                    Id = Guid.NewGuid(), // Временный ID, будет заменен на существующий или использован для нового
+                    Name = actorName.Trim()
+                };
+                actors.Add(actor);
             }
         }
 
-        return new Series
+        return Task.FromResult(new Series
         {
             Id = Guid.NewGuid(),
             Title = request.Title,
@@ -50,11 +44,13 @@ public static class SeriesMapping
             TotalEpisodes = request.TotalEpisodes,
             IsOngoing = request.IsOngoing,
             Actors = actors
-        };
+        });
     }
 
-    public static async Task<Series> MapToSeriesAsync(this UpdateSeriesRequest request, Guid id, IActorRepository actorRepository)
+    public static Task<Series> MapToSeriesAsync(this UpdateSeriesRequest request, Guid id, IActorRepository actorRepository)
     {
+        // Актеры будут созданы автоматически в репозитории при обновлении сериала
+        // Здесь просто создаем объекты Actor с именами для передачи в репозиторий
         var actors = new List<Actor>();
         if (request.Actors != null && request.Actors.Any())
         {
@@ -62,26 +58,18 @@ public static class SeriesMapping
             {
                 if (string.IsNullOrWhiteSpace(actorName)) continue;
                 
-                var existingActor = await actorRepository.GetByNameAsync(actorName.Trim());
-                if (existingActor != null)
+                // Создаем временный объект Actor с именем
+                // Репозиторий проверит существование по имени и создаст актера, если его нет
+                var actor = new Actor
                 {
-                    actors.Add(existingActor);
-                }
-                else
-                {
-                    // Создаем нового актера, если не найден
-                    var newActor = new Actor
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = actorName.Trim()
-                    };
-                    await actorRepository.CreateAsync(newActor);
-                    actors.Add(newActor);
-                }
+                    Id = Guid.NewGuid(), // Временный ID, будет заменен на существующий или использован для нового
+                    Name = actorName.Trim()
+                };
+                actors.Add(actor);
             }
         }
 
-        return new Series
+        return Task.FromResult(new Series
         {
             Id = id,
             Title = request.Title,
@@ -95,7 +83,7 @@ public static class SeriesMapping
             TotalEpisodes = request.TotalEpisodes,
             IsOngoing = request.IsOngoing,
             Actors = actors
-        };
+        });
     }
 
     public static SeriesResponse MapToResponse(this Series series)
