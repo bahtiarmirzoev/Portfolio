@@ -6,6 +6,7 @@ import { adminService } from '../../services/adminService';
 import { moviesService } from '../../services/moviesService';
 import { seriesService } from '../../services/seriesService';
 import { actorsService } from '../../services/actorsService';
+import { storageService } from '../../services/storageService';
 import { 
   FiFilm, 
   FiTv, 
@@ -15,7 +16,8 @@ import {
   FiTrash2, 
   FiShield,
   FiX,
-  FiSave
+  FiSave,
+  FiUpload
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -27,6 +29,8 @@ const AdminPanel = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [posterUploadLoading, setPosterUploadLoading] = useState(false);
+  const [posterUploadError, setPosterUploadError] = useState('');
 
   // Movies state
   const [movies, setMovies] = useState([]);
@@ -302,6 +306,74 @@ const AdminPanel = () => {
     }
   };
 
+  const handlePosterFileUpload = async (event, target) => {
+    const input = event.target;
+    const file = input?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setPosterUploadError('');
+
+    try {
+      setPosterUploadLoading(true);
+      
+      console.log('Uploading poster:', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
+
+      const { url } = await storageService.uploadPoster(file);
+
+      console.log('Poster uploaded successfully:', url);
+
+      if (target === 'movies') {
+        setMovieForm((prev) => ({ ...prev, posterUrl: url }));
+      } else {
+        setSeriesForm((prev) => ({ ...prev, posterUrl: url }));
+      }
+
+      toast.success(t?.('posterUploaded') || 'Постер загружен');
+    } catch (error) {
+      console.error('Poster upload failed:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      let message = t?.('posterUploadFailed') || 'Не удалось загрузить постер';
+      
+      if (error.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        // Если есть детальная ошибка от S3
+        const s3Error = error.response.data.error;
+        if (s3Error.includes('bucket') || s3Error.includes('Bucket')) {
+          message = 'Ошибка S3: Проверьте настройки bucket (название, регион, права доступа)';
+        } else if (s3Error.includes('AccessDenied') || s3Error.includes('access')) {
+          message = 'Ошибка доступа к S3: Проверьте права IAM пользователя';
+        } else if (s3Error.includes('InvalidAccessKeyId') || s3Error.includes('SignatureDoesNotMatch')) {
+          message = 'Ошибка авторизации S3: Проверьте Access Key и Secret Key';
+        } else {
+          message = error.response.data.message || s3Error;
+        }
+      } else if (error.message) {
+        message = error.message;
+      }
+      
+      setPosterUploadError(message);
+      toast.error(message);
+    } finally {
+      setPosterUploadLoading(false);
+      if (input) {
+        input.value = '';
+      }
+    }
+  };
+
   const resetMovieForm = () => {
     setMovieForm({
       title: '',
@@ -312,6 +384,8 @@ const AdminPanel = () => {
       genres: [],
       actors: []
     });
+    setPosterUploadError('');
+    setPosterUploadLoading(false);
   };
 
   const resetSeriesForm = () => {
@@ -328,6 +402,8 @@ const AdminPanel = () => {
       totalEpisodes: null,
       isOngoing: false
     });
+    setPosterUploadError('');
+    setPosterUploadLoading(false);
   };
 
   const resetActorForm = () => {
@@ -340,6 +416,8 @@ const AdminPanel = () => {
 
   const openEditModal = (item) => {
     setEditingItem(item);
+    setPosterUploadError('');
+    setPosterUploadLoading(false);
     if (activeTab === 'movies') {
       setMovieForm({
         title: item.title || '',
@@ -419,6 +497,8 @@ const AdminPanel = () => {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     setActiveTab(tab.id);
+                    setPosterUploadError('');
+                    setPosterUploadLoading(false);
                     if (tab.id === 'movies') loadMovies();
                     else if (tab.id === 'series') loadSeries();
                     else if (tab.id === 'actors') loadActors();
@@ -452,6 +532,8 @@ const AdminPanel = () => {
                 if (activeTab === 'movies') resetMovieForm();
                 else if (activeTab === 'series') resetSeriesForm();
                 else if (activeTab === 'actors') resetActorForm();
+                setPosterUploadError('');
+                setPosterUploadLoading(false);
                 setShowCreateModal(true);
               }}
               className="btn-primary flex items-center gap-2"
@@ -643,15 +725,75 @@ const AdminPanel = () => {
                       placeholder="Описание фильма"
                     />
                   </div>
-                  <div>
-                    <label className="block text-white/80 mb-2">URL постера</label>
-                    <input
-                      type="url"
-                      value={movieForm.posterUrl}
-                      onChange={(e) => setMovieForm({ ...movieForm, posterUrl: e.target.value })}
-                      className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
-                      placeholder="https://example.com/poster.jpg"
-                    />
+                  <div className="border border-white/20 rounded-lg p-4 bg-white/5">
+                    <label className="block text-white font-semibold mb-3">
+                      <FiUpload className="inline mr-2" size={18} />
+                      Постер фильма
+                    </label>
+                    <div className="space-y-3">
+                      <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        <label
+                          className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border-2 border-dashed border-white/30 bg-white/5 text-white transition-all ${
+                            posterUploadLoading 
+                              ? 'opacity-60 cursor-not-allowed' 
+                              : 'cursor-pointer hover:bg-white/10 hover:border-white/50'
+                          }`}
+                        >
+                          <FiUpload size={20} />
+                          <span className="font-medium">
+                            {posterUploadLoading ? (t?.('loading') || 'Загрузка...') : t?.('uploadPoster') || 'Загрузить файл'}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,image/webp"
+                            className="hidden"
+                            onChange={(e) => handlePosterFileUpload(e, 'movies')}
+                            disabled={posterUploadLoading}
+                          />
+                        </label>
+                        {movieForm.posterUrl && (
+                          <div className="relative">
+                            <img
+                              src={movieForm.posterUrl}
+                              alt="Превью постера"
+                              className="h-32 w-24 rounded-lg border-2 border-white/20 object-cover shadow-xl"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setMovieForm({ ...movieForm, posterUrl: '' })}
+                              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-lg"
+                              title="Удалить постер"
+                            >
+                              <FiX size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-white/70 text-sm mb-1">Или введите URL вручную:</label>
+                        <input
+                          type="url"
+                          value={movieForm.posterUrl}
+                          onChange={(e) => setMovieForm({ ...movieForm, posterUrl: e.target.value })}
+                          className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
+                          placeholder="https://example.com/poster.jpg"
+                        />
+                      </div>
+                      {posterUploadError && activeTab === 'movies' && (
+                        <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+                          <p className="text-sm text-red-300">{posterUploadError}</p>
+                        </div>
+                      )}
+                      {posterUploadLoading && (
+                        <div className="flex items-center gap-2 text-white/70 text-sm">
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                          <span>Загрузка файла на сервер...</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <label className="block text-white/80 mb-2">URL трейлера</label>
@@ -739,27 +881,85 @@ const AdminPanel = () => {
                       placeholder="Описание сериала"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-white/80 mb-2">URL постера</label>
-                      <input
-                        type="url"
-                        value={seriesForm.posterUrl}
-                        onChange={(e) => setSeriesForm({ ...seriesForm, posterUrl: e.target.value })}
-                        className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
-                        placeholder="https://example.com/poster.jpg"
-                      />
+                  <div className="border border-white/20 rounded-lg p-4 bg-white/5">
+                    <label className="block text-white font-semibold mb-3">
+                      <FiUpload className="inline mr-2" size={18} />
+                      Постер сериала
+                    </label>
+                    <div className="space-y-3">
+                      <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        <label
+                          className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border-2 border-dashed border-white/30 bg-white/5 text-white transition-all ${
+                            posterUploadLoading 
+                              ? 'opacity-60 cursor-not-allowed' 
+                              : 'cursor-pointer hover:bg-white/10 hover:border-white/50'
+                          }`}
+                        >
+                          <FiUpload size={20} />
+                          <span className="font-medium">
+                            {posterUploadLoading ? (t?.('loading') || 'Загрузка...') : t?.('uploadPoster') || 'Загрузить файл'}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,image/webp"
+                            className="hidden"
+                            onChange={(e) => handlePosterFileUpload(e, 'series')}
+                            disabled={posterUploadLoading}
+                          />
+                        </label>
+                        {seriesForm.posterUrl && (
+                          <div className="relative">
+                            <img
+                              src={seriesForm.posterUrl}
+                              alt="Превью постера"
+                              className="h-32 w-24 rounded-lg border-2 border-white/20 object-cover shadow-xl"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setSeriesForm({ ...seriesForm, posterUrl: '' })}
+                              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-lg"
+                              title="Удалить постер"
+                            >
+                              <FiX size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-white/70 text-sm mb-1">Или введите URL вручную:</label>
+                        <input
+                          type="url"
+                          value={seriesForm.posterUrl}
+                          onChange={(e) => setSeriesForm({ ...seriesForm, posterUrl: e.target.value })}
+                          className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
+                          placeholder="https://example.com/poster.jpg"
+                        />
+                      </div>
+                      {posterUploadError && activeTab === 'series' && (
+                        <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+                          <p className="text-sm text-red-300">{posterUploadError}</p>
+                        </div>
+                      )}
+                      {posterUploadLoading && (
+                        <div className="flex items-center gap-2 text-white/70 text-sm">
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                          <span>Загрузка файла на сервер...</span>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <label className="block text-white/80 mb-2">URL трейлера</label>
-                      <input
-                        type="url"
-                        value={seriesForm.trailerUrl}
-                        onChange={(e) => setSeriesForm({ ...seriesForm, trailerUrl: e.target.value })}
-                        className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
-                        placeholder="https://youtube.com/watch?v=..."
-                      />
-                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-white/80 mb-2">URL трейлера</label>
+                    <input
+                      type="url"
+                      value={seriesForm.trailerUrl}
+                      onChange={(e) => setSeriesForm({ ...seriesForm, trailerUrl: e.target.value })}
+                      className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
+                      placeholder="https://youtube.com/watch?v=..."
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>

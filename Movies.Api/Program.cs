@@ -1,10 +1,16 @@
+using System;
 using System.Security.Claims;
 using System.Text;
+using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Movies.Api.Mapping;
+using Movies.Api.Services;
 using Movies.Application;
 using Movies.Application.Database;
 using Movies.Application.Interfaces;
@@ -18,6 +24,27 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 builder.Services.Configure<JwtOptions>(config.GetSection("JwtOptions"));
+builder.Services.Configure<S3StorageOptions>(config.GetSection(S3StorageOptions.SectionName));
+
+// AWS S3 Configuration
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+    var options = sp.GetRequiredService<IOptions<S3StorageOptions>>().Value;
+
+    if (string.IsNullOrWhiteSpace(options.BucketName) ||
+        string.IsNullOrWhiteSpace(options.Region) ||
+        string.IsNullOrWhiteSpace(options.AccessKey) ||
+        string.IsNullOrWhiteSpace(options.SecretKey))
+    {
+        throw new InvalidOperationException("S3 configuration is missing. Please set S3:BucketName, Region, AccessKey and SecretKey in configuration.");
+    }
+
+    var credentials = new BasicAWSCredentials(options.AccessKey, options.SecretKey);
+    var region = RegionEndpoint.GetBySystemName(options.Region);
+    return new AmazonS3Client(credentials, region);
+});
+
+builder.Services.AddSingleton<IFileStorageService, S3FileStorageService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -55,6 +82,13 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
+
+// Настройка лимитов для загрузки файлов
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 5 * 1024 * 1024; // 5 MB
+    options.ValueLengthLimit = 5 * 1024 * 1024;
+});
 
 // CORS configuration
 builder.Services.AddCors(options =>

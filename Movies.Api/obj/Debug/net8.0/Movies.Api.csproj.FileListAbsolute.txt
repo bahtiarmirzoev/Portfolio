@@ -275,3 +275,5 @@ C:/Users/nizam/Documents/C#/Portfolio/Movies.Api/bin/Debug/net8.0/Microsoft.Iden
 /Users/mac/Desktop/Cinema/Movies.Api/obj/Debug/net8.0/Movies.Api.pdb
 /Users/mac/Desktop/Cinema/Movies.Api/obj/Debug/net8.0/Movies.Api.genruntimeconfig.cache
 /Users/mac/Desktop/Cinema/Movies.Api/obj/Debug/net8.0/ref/Movies.Api.dll
+/Users/mac/Desktop/Cinema/Movies.Api/bin/Debug/net8.0/AWSSDK.Core.dll
+/Users/mac/Desktop/Cinema/Movies.Api/bin/Debug/net8.0/AWSSDK.S3.dll
