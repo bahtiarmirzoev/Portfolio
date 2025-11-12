@@ -60,9 +60,22 @@ const ActorsList = () => {
       });
 
       const items = result.items || [];
-      const total = result.total ?? result.totalCount ?? items.length;
+      
+      // Убираем дубликаты по ID и имени (на случай, если бэкенд вернул дубликаты)
+      const uniqueActors = items.reduce((acc, actor) => {
+        const existing = acc.find(a => 
+          a.id === actor.id || 
+          a.name?.toLowerCase().trim() === actor.name?.toLowerCase().trim()
+        );
+        if (!existing) {
+          acc.push(actor);
+        }
+        return acc;
+      }, []);
 
-      setActors(items);
+      const total = result.total ?? result.totalCount ?? uniqueActors.length;
+
+      setActors(uniqueActors);
       setTotalActors(total);
     } catch (error) {
       console.error('Error loading actors:', error);
@@ -288,8 +301,8 @@ const ActorsList = () => {
     }
 
     return (
-      <div className="grid gap-3 sm:grid-cols-2">
-        {items.slice(0, 8).map((item) => (
+      <div className="grid gap-3 sm:grid-cols-2 max-h-96 overflow-y-auto">
+        {items.map((item) => (
           <Link
             key={item.id}
             to={`/${type === 'movies' ? 'movies' : 'series'}/${item.id}`}
@@ -312,11 +325,6 @@ const ActorsList = () => {
             </div>
           </Link>
         ))}
-        {items.length > 8 && (
-          <div className="flex items-center justify-center rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/50">
-            +{items.length - 8} {t?.('more') || 'еще'}
-          </div>
-        )}
       </div>
     );
   };
@@ -532,7 +540,10 @@ const ActorsList = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03, duration: 0.5, ease: 'easeOut' }}
                       whileHover={{ y: -8, scale: 1.02 }}
-                      onClick={() => handleActorClick(actor.id)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleActorClick(actor.id);
+                      }}
                       className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 cursor-pointer backdrop-blur-2xl shadow-[0_0_60px_rgba(255,255,255,0.05)] transition-all"
                     >
                       <motion.span
@@ -581,7 +592,10 @@ const ActorsList = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.02, duration: 0.4 }}
                       whileHover={{ x: 4 }}
-                      onClick={() => handleActorClick(actor.id)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleActorClick(actor.id);
+                      }}
                       className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 cursor-pointer backdrop-blur-2xl transition-all hover:border-white/20 hover:bg-white/[0.06]"
                     >
                       <div className="flex items-center gap-4">

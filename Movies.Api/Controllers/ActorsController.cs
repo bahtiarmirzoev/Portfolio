@@ -80,9 +80,9 @@ public class ActorsController : ControllerBase
                 request.Search, 
                 token);
 
-            // Убираем дубликаты по ID и имени
+            // Убираем дубликаты по ID и имени (case-insensitive)
             var uniqueActors = actors
-                .GroupBy(a => new { a.Id, a.Name })
+                .GroupBy(a => a.Name?.Trim().ToLowerInvariant() ?? string.Empty)
                 .Select(g => g.First())
                 .Select(a => a.MapToResponse())
                 .ToList();

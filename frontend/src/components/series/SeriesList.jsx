@@ -7,7 +7,7 @@ import { FiTv, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, F
 import toast from 'react-hot-toast';
 
 const SeriesList = () => {
-  const { t } = useLanguageStore();
+  const { t, translateGenre } = useLanguageStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [series, setSeries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -655,7 +655,7 @@ const SeriesList = () => {
                                 key={idx}
                                 className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/60"
                               >
-                                {genre}
+                                {translateGenre(genre)}
                               </span>
                             ))}
                           </div>
@@ -752,7 +752,7 @@ const SeriesList = () => {
                                 key={idx}
                                 className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/60"
                               >
-                                {genre}
+                                {translateGenre(genre)}
                               </span>
                             ))}
                           </div>

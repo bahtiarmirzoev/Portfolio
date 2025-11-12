@@ -54,8 +54,10 @@ export const useAuthStore = create((set, get) => {
     }
   };
 
-  // Вызываем проверку аутентификации при инициализации
-  checkAuth();
+  // Вызываем проверку аутентификации при инициализации (асинхронно, чтобы не блокировать)
+  if (typeof window !== 'undefined') {
+    checkAuth();
+  }
 
   return {
     user: null,

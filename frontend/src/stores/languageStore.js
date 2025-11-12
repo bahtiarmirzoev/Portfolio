@@ -325,7 +325,7 @@ const translations = {
     noActorMovies: 'No movies with this actor',
     noActorSeries: 'No series with this actor',
     selectActor: 'Select an actor to see details',
-    tipExploreActor: 'Tip: open any of the actor's projects to discover more details.',
+    tipExploreActor: 'Tip: open any of the actors projects to discover more details.',
     errorLoadingActorDetails: 'Failed to load actor details',
     
     // Common
@@ -622,6 +622,79 @@ const translations = {
   },
 };
 
+// Словарь переводов жанров
+const genreTranslations = {
+  ru: {
+    'Action': 'Боевик',
+    'Adventure': 'Приключения',
+    'Animation': 'Мультфильм',
+    'Biography': 'Биография',
+    'Comedy': 'Комедия',
+    'Crime': 'Криминал',
+    'Documentary': 'Документальный',
+    'Drama': 'Драма',
+    'Family': 'Семейный',
+    'Fantasy': 'Фэнтези',
+    'History': 'История',
+    'Horror': 'Ужасы',
+    'Musical': 'Мюзикл',
+    'Mystery': 'Детектив',
+    'Romance': 'Мелодрама',
+    'Sci-Fi': 'Научная фантастика',
+    'Science Fiction': 'Научная фантастика',
+    'Sport': 'Спорт',
+    'Thriller': 'Триллер',
+    'War': 'Военный',
+    'Western': 'Вестерн',
+  },
+  en: {
+    'Action': 'Action',
+    'Adventure': 'Adventure',
+    'Animation': 'Animation',
+    'Biography': 'Biography',
+    'Comedy': 'Comedy',
+    'Crime': 'Crime',
+    'Documentary': 'Documentary',
+    'Drama': 'Drama',
+    'Family': 'Family',
+    'Fantasy': 'Fantasy',
+    'History': 'History',
+    'Horror': 'Horror',
+    'Musical': 'Musical',
+    'Mystery': 'Mystery',
+    'Romance': 'Romance',
+    'Sci-Fi': 'Sci-Fi',
+    'Science Fiction': 'Science Fiction',
+    'Sport': 'Sport',
+    'Thriller': 'Thriller',
+    'War': 'War',
+    'Western': 'Western',
+  },
+  az: {
+    'Action': 'Döyüş',
+    'Adventure': 'Macəra',
+    'Animation': 'Animasiya',
+    'Biography': 'Bioqrafiya',
+    'Comedy': 'Komediya',
+    'Crime': 'Cinayət',
+    'Documentary': 'Sənədli',
+    'Drama': 'Dram',
+    'Family': 'Ailə',
+    'Fantasy': 'Fantastika',
+    'History': 'Tarix',
+    'Horror': 'Qorxu',
+    'Musical': 'Musiqili',
+    'Mystery': 'Detektiv',
+    'Romance': 'Romantika',
+    'Sci-Fi': 'Elmi fantastika',
+    'Science Fiction': 'Elmi fantastika',
+    'Sport': 'İdman',
+    'Thriller': 'Triller',
+    'War': 'Hərbi',
+    'Western': 'Vestern',
+  },
+};
+
 export const useLanguageStore = create(
   persist(
     (set, get) => ({
@@ -630,6 +703,12 @@ export const useLanguageStore = create(
       t: (key) => {
         const state = get();
         return translations[state.language]?.[key] || key;
+      },
+      translateGenre: (genre) => {
+        const state = get();
+        if (!genre) return genre;
+        const genreKey = genre.trim();
+        return genreTranslations[state.language]?.[genreKey] || genreTranslations['en']?.[genreKey] || genre;
       },
     }),
     {

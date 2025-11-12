@@ -14,7 +14,7 @@ const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
-  const { t } = useLanguageStore();
+  const { t, translateGenre } = useLanguageStore();
   const [movie, setMovie] = useState(null);
   const [comments, setComments] = useState([]);
   const [similarMovies, setSimilarMovies] = useState([]);
@@ -306,7 +306,7 @@ const MovieDetail = () => {
                       whileHover={{ scale: 1.1 }}
                       className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white/80 text-sm font-medium transition-colors cursor-default"
                     >
-                      {genre}
+                      {translateGenre(genre)}
                     </motion.span>
                   ))}
                 </motion.div>

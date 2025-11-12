@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuthStore } from '../../stores/authStore';
-import { useLanguageStore } from '../../stores/languageStore';
+import { useAuthStore } from '../stores/authStore';
+import { useLanguageStore } from '../stores/languageStore';
 import { FiFilm, FiTv, FiHeart, FiTrendingUp, FiStar, FiArrowRight, FiZap, FiMessageSquare, FiPlay } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { moviesService } from '../services/moviesService';

@@ -15,7 +15,7 @@ const SeriesDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
-  const { t } = useLanguageStore();
+  const { t, translateGenre } = useLanguageStore();
   const [series, setSeries] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -255,7 +255,7 @@ const SeriesDetail = () => {
                       key={idx}
                       className="px-3 py-1 bg-white/10 rounded-full text-white/80 text-sm"
                     >
-                      {genre}
+                      {translateGenre(genre)}
                     </span>
                   ))}
                 </div>
