@@ -40,6 +40,7 @@ const AdminPanel = () => {
     description: '',
     posterUrl: '',
     trailerUrl: '',
+    watchUrl: '',
     genres: [],
     actors: []
   });
@@ -53,6 +54,7 @@ const AdminPanel = () => {
     description: '',
     posterUrl: '',
     trailerUrl: '',
+    watchUrl: '',
     genres: [],
     actors: [],
     totalSeasons: null,
@@ -151,13 +153,39 @@ const AdminPanel = () => {
   };
 
   const handleUpdateMovie = async () => {
+    // Валидация обязательных полей
+    if (!movieForm.title || !movieForm.title.trim()) {
+      toast.error('Название фильма обязательно');
+      return;
+    }
+    
+    if (!movieForm.year || movieForm.year < 1900 || movieForm.year > new Date().getFullYear() + 10) {
+      toast.error('Год выпуска должен быть корректным');
+      return;
+    }
+    
     try {
       setLoading(true);
-      const response = await adminService.updateMovie(editingItem.id, {
-        ...movieForm,
-        genres: movieForm.genres.filter(g => g.trim()),
-        actors: movieForm.actors.filter(a => a.trim())
-      });
+      
+      // Явно указываем поля в формате, ожидаемом API
+      const updateData = {
+        title: movieForm.title.trim(),
+        year: movieForm.year,
+        description: movieForm.description?.trim() || null,
+        posterUrl: movieForm.posterUrl?.trim() || null,
+        trailerUrl: movieForm.trailerUrl?.trim() || null,
+        watchUrl: movieForm.watchUrl?.trim() || null,
+        genres: Array.isArray(movieForm.genres) 
+          ? movieForm.genres.filter(g => g && g.trim()).map(g => g.trim())
+          : [],
+        actors: Array.isArray(movieForm.actors)
+          ? movieForm.actors.filter(a => a && a.trim()).map(a => a.trim())
+          : []
+      };
+      
+      console.log('Updating movie with data:', updateData);
+      
+      const response = await adminService.updateMovie(editingItem.id, updateData);
       toast.success('Фильм обновлен успешно!');
       setShowEditModal(false);
       setEditingItem(null);
@@ -167,6 +195,20 @@ const AdminPanel = () => {
       const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Ошибка обновления фильма';
       toast.error(errorMessage);
       console.error('Error updating movie:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Request data:', {
+        id: editingItem.id,
+        data: {
+          title: movieForm.title,
+          year: movieForm.year,
+          description: movieForm.description,
+          posterUrl: movieForm.posterUrl,
+          trailerUrl: movieForm.trailerUrl,
+          watchUrl: movieForm.watchUrl,
+          genres: movieForm.genres,
+          actors: movieForm.actors
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -381,6 +423,7 @@ const AdminPanel = () => {
       description: '',
       posterUrl: '',
       trailerUrl: '',
+      watchUrl: '',
       genres: [],
       actors: []
     });
@@ -396,6 +439,7 @@ const AdminPanel = () => {
       description: '',
       posterUrl: '',
       trailerUrl: '',
+      watchUrl: '',
       genres: [],
       actors: [],
       totalSeasons: null,
@@ -425,6 +469,7 @@ const AdminPanel = () => {
         description: item.description || '',
         posterUrl: item.posterUrl || '',
         trailerUrl: item.trailerUrl || '',
+        watchUrl: item.watchUrl || '',
         genres: item.genres || [],
         actors: item.actors?.map(a => a.name || a) || []
       });
@@ -436,6 +481,7 @@ const AdminPanel = () => {
         description: item.description || '',
         posterUrl: item.posterUrl || '',
         trailerUrl: item.trailerUrl || '',
+        watchUrl: item.watchUrl || '',
         genres: item.genres || [],
         actors: item.actors?.map(a => a.name || a) || [],
         totalSeasons: item.totalSeasons || null,
@@ -806,6 +852,16 @@ const AdminPanel = () => {
                     />
                   </div>
                   <div>
+                    <label className="block text-white/80 mb-2">Ссылка для просмотра (внешний сервис)</label>
+                    <input
+                      type="url"
+                      value={movieForm.watchUrl}
+                      onChange={(e) => setMovieForm({ ...movieForm, watchUrl: e.target.value })}
+                      className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
+                      placeholder="https://example.com/watch/..."
+                    />
+                  </div>
+                  <div>
                     <label className="block text-white/80 mb-2">Жанры (через запятую) *</label>
                     <input
                       type="text"
@@ -959,6 +1015,16 @@ const AdminPanel = () => {
                       onChange={(e) => setSeriesForm({ ...seriesForm, trailerUrl: e.target.value })}
                       className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
                       placeholder="https://youtube.com/watch?v=..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white/80 mb-2">Ссылка для просмотра (внешний сервис)</label>
+                    <input
+                      type="url"
+                      value={seriesForm.watchUrl}
+                      onChange={(e) => setSeriesForm({ ...seriesForm, watchUrl: e.target.value })}
+                      className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
+                      placeholder="https://example.com/watch/..."
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">

@@ -35,8 +35,10 @@ public class StorageController : ControllerBase
 
     [HttpPost("posters")]
     [Authorize(Roles = "admin")]
+    [Consumes("multipart/form-data")]
     [RequestSizeLimit(MaxFileSizeBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = MaxFileSizeBytes)]
+    [Microsoft.AspNetCore.Mvc.ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> UploadPoster([FromForm] IFormFile file, CancellationToken cancellationToken)
     {
         try

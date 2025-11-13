@@ -22,9 +22,9 @@ public class SeriesRepository : ISeriesRepository
 
         var result = await connection.ExecuteAsync("""
             INSERT INTO series (id, slug, title, yearofrelease, yearofend, description, 
-                posterurl, trailerurl, totalseasons, totalepisodes, isongoing)
+                posterurl, trailerurl, watchurl, totalseasons, totalepisodes, isongoing)
             VALUES (@Id, @Slug, @Title, @YearOfRelease, @YearOfEnd, @Description, 
-                @PosterUrl, @TrailerUrl, @TotalSeasons, @TotalEpisodes, @IsOngoing)
+                @PosterUrl, @TrailerUrl, @WatchUrl, @TotalSeasons, @TotalEpisodes, @IsOngoing)
         """, series, transaction);
 
         if (result > 0 && series.Genres.Any())
@@ -91,7 +91,7 @@ public class SeriesRepository : ISeriesRepository
 
         var series = await connection.QuerySingleOrDefaultAsync<Series>("""
             SELECT id, title, yearofrelease as YearOfRelease, yearofend as YearOfEnd,
-                   slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl,
+                   slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl, watchurl as WatchUrl,
                    totalseasons as TotalSeasons, totalepisodes as TotalEpisodes, 
                    isongoing as IsOngoing
             FROM series WHERE id=@id
@@ -132,7 +132,7 @@ public class SeriesRepository : ISeriesRepository
 
         var series = await connection.QuerySingleOrDefaultAsync<Series>("""
             SELECT id, title, yearofrelease as YearOfRelease, yearofend as YearOfEnd,
-                   slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl,
+                   slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl, watchurl as WatchUrl,
                    totalseasons as TotalSeasons, totalepisodes as TotalEpisodes, 
                    isongoing as IsOngoing
             FROM series WHERE slug=@slug
@@ -270,7 +270,7 @@ public class SeriesRepository : ISeriesRepository
             UPDATE series
             SET slug=@Slug, title=@Title, yearofrelease=@YearOfRelease, 
                 yearofend=@YearOfEnd, description=@Description, 
-                posterurl=@PosterUrl, trailerurl=@TrailerUrl,
+                posterurl=@PosterUrl, trailerurl=@TrailerUrl, watchurl=@WatchUrl,
                 totalseasons=@TotalSeasons, totalepisodes=@TotalEpisodes,
                 isongoing=@IsOngoing
             WHERE id=@Id
@@ -312,7 +312,7 @@ public class SeriesRepository : ISeriesRepository
 
         var seriesList = await connection.QueryAsync<Series>("""
             SELECT id, title, yearofrelease as YearOfRelease, yearofend as YearOfEnd,
-                   slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl,
+                   slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl, watchurl as WatchUrl,
                    totalseasons as TotalSeasons, totalepisodes as TotalEpisodes, 
                    isongoing as IsOngoing
             FROM series 
@@ -361,7 +361,7 @@ public class SeriesRepository : ISeriesRepository
 
         var seriesList = await connection.QueryAsync<Series>("""
             SELECT id, title, yearofrelease as YearOfRelease, yearofend as YearOfEnd,
-                   slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl,
+                   slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl, watchurl as WatchUrl,
                    totalseasons as TotalSeasons, totalepisodes as TotalEpisodes, 
                    isongoing as IsOngoing
             FROM series 
@@ -454,7 +454,7 @@ public class SeriesRepository : ISeriesRepository
 
         var seriesSql = $@"
             SELECT s.id, s.title, s.yearofrelease as YearOfRelease, s.yearofend as YearOfEnd,
-                   s.slug, s.description, s.posterurl as PosterUrl, s.trailerurl as TrailerUrl,
+                   s.slug, s.description, s.posterurl as PosterUrl, s.trailerurl as TrailerUrl, s.watchurl as WatchUrl,
                    s.totalseasons as TotalSeasons, s.totalepisodes as TotalEpisodes, 
                    s.isongoing as IsOngoing
             FROM series s 
@@ -504,7 +504,7 @@ public class SeriesRepository : ISeriesRepository
 
         var seriesList = await connection.QueryAsync<Series>("""
             SELECT id, title, yearofrelease as YearOfRelease, yearofend as YearOfEnd,
-                   slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl,
+                   slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl, watchurl as WatchUrl,
                    totalseasons as TotalSeasons, totalepisodes as TotalEpisodes, 
                    isongoing as IsOngoing
             FROM series 

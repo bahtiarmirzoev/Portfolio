@@ -14,6 +14,8 @@ public partial class Movie
     public string? PosterUrl { get; set; } 
     
     public string? TrailerUrl { get; set; }
+    
+    public string? WatchUrl { get; set; } // Ссылка на внешний киносервис для просмотра
     public required List<string> Genres { get; set; } = new();
     public double? AverageRating { get; set; }
     public List<Actor> Actors { get; set; } = new();

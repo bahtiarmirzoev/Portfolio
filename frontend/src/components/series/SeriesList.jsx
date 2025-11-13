@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { seriesService } from '../../services/seriesService';
 import { useLanguageStore } from '../../stores/languageStore';
-import { FiTv, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiPlay, FiLayers, FiCheck } from 'react-icons/fi';
+import { FiTv, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiPlay, FiLayers, FiCheck, FiExternalLink } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const SeriesList = () => {
@@ -660,6 +660,29 @@ const SeriesList = () => {
                             ))}
                           </div>
                         )}
+
+                        <motion.a
+                          href={item.watchUrl || '#'}
+                          target={item.watchUrl ? "_blank" : undefined}
+                          rel={item.watchUrl ? "noopener noreferrer" : undefined}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!item.watchUrl) {
+                              e.preventDefault();
+                              toast.error(t('watchUrlNotAvailable') || 'Ссылка для просмотра недоступна');
+                            }
+                          }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`mt-2 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-white transition-colors ${
+                            item.watchUrl 
+                              ? 'bg-white/10 hover:bg-white/20' 
+                              : 'bg-white/5 hover:bg-white/10 cursor-not-allowed opacity-60'
+                          }`}
+                        >
+                          <FiExternalLink size={16} />
+                          <span>{t('watchSeries') || 'Смотреть сериал'}</span>
+                        </motion.a>
                       </div>
                     </Link>
                   </motion.div>
@@ -757,6 +780,29 @@ const SeriesList = () => {
                             ))}
                           </div>
                         )}
+
+                        <motion.a
+                          href={item.watchUrl || '#'}
+                          target={item.watchUrl ? "_blank" : undefined}
+                          rel={item.watchUrl ? "noopener noreferrer" : undefined}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!item.watchUrl) {
+                              e.preventDefault();
+                              toast.error(t('watchUrlNotAvailable') || 'Ссылка для просмотра недоступна');
+                            }
+                          }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`mt-3 flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm text-white transition-colors ${
+                            item.watchUrl 
+                              ? 'bg-white/10 hover:bg-white/20' 
+                              : 'bg-white/5 hover:bg-white/10 cursor-not-allowed opacity-60'
+                          }`}
+                        >
+                          <FiExternalLink size={16} />
+                          <span>{t('watchSeries') || 'Смотреть сериал'}</span>
+                        </motion.a>
                       </div>
                     </Link>
                   </motion.div>

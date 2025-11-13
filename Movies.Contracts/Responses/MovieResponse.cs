@@ -9,7 +9,9 @@ public class MovieResponse
     
     public string? PosterUrl { get; init; }
     
-    public string? TrailerUrl { get; init; } 
+    public string? TrailerUrl { get; init; }
+    
+    public string? WatchUrl { get; init; } // Ссылка на внешний киносервис для просмотра 
     
     public required string Slug { get; init; }
     

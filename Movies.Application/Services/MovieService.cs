@@ -48,7 +48,8 @@ public class MovieService : IMovieService
         }
 
         await _movieRepository.UpdateMovieAsync(movie);
-        return movie;
+        // Загружаем обновленный фильм из базы данных, чтобы получить все связанные данные
+        return await _movieRepository.GetByIdAsync(movie.Id);
     }
 
     public Task<bool> DeleteMovieByIdAsync(Guid id)

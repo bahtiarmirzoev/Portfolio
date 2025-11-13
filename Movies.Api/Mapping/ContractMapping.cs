@@ -38,6 +38,7 @@ public static class ContractMapping
             Description = request.Description,
             PosterUrl = request.PosterUrl,
             TrailerUrl = request.TrailerUrl,
+            WatchUrl = request.WatchUrl,
             Genres = request.Genres.ToList(),
             Actors = actors
         });
@@ -73,6 +74,7 @@ public static class ContractMapping
             Description = request.Description,
             PosterUrl = request.PosterUrl,
             TrailerUrl = request.TrailerUrl,
+            WatchUrl = request.WatchUrl,
             Genres = request.Genres.ToList(),
             Actors = actors
         });
@@ -89,6 +91,7 @@ public static class ContractMapping
             Description = movie.Description,
             PosterUrl = movie.PosterUrl, // ✅ Используем movie.PosterUrl
             TrailerUrl = movie.TrailerUrl, // ✅ Используем movie.TrailerUrl
+            WatchUrl = movie.WatchUrl, // ✅ Используем movie.WatchUrl
             AverageRating = movie.AverageRating,
             Genres = movie.Genres.ToList(),
             Actors = movie.Actors.Select(a => new ActorResponse

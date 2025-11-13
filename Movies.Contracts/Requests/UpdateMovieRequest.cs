@@ -10,7 +10,9 @@ public class UpdateMovieRequest
     
     public string? PosterUrl { get; init; } 
     
-    public string? TrailerUrl { get; init; } 
+    public string? TrailerUrl { get; init; }
+    
+    public string? WatchUrl { get; init; } // Ссылка на внешний киносервис для просмотра 
     
     public required IEnumerable<string>  Genres { get; init; } = Enumerable.Empty<string>();
     

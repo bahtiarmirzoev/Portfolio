@@ -49,7 +49,8 @@ public class SeriesService : ISeriesService
         }
 
         await _seriesRepository.UpdateSeriesAsync(series);
-        return series;
+        // Загружаем обновленный сериал из базы данных, чтобы получить все связанные данные
+        return await _seriesRepository.GetByIdAsync(series.Id);
     }
 
     public Task<bool> DeleteSeriesByIdAsync(Guid id)

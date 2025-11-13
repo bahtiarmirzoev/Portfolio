@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { moviesService } from '../../services/moviesService';
 import { useLanguageStore } from '../../stores/languageStore';
-import { FiFilm, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiClock, FiCheck, FiPlay } from 'react-icons/fi';
+import { FiFilm, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiClock, FiCheck, FiPlay, FiExternalLink } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const MoviesList = () => {
@@ -589,6 +589,29 @@ const MoviesList = () => {
                             ))}
                           </div>
                         )}
+
+                        <motion.a
+                          href={movie.watchUrl || '#'}
+                          target={movie.watchUrl ? "_blank" : undefined}
+                          rel={movie.watchUrl ? "noopener noreferrer" : undefined}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!movie.watchUrl) {
+                              e.preventDefault();
+                              toast.error(t('watchUrlNotAvailable') || 'Ссылка для просмотра недоступна');
+                            }
+                          }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`mt-2 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-white transition-colors ${
+                            movie.watchUrl 
+                              ? 'bg-white/10 hover:bg-white/20' 
+                              : 'bg-white/5 hover:bg-white/10 cursor-not-allowed opacity-60'
+                          }`}
+                        >
+                          <FiExternalLink size={16} />
+                          <span>{t('watchMovie') || 'Смотреть фильм'}</span>
+                        </motion.a>
                       </div>
                     </Link>
                   </motion.div>
@@ -666,6 +689,29 @@ const MoviesList = () => {
                             ))}
                           </div>
                         )}
+
+                        <motion.a
+                          href={movie.watchUrl || '#'}
+                          target={movie.watchUrl ? "_blank" : undefined}
+                          rel={movie.watchUrl ? "noopener noreferrer" : undefined}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!movie.watchUrl) {
+                              e.preventDefault();
+                              toast.error(t('watchUrlNotAvailable') || 'Ссылка для просмотра недоступна');
+                            }
+                          }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`mt-3 flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm text-white transition-colors ${
+                            movie.watchUrl 
+                              ? 'bg-white/10 hover:bg-white/20' 
+                              : 'bg-white/5 hover:bg-white/10 cursor-not-allowed opacity-60'
+                          }`}
+                        >
+                          <FiExternalLink size={16} />
+                          <span>{t('watchMovie') || 'Смотреть фильм'}</span>
+                        </motion.a>
                       </div>
                     </Link>
                   </motion.div>

@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 import { useLanguageStore } from '../stores/languageStore';
-import { FiFilm, FiTv, FiHeart, FiTrendingUp, FiStar, FiArrowRight, FiZap, FiMessageSquare, FiPlay } from 'react-icons/fi';
+import { FiFilm, FiTv, FiHeart, FiTrendingUp, FiStar, FiArrowRight, FiZap, FiMessageSquare, FiPlay, FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { moviesService } from '../services/moviesService';
 import { seriesService } from '../services/seriesService';
+import toast from 'react-hot-toast';
 
 const Home = () => {
   const { isAuthenticated } = useAuthStore();
@@ -278,14 +279,29 @@ const Home = () => {
                                   <span className="text-white text-xs font-semibold">{movie.averageRating.toFixed(1)}</span>
                                 </div>
                               )}
-                              <motion.div
+                              <motion.a
+                                href={movie.watchUrl || '#'}
+                                target={movie.watchUrl ? "_blank" : undefined}
+                                rel={movie.watchUrl ? "noopener noreferrer" : undefined}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!movie.watchUrl) {
+                                    e.preventDefault();
+                                    toast.error('Ссылка для просмотра недоступна');
+                                  }
+                                }}
                                 initial={{ opacity: 0, y: 10 }}
-                                whileHover={{ opacity: 1, y: 0 }}
-                                className="mt-3 flex items-center gap-2 text-white/80 text-xs"
+                                whileHover={{ opacity: 1, y: 0, scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`mt-3 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors ${
+                                  movie.watchUrl
+                                    ? 'bg-white/20 hover:bg-white/30 text-white'
+                                    : 'bg-white/10 text-white/60 cursor-not-allowed opacity-60'
+                                }`}
                               >
-                                <FiPlay className="text-white" size={16} />
-                                <span>Смотреть</span>
-                              </motion.div>
+                                <FiExternalLink className="text-white" size={14} />
+                                <span>Смотреть фильм</span>
+                              </motion.a>
                             </div>
                           </div>
                           {movie.year && (
@@ -414,14 +430,29 @@ const Home = () => {
                                   <span className="text-white text-xs font-semibold">{series.averageRating.toFixed(1)}</span>
                                 </div>
                               )}
-                              <motion.div
+                              <motion.a
+                                href={series.watchUrl || '#'}
+                                target={series.watchUrl ? "_blank" : undefined}
+                                rel={series.watchUrl ? "noopener noreferrer" : undefined}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!series.watchUrl) {
+                                    e.preventDefault();
+                                    toast.error('Ссылка для просмотра недоступна');
+                                  }
+                                }}
                                 initial={{ opacity: 0, y: 10 }}
-                                whileHover={{ opacity: 1, y: 0 }}
-                                className="mt-3 flex items-center gap-2 text-white/80 text-xs"
+                                whileHover={{ opacity: 1, y: 0, scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`mt-3 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors ${
+                                  series.watchUrl
+                                    ? 'bg-white/20 hover:bg-white/30 text-white'
+                                    : 'bg-white/10 text-white/60 cursor-not-allowed opacity-60'
+                                }`}
                               >
-                                <FiPlay className="text-white" size={16} />
-                                <span>Смотреть</span>
-                              </motion.div>
+                                <FiExternalLink className="text-white" size={14} />
+                                <span>Смотреть сериал</span>
+                              </motion.a>
                             </div>
                           </div>
                           {series.yearOfRelease && (

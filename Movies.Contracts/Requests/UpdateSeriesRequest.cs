@@ -14,6 +14,8 @@ public class UpdateSeriesRequest
     
     public string? TrailerUrl { get; init; }
     
+    public string? WatchUrl { get; init; } // Ссылка на внешний киносервис для просмотра
+    
     public required IEnumerable<string> Genres { get; init; } = Enumerable.Empty<string>();
     
     public IEnumerable<string> Actors { get; init; } = Enumerable.Empty<string>();

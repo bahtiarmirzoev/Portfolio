@@ -7,7 +7,7 @@ import { favoritesService } from '../../services/favoritesService';
 import { ratingsService } from '../../services/ratingsService';
 import { useAuthStore } from '../../stores/authStore';
 import { useLanguageStore } from '../../stores/languageStore';
-import { FiFilm, FiHeart, FiStar, FiMessageSquare, FiArrowLeft, FiPlay } from 'react-icons/fi';
+import { FiFilm, FiHeart, FiStar, FiMessageSquare, FiArrowLeft, FiPlay, FiExternalLink } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const MovieDetail = () => {
@@ -367,6 +367,27 @@ const MovieDetail = () => {
                     <FiPlay /> {t('trailer')}
                   </motion.a>
                 )}
+
+                <motion.a
+                  href={movie.watchUrl || '#'}
+                  target={movie.watchUrl ? "_blank" : undefined}
+                  rel={movie.watchUrl ? "noopener noreferrer" : undefined}
+                  onClick={(e) => {
+                    if (!movie.watchUrl) {
+                      e.preventDefault();
+                      toast.error(t('watchUrlNotAvailable') || 'Ссылка для просмотра недоступна');
+                    }
+                  }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl border-2 transition-all ${
+                    movie.watchUrl
+                      ? 'btn-primary'
+                      : 'bg-white/5 border-white/20 text-white/60 cursor-not-allowed hover:bg-white/5'
+                  }`}
+                >
+                  <FiExternalLink /> {t('watchMovie') || 'Смотреть фильм'}
+                </motion.a>
               </div>
             </div>
           </div>

@@ -7,7 +7,7 @@ import { seriesRatingsService } from '../../services/seriesRatingsService';
 import { favoritesService } from '../../services/favoritesService';
 import { useAuthStore } from '../../stores/authStore';
 import { useLanguageStore } from '../../stores/languageStore';
-import { FiTv, FiArrowLeft, FiPlay, FiCalendar, FiStar, FiMessageSquare, FiHeart } from 'react-icons/fi';
+import { FiTv, FiArrowLeft, FiPlay, FiCalendar, FiStar, FiMessageSquare, FiHeart, FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -308,6 +308,27 @@ const SeriesDetail = () => {
                     <FiPlay /> {t('trailer')}
                   </motion.a>
                 )}
+
+                <motion.a
+                  href={series.watchUrl || '#'}
+                  target={series.watchUrl ? "_blank" : undefined}
+                  rel={series.watchUrl ? "noopener noreferrer" : undefined}
+                  onClick={(e) => {
+                    if (!series.watchUrl) {
+                      e.preventDefault();
+                      toast.error(t('watchUrlNotAvailable') || 'Ссылка для просмотра недоступна');
+                    }
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl border-2 transition-all ${
+                    series.watchUrl
+                      ? 'btn-primary'
+                      : 'bg-white/5 border-white/20 text-white/60 cursor-not-allowed hover:bg-white/5'
+                  }`}
+                >
+                  <FiExternalLink /> {t('watchSeries') || 'Смотреть сериал'}
+                </motion.a>
                 {isAuthenticated && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}

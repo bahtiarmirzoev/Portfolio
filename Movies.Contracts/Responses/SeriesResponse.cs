@@ -18,6 +18,8 @@ public class SeriesResponse
     
     public string? TrailerUrl { get; init; }
     
+    public string? WatchUrl { get; init; } // Ссылка на внешний киносервис для просмотра
+    
     public double? AverageRating { get; init; }
     
     public required IEnumerable<string> Genres { get; init; } = Enumerable.Empty<string>();

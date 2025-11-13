@@ -19,6 +19,7 @@ using Movies.Application.Options;
 using Movies.Application.Repositories;
 using Movies.Application.Services;
 using Movies.Application.Validators;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -76,6 +77,20 @@ builder.Services.AddSwaggerGen(c =>
             new string[] {}
         }
     });
+
+    // 🔹 Configure Swagger to handle file uploads
+    c.MapType<Microsoft.AspNetCore.Http.IFormFile>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Format = "binary"
+    });
+    
+    // Используем CustomOperationIds для правильной обработки операций
+    c.CustomOperationIds(apiDesc => apiDesc.TryGetMethodInfo(out var methodInfo) 
+        ? methodInfo.Name 
+        : null);
+    
+    c.OperationFilter<FileUploadOperationFilter>();
 });
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

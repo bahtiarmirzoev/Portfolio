@@ -27,10 +27,22 @@ public class DbInitializer
                 description TEXT,
                 posterurl TEXT,
                 trailerurl TEXT,
+                watchurl TEXT,
                 totalseasons INTEGER,
                 totalepisodes INTEGER,
                 isongoing BOOLEAN NOT NULL DEFAULT false
             );
+            
+            -- Добавляем колонку watchurl, если она не существует (для существующих баз данных)
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'series' AND column_name = 'watchurl'
+                ) THEN
+                    ALTER TABLE series ADD COLUMN watchurl TEXT;
+                END IF;
+            END $$;
             
             -- Создание индексов для series
             CREATE INDEX IF NOT EXISTS idx_series_slug ON series(slug);
@@ -126,8 +138,20 @@ public class DbInitializer
                 yearofrelease INTEGER NOT NULL,
                 description TEXT,
                 posterurl TEXT,
-                trailerurl TEXT
+                trailerurl TEXT,
+                watchurl TEXT
             );
+            
+            -- Добавляем колонку watchurl, если она не существует (для существующих баз данных)
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'movies' AND column_name = 'watchurl'
+                ) THEN
+                    ALTER TABLE movies ADD COLUMN watchurl TEXT;
+                END IF;
+            END $$;
             """);
 
         // Таблица актеров
