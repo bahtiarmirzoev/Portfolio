@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using Movies.Application.Interfaces;
+using Movies.Application.Models;
 using Movies.Application.Options;
 
 namespace Movies.Application.Services;

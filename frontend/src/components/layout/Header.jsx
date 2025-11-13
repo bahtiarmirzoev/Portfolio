@@ -17,7 +17,8 @@ import {
   FiCheck,
   FiShield,
   FiMoreHorizontal,
-  FiSettings
+  FiSettings,
+  FiHome
 } from 'react-icons/fi';
 
 const Header = () => {
@@ -65,6 +66,7 @@ const Header = () => {
   };
 
   const navLinks = [
+    { to: '/', label: t('home') || 'Главная', icon: FiHome },
     { to: '/movies', label: t('movies'), icon: FiFilm },
     { to: '/series', label: t('series'), icon: FiTv },
     { to: '/actors', label: t('actors'), icon: FiUser },
