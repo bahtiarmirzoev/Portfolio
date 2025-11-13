@@ -279,14 +279,13 @@ const Home = () => {
                                   <span className="text-white text-xs font-semibold">{movie.averageRating.toFixed(1)}</span>
                                 </div>
                               )}
-                              <motion.a
-                                href={movie.watchUrl || '#'}
-                                target={movie.watchUrl ? "_blank" : undefined}
-                                rel={movie.watchUrl ? "noopener noreferrer" : undefined}
+                              <motion.button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  if (!movie.watchUrl) {
-                                    e.preventDefault();
+                                  e.preventDefault();
+                                  if (movie.watchUrl) {
+                                    window.open(movie.watchUrl, '_blank', 'noopener,noreferrer');
+                                  } else {
                                     toast.error('Ссылка для просмотра недоступна');
                                   }
                                 }}
@@ -301,7 +300,7 @@ const Home = () => {
                               >
                                 <FiExternalLink className="text-white" size={14} />
                                 <span>Смотреть фильм</span>
-                              </motion.a>
+                              </motion.button>
                             </div>
                           </div>
                           {movie.year && (
@@ -430,14 +429,13 @@ const Home = () => {
                                   <span className="text-white text-xs font-semibold">{series.averageRating.toFixed(1)}</span>
                                 </div>
                               )}
-                              <motion.a
-                                href={series.watchUrl || '#'}
-                                target={series.watchUrl ? "_blank" : undefined}
-                                rel={series.watchUrl ? "noopener noreferrer" : undefined}
+                              <motion.button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  if (!series.watchUrl) {
-                                    e.preventDefault();
+                                  e.preventDefault();
+                                  if (series.watchUrl) {
+                                    window.open(series.watchUrl, '_blank', 'noopener,noreferrer');
+                                  } else {
                                     toast.error('Ссылка для просмотра недоступна');
                                   }
                                 }}
@@ -452,7 +450,7 @@ const Home = () => {
                               >
                                 <FiExternalLink className="text-white" size={14} />
                                 <span>Смотреть сериал</span>
-                              </motion.a>
+                              </motion.button>
                             </div>
                           </div>
                           {series.yearOfRelease && (

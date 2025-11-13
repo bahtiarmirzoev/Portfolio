@@ -15,7 +15,6 @@ import ActorDetail from './components/actors/ActorDetail';
 import AdminPanel from './components/admin/AdminPanel';
 import Layout from './components/layout/Layout';
 import AiAssistant from './components/ai/AiAssistant';
-import { AnimatePresence } from 'framer-motion';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
@@ -69,8 +68,7 @@ const PublicRoute = ({ children }) => {
 
 function AppRoutes() {
   return (
-    <AnimatePresence mode="wait">
-      <Routes>
+    <Routes>
         <Route
           path="/sign-in"
           element={
@@ -181,7 +179,6 @@ function AppRoutes() {
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </AnimatePresence>
   );
 }
 
