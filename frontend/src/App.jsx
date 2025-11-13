@@ -14,6 +14,7 @@ import ActorsList from './components/actors/ActorsList';
 import ActorDetail from './components/actors/ActorDetail';
 import AdminPanel from './components/admin/AdminPanel';
 import Layout from './components/layout/Layout';
+import AiAssistant from './components/ai/AiAssistant';
 import { AnimatePresence } from 'framer-motion';
 
 const ProtectedRoute = ({ children }) => {
@@ -188,6 +189,7 @@ function App() {
   return (
     <Router>
       <AppRoutes />
+      <AiAssistant />
     </Router>
   );
 }

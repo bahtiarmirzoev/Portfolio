@@ -26,6 +26,7 @@ var config = builder.Configuration;
 
 builder.Services.Configure<JwtOptions>(config.GetSection("JwtOptions"));
 builder.Services.Configure<S3StorageOptions>(config.GetSection(S3StorageOptions.SectionName));
+builder.Services.Configure<AiOptions>(config.GetSection(AiOptions.SectionName));
 
 // AWS S3 Configuration
 builder.Services.AddSingleton<IAmazonS3>(sp =>
@@ -149,6 +150,36 @@ builder.Services.AddScoped<ISeriesRatingRepository, SeriesRatingRepository>();
 builder.Services.AddScoped<ISeriesRatingService, SeriesRatingService>();
 builder.Services.AddScoped<ISeriesCommentRepository, SeriesCommentRepository>();
 builder.Services.AddScoped<ISeriesCommentService, SeriesCommentService>();
+
+// AI Assistant Service
+builder.Services.AddHttpClient<IAiAssistantService, AiAssistantService>((sp, client) =>
+{
+    var options = sp.GetRequiredService<IOptions<AiOptions>>().Value;
+    client.Timeout = TimeSpan.FromSeconds(60);
+    
+    // Устанавливаем BaseAddress в зависимости от провайдера
+    var baseUrl = options.Provider.ToLower() switch
+    {
+        "groq" => "https://api.groq.com",
+        "huggingface" => "https://api-inference.huggingface.co",
+        "openai" => "https://api.openai.com",
+        _ => "https://api.groq.com"
+    };
+    client.BaseAddress = new Uri(baseUrl);
+    
+    if (!string.IsNullOrEmpty(options.ApiKey))
+    {
+        // Для Hugging Face используется заголовок "Authorization" с Bearer токеном
+        // Для Groq и OpenAI тоже используется "Authorization"
+        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.ApiKey}");
+    }
+    
+    // Hugging Face требует дополнительный заголовок
+    if (options.Provider.ToLower() == "huggingface")
+    {
+        client.DefaultRequestHeaders.Add("Accept", "application/json");
+    }
+});
 
 var jwtSettings = config.GetSection("JwtOptions");
 
