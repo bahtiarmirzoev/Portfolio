@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from './stores/authStore';
 import SignIn from './components/auth/SignIn';
 import SignUp from './components/auth/SignUp';
@@ -54,8 +55,22 @@ const AdminRoute = ({ children }) => {
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
+  const [timeoutReached, setTimeoutReached] = useState(false);
 
-  if (loading) {
+  // Таймаут для loading - если загрузка длится больше 2 секунд, показываем страницу
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        setTimeoutReached(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    } else {
+      setTimeoutReached(false);
+    }
+  }, [loading]);
+
+  // Если загрузка и таймаут не достигнут, показываем спиннер
+  if (loading && !timeoutReached) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
@@ -63,7 +78,13 @@ const PublicRoute = ({ children }) => {
     );
   }
 
-  return !isAuthenticated ? children : <Navigate to="/" replace />;
+  // Если пользователь уже аутентифицирован, перенаправляем на главную
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  // Показываем страницу входа/регистрации
+  return children;
 };
 
 function AppRoutes() {

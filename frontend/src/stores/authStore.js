@@ -9,7 +9,7 @@ export const useAuthStore = create((set, get) => {
     try {
       const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) {
-        set({ loading: false });
+        set({ loading: false, isAuthenticated: false });
         return;
       }
 
@@ -48,9 +48,8 @@ export const useAuthStore = create((set, get) => {
         isAdmin: false,
         userRoles: [],
         user: null,
+        loading: false,
       });
-    } finally {
-      set({ loading: false });
     }
   };
 
