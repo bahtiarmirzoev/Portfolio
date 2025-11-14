@@ -151,9 +151,6 @@ const Favorites = () => {
               }`}
             >
               {tab === 'all' ? t('all') : tab === 'movies' ? t('movies') : t('series')}
-              {tab === 'all' && ` (${favorites.length})`}
-              {tab === 'movies' && ` (${moviesCount})`}
-              {tab === 'series' && ` (${seriesCount})`}
             </motion.button>
           ))}
         </div>

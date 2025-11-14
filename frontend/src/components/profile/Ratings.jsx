@@ -189,30 +189,24 @@ const Ratings = () => {
         
         {/* Tabs */}
         <div className="flex gap-2">
-          {['all', 'movies', 'series'].map((tab) => {
-            const count = tab === 'all' 
-              ? ratings.length 
-              : ratings.filter(r => r.type === tab.slice(0, -1)).length;
-            return (
-              <motion.button
-                key={tab}
-                onClick={() => {
-                  setActiveTab(tab);
-                  setRatings([]);
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  activeTab === tab
-                    ? 'bg-white text-black font-semibold'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                {tab === 'all' ? t('all') : tab === 'movies' ? t('movies') : t('series')}
-                {` (${count})`}
-              </motion.button>
-            );
-          })}
+          {['all', 'movies', 'series'].map((tab) => (
+            <motion.button
+              key={tab}
+              onClick={() => {
+                setActiveTab(tab);
+                setRatings([]);
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-4 py-2 rounded-lg transition-all ${
+                activeTab === tab
+                  ? 'bg-white text-black font-semibold'
+                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+              }`}
+            >
+              {tab === 'all' ? t('all') : tab === 'movies' ? t('movies') : t('series')}
+            </motion.button>
+          ))}
         </div>
         
         <p className="text-white/60">

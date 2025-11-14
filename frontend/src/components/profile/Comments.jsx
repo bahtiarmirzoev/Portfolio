@@ -29,23 +29,102 @@ const Comments = () => {
       // Загружаем комментарии к фильмам
       if (activeTab === 'all' || activeTab === 'movies') {
         try {
-          // Пока используем старый метод, так как нет эндпоинта для всех комментариев пользователя
-          const movies = await moviesService.getAll({ take: 100 });
-          for (const movie of movies.items || []) {
-            try {
-              const movieComments = await commentsService.getMovieComments(movie.id);
-              const userComments = movieComments.map(comment => ({
-                ...comment,
-                movie: movie,
-                type: 'movie',
-              }));
-              allComments.push(...userComments);
-            } catch (error) {
-              // Пропускаем фильмы без комментариев
+          console.log('Loading movie comments...');
+          const response = await commentsService.getMyComments();
+          console.log('Raw response from getMyComments:', response);
+          console.log('Response type:', typeof response);
+          console.log('Is array:', Array.isArray(response));
+          
+          // Обрабатываем разные форматы ответа
+          let commentsArray = [];
+          if (Array.isArray(response)) {
+            commentsArray = response;
+          } else if (response && typeof response === 'object') {
+            // Проверяем все возможные поля
+            if (Array.isArray(response.items)) {
+              commentsArray = response.items;
+            } else if (Array.isArray(response.data)) {
+              commentsArray = response.data;
+            } else if (Array.isArray(response.comments)) {
+              commentsArray = response.comments;
+            } else {
+              // Если это не массив, попробуем преобразовать в массив
+              commentsArray = [response];
             }
           }
+          
+          console.log('Processed comments array length:', commentsArray.length);
+          console.log('First comment:', commentsArray[0]);
+          
+          if (commentsArray.length === 0) {
+            console.warn('No movie comments found');
+          }
+          
+          const movieCommentsWithDetails = await Promise.all(
+            commentsArray.map(async (comment, index) => {
+              try {
+                console.log(`Processing comment ${index}:`, comment);
+                
+                // Обрабатываем разные форматы полей (camelCase и PascalCase)
+                const movieId = comment.movieId || comment.MovieId || comment.movie_id;
+                const commentId = comment.id || comment.Id || comment.comment_id;
+                const userId = comment.userId || comment.UserId || comment.user_id;
+                const content = comment.content || comment.Content;
+                const createdAt = comment.createdAt || comment.CreatedAt || comment.created_at;
+                const updatedAt = comment.updatedAt || comment.UpdatedAt || comment.updated_at;
+                
+                console.log(`Comment ${index} - movieId:`, movieId, 'commentId:', commentId);
+                
+                if (!movieId) {
+                  console.error(`Comment ${index} has no movieId:`, comment);
+                  return null;
+                }
+                
+                if (!commentId) {
+                  console.error(`Comment ${index} has no id:`, comment);
+                  return null;
+                }
+                
+                console.log(`Loading movie details for movieId: ${movieId}`);
+                const movie = await moviesService.getById(movieId);
+                console.log(`Movie loaded:`, movie ? movie.title || movie.Title : 'NOT FOUND');
+                
+                if (!movie) {
+                  console.warn(`Movie not found for ID: ${movieId}`);
+                  return null;
+                }
+                
+                const processedComment = {
+                  id: commentId,
+                  movieId: movieId,
+                  userId: userId,
+                  content: content,
+                  createdAt: createdAt,
+                  updatedAt: updatedAt,
+                  movie: movie,
+                  type: 'movie',
+                };
+                
+                console.log(`Processed comment ${index}:`, processedComment);
+                return processedComment;
+              } catch (error) {
+                console.error(`Error processing comment ${index}:`, error);
+                console.error('Comment data:', comment);
+                return null;
+              }
+            })
+          );
+          
+          const validComments = movieCommentsWithDetails.filter(Boolean);
+          console.log(`Valid movie comments count: ${validComments.length}`);
+          allComments.push(...validComments);
         } catch (error) {
           console.error('Error loading movie comments:', error);
+          console.error('Error message:', error.message);
+          console.error('Error response:', error.response?.data);
+          console.error('Error status:', error.response?.status);
+          console.error('Error config:', error.config);
+          toast.error(`Ошибка загрузки комментариев к фильмам: ${error.message}`);
         }
       }
 
@@ -73,10 +152,14 @@ const Comments = () => {
         }
       }
 
+      console.log('Loaded comments:', allComments);
+      console.log('Movie comments count:', allComments.filter(c => c.type === 'movie').length);
+      console.log('Series comments count:', allComments.filter(c => c.type === 'series').length);
       setComments(allComments);
     } catch (error) {
       toast.error(t('errorLoadingComments'));
-      console.error(error);
+      console.error('Error loading comments:', error);
+      console.error('Error response:', error.response?.data);
     } finally {
       setLoading(false);
     }
@@ -91,9 +174,19 @@ const Comments = () => {
     try {
       let updated;
       if (comment.type === 'movie') {
-        updated = await commentsService.updateComment(comment.movieId, comment.id, editContent);
+        const movieId = comment.movieId || comment.movie?.id;
+        if (!movieId) {
+          toast.error('Не удалось определить ID фильма');
+          return;
+        }
+        updated = await commentsService.updateComment(movieId, comment.id, editContent);
       } else {
-        updated = await seriesCommentsService.updateComment(comment.seriesId, comment.id, editContent);
+        const seriesId = comment.seriesId || comment.series?.id;
+        if (!seriesId) {
+          toast.error('Не удалось определить ID сериала');
+          return;
+        }
+        updated = await seriesCommentsService.updateComment(seriesId, comment.id, editContent);
       }
       setComments(prev =>
         prev.map(c => c.id === comment.id ? { ...c, ...updated } : c)
@@ -102,6 +195,7 @@ const Comments = () => {
       setEditContent('');
       toast.success(t('commentUpdated'));
     } catch (error) {
+      console.error('Error updating comment:', error);
       toast.error(t('commentError'));
     }
   };
@@ -111,13 +205,24 @@ const Comments = () => {
 
     try {
       if (comment.type === 'movie') {
-        await commentsService.deleteComment(comment.movieId, comment.id);
+        const movieId = comment.movieId || comment.movie?.id;
+        if (!movieId) {
+          toast.error('Не удалось определить ID фильма');
+          return;
+        }
+        await commentsService.deleteComment(movieId, comment.id);
       } else {
-        await seriesCommentsService.deleteComment(comment.seriesId, comment.id);
+        const seriesId = comment.seriesId || comment.series?.id;
+        if (!seriesId) {
+          toast.error('Не удалось определить ID сериала');
+          return;
+        }
+        await seriesCommentsService.deleteComment(seriesId, comment.id);
       }
       setComments(prev => prev.filter(c => c.id !== comment.id));
       toast.success(t('commentDeleted'));
     } catch (error) {
+      console.error('Error deleting comment:', error);
       toast.error(t('commentError'));
     }
   };
@@ -176,30 +281,24 @@ const Comments = () => {
         
         {/* Tabs */}
         <div className="flex gap-2 mb-4">
-          {['all', 'movies', 'series'].map((tab) => {
-            const count = tab === 'all' 
-              ? comments.length 
-              : comments.filter(c => c.type === tab.slice(0, -1)).length;
-            return (
-              <motion.button
-                key={tab}
-                onClick={() => {
-                  setActiveTab(tab);
-                  setComments([]);
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  activeTab === tab
-                    ? 'bg-white text-black font-semibold'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                {tab === 'all' ? t('all') : tab === 'movies' ? t('movies') : t('series')}
-                {` (${count})`}
-              </motion.button>
-            );
-          })}
+          {['all', 'movies', 'series'].map((tab) => (
+            <motion.button
+              key={tab}
+              onClick={() => {
+                setActiveTab(tab);
+                setComments([]);
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-4 py-2 rounded-lg transition-all ${
+                activeTab === tab
+                  ? 'bg-white text-black font-semibold'
+                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+              }`}
+            >
+              {tab === 'all' ? t('all') : tab === 'movies' ? t('movies') : t('series')}
+            </motion.button>
+          ))}
         </div>
         
         <p className="text-white/60">
@@ -228,7 +327,7 @@ const Comments = () => {
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <Link to={comment.type === 'movie' ? `/movies/${comment.movieId}` : `/series/${comment.seriesId}`}>
+                <Link to={comment.type === 'movie' ? `/movies/${comment.movieId || comment.movie?.id}` : `/series/${comment.seriesId || comment.series?.id}`}>
                   <div className="flex items-center gap-2 mb-1">
                     {comment.type === 'movie' ? (
                       <FiFilm className="text-white/40" size={16} />
@@ -236,7 +335,9 @@ const Comments = () => {
                       <FiTv className="text-white/40" size={16} />
                     )}
                     <h3 className="text-lg font-semibold text-white hover:text-white/80 transition-colors">
-                      {comment.type === 'movie' ? (comment.movie?.title || t('movie')) : (comment.series?.title || t('series'))}
+                      {comment.type === 'movie' 
+                        ? (comment.movie?.title || comment.movie?.Title || t('movie')) 
+                        : (comment.series?.title || comment.series?.Title || t('series'))}
                     </h3>
                   </div>
                 </Link>

@@ -21,7 +21,7 @@ public class CommentsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "user,trusted_user")]
+    [Authorize(Roles = "user,trusted_user,admin")]
     public async Task<IActionResult> CreateComment(
         [FromRoute] Guid movieId,
         [FromBody] CreateCommentRequest request,
