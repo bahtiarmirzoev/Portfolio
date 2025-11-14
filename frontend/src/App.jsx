@@ -19,8 +19,22 @@ import AiAssistant from './components/ai/AiAssistant';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
+  const [timeoutReached, setTimeoutReached] = useState(false);
 
-  if (loading) {
+  // Таймаут для loading - если загрузка длится больше 3 секунд, показываем страницу или редирект
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        setTimeoutReached(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else {
+      setTimeoutReached(false);
+    }
+  }, [loading]);
+
+  // Если загрузка и таймаут не достигнут, показываем спиннер
+  if (loading && !timeoutReached) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
@@ -28,13 +42,28 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
+  // Если таймаут достигнут, проверяем аутентификацию
   return isAuthenticated ? children : <Navigate to="/sign-in" replace />;
 };
 
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, isAdmin, loading } = useAuthStore();
+  const [timeoutReached, setTimeoutReached] = useState(false);
 
-  if (loading) {
+  // Таймаут для loading - если загрузка длится больше 3 секунд, показываем страницу или редирект
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        setTimeoutReached(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else {
+      setTimeoutReached(false);
+    }
+  }, [loading]);
+
+  // Если загрузка и таймаут не достигнут, показываем спиннер
+  if (loading && !timeoutReached) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
@@ -42,6 +71,7 @@ const AdminRoute = ({ children }) => {
     );
   }
 
+  // Если таймаут достигнут, проверяем аутентификацию и права
   if (!isAuthenticated) {
     return <Navigate to="/sign-in" replace />;
   }
@@ -205,7 +235,12 @@ function AppRoutes() {
 
 function App() {
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <AppRoutes />
       <AiAssistant />
     </Router>

@@ -22,7 +22,7 @@ import {
 import toast from 'react-hot-toast';
 
 const AdminPanel = () => {
-  const { isAdmin } = useAuthStore();
+  const { isAdmin, loading: authLoading } = useAuthStore();
   const { t } = useLanguageStore();
   const [activeTab, setActiveTab] = useState('movies');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -70,6 +70,15 @@ const AdminPanel = () => {
     biography: ''
   });
 
+  // Показываем загрузку, пока проверяется статус администратора
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -96,10 +105,31 @@ const AdminPanel = () => {
     try {
       setLoading(true);
       const response = await moviesService.getAll({ take: 100 });
-      setMovies(response.items || []);
+      console.log('Movies API response:', response);
+      
+      // Обрабатываем разные форматы ответа
+      let moviesData = [];
+      if (Array.isArray(response)) {
+        moviesData = response;
+      } else if (response?.items && Array.isArray(response.items)) {
+        moviesData = response.items;
+      } else if (response?.Items && Array.isArray(response.Items)) {
+        moviesData = response.Items;
+      } else if (response?.data && Array.isArray(response.data)) {
+        moviesData = response.data;
+      } else {
+        console.warn('Unexpected response format:', response);
+        moviesData = [];
+      }
+      
+      console.log('Parsed movies:', moviesData);
+      setMovies(moviesData);
     } catch (error) {
       toast.error('Ошибка загрузки фильмов');
-      console.error(error);
+      console.error('Error loading movies:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      setMovies([]);
     } finally {
       setLoading(false);
     }
@@ -109,10 +139,31 @@ const AdminPanel = () => {
     try {
       setLoading(true);
       const response = await seriesService.getAll({ take: 100 });
-      setSeries(response.items || []);
+      console.log('Series API response:', response);
+      
+      // Обрабатываем разные форматы ответа
+      let seriesData = [];
+      if (Array.isArray(response)) {
+        seriesData = response;
+      } else if (response?.items && Array.isArray(response.items)) {
+        seriesData = response.items;
+      } else if (response?.Items && Array.isArray(response.Items)) {
+        seriesData = response.Items;
+      } else if (response?.data && Array.isArray(response.data)) {
+        seriesData = response.data;
+      } else {
+        console.warn('Unexpected response format:', response);
+        seriesData = [];
+      }
+      
+      console.log('Parsed series:', seriesData);
+      setSeries(seriesData);
     } catch (error) {
       toast.error('Ошибка загрузки сериалов');
-      console.error(error);
+      console.error('Error loading series:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      setSeries([]);
     } finally {
       setLoading(false);
     }
@@ -121,11 +172,32 @@ const AdminPanel = () => {
   const loadActors = async () => {
     try {
       setLoading(true);
-      const { items } = await actorsService.getAll({ pageSize: 200 });
-      setActors(Array.isArray(items) ? items : []);
+      const response = await actorsService.getAll({ pageSize: 200 });
+      console.log('Actors API response:', response);
+      
+      // Обрабатываем разные форматы ответа
+      let actorsData = [];
+      if (Array.isArray(response)) {
+        actorsData = response;
+      } else if (response?.items && Array.isArray(response.items)) {
+        actorsData = response.items;
+      } else if (response?.Items && Array.isArray(response.Items)) {
+        actorsData = response.Items;
+      } else if (response?.data && Array.isArray(response.data)) {
+        actorsData = response.data;
+      } else {
+        console.warn('Unexpected response format:', response);
+        actorsData = [];
+      }
+      
+      console.log('Parsed actors:', actorsData);
+      setActors(actorsData);
     } catch (error) {
       toast.error('Ошибка загрузки актеров');
-      console.error(error);
+      console.error('Error loading actors:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      setActors([]);
     } finally {
       setLoading(false);
     }
@@ -498,11 +570,15 @@ const AdminPanel = () => {
     setShowEditModal(true);
   };
 
-  // Load data when tab changes
+  // Load data when component mounts and when tab changes
   useEffect(() => {
-    if (activeTab === 'movies') loadMovies();
-    else if (activeTab === 'series') loadSeries();
-    else if (activeTab === 'actors') loadActors();
+    if (activeTab === 'movies') {
+      loadMovies();
+    } else if (activeTab === 'series') {
+      loadSeries();
+    } else if (activeTab === 'actors') {
+      loadActors();
+    }
   }, [activeTab]);
 
   return (

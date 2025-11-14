@@ -14,7 +14,6 @@ export const useAuthStore = create((set, get) => {
       }
 
       await authService.checkAuth();
-      set({ isAuthenticated: true });
       
       const updateUserRoles = (token) => {
         if (!token) {
@@ -35,11 +34,14 @@ export const useAuthStore = create((set, get) => {
       // Загружаем данные пользователя
       try {
         const userData = await authService.getCurrentUser();
-        set({ user: userData });
+        set({ user: userData, isAuthenticated: true, loading: false });
       } catch (error) {
         console.error('Failed to load user data:', error);
+        // Даже если не удалось загрузить данные пользователя, считаем аутентификацию успешной
+        set({ isAuthenticated: true, loading: false });
       }
     } catch (error) {
+      console.error('Auth check failed:', error);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       set({
@@ -87,7 +89,6 @@ export const useAuthStore = create((set, get) => {
         const tokenData = await authService.signIn(username, password);
         localStorage.setItem('accessToken', tokenData.accessToken);
         localStorage.setItem('refreshToken', tokenData.refreshToken);
-        set({ isAuthenticated: true });
         
         const updateUserRoles = (token) => {
           if (!token) {
@@ -108,9 +109,11 @@ export const useAuthStore = create((set, get) => {
         // Загружаем данные пользователя
         try {
           const userData = await authService.getCurrentUser();
-          set({ user: userData });
+          set({ user: userData, isAuthenticated: true, loading: false });
         } catch (error) {
           console.error('Failed to load user data:', error);
+          // Даже если не удалось загрузить данные пользователя, считаем вход успешным
+          set({ isAuthenticated: true, loading: false });
         }
         
         toast.success('Вход выполнен успешно!');
@@ -118,6 +121,7 @@ export const useAuthStore = create((set, get) => {
       } catch (error) {
         const message = error.response?.data?.error || error.response?.data || 'Неверное имя пользователя или пароль';
         toast.error(message);
+        set({ loading: false });
         return { success: false, error: message };
       }
     },

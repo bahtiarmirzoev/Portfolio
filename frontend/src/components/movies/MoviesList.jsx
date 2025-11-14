@@ -590,14 +590,13 @@ const MoviesList = () => {
                           </div>
                         )}
 
-                        <motion.a
-                          href={movie.watchUrl || '#'}
-                          target={movie.watchUrl ? "_blank" : undefined}
-                          rel={movie.watchUrl ? "noopener noreferrer" : undefined}
+                        <motion.button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!movie.watchUrl) {
-                              e.preventDefault();
+                            e.preventDefault();
+                            if (movie.watchUrl) {
+                              window.open(movie.watchUrl, '_blank', 'noopener,noreferrer');
+                            } else {
                               toast.error(t('watchUrlNotAvailable') || 'Ссылка для просмотра недоступна');
                             }
                           }}
@@ -611,7 +610,7 @@ const MoviesList = () => {
                         >
                           <FiExternalLink size={16} />
                           <span>{t('watchMovie') || 'Смотреть фильм'}</span>
-                        </motion.a>
+                        </motion.button>
                       </div>
                     </Link>
                   </motion.div>
@@ -690,14 +689,13 @@ const MoviesList = () => {
                           </div>
                         )}
 
-                        <motion.a
-                          href={movie.watchUrl || '#'}
-                          target={movie.watchUrl ? "_blank" : undefined}
-                          rel={movie.watchUrl ? "noopener noreferrer" : undefined}
+                        <motion.button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!movie.watchUrl) {
-                              e.preventDefault();
+                            e.preventDefault();
+                            if (movie.watchUrl) {
+                              window.open(movie.watchUrl, '_blank', 'noopener,noreferrer');
+                            } else {
                               toast.error(t('watchUrlNotAvailable') || 'Ссылка для просмотра недоступна');
                             }
                           }}
@@ -711,7 +709,7 @@ const MoviesList = () => {
                         >
                           <FiExternalLink size={16} />
                           <span>{t('watchMovie') || 'Смотреть фильм'}</span>
-                        </motion.a>
+                        </motion.button>
                       </div>
                     </Link>
                   </motion.div>
