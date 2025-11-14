@@ -70,12 +70,9 @@ const SignIn = () => {
 
             <div className="p-8 md:p-10">
               <div className="mb-8">
-                <h1 className="text-3xl font-semibold text-white tracking-tight mb-2">
+                <h1 className="text-3xl font-semibold text-white tracking-tight">
                   {t('signIn')}
                 </h1>
-                <p className="text-white/50 text-sm">
-                  {t('signInSubtitle') || t('signInTitle')}
-                </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -120,8 +117,7 @@ const SignIn = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-white/30">{t('secureLogin') || 'Secure login area'}</span>
+                <div className="flex items-center justify-end text-sm">
                   <Link
                     to="/forgot-password"
                     className="text-white/60 hover:text-white transition-colors underline-offset-2 hover:underline"

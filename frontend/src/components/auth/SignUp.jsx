@@ -90,12 +90,9 @@ const SignUp = () => {
 
             <div className="p-8 md:p-10">
               <div className="mb-8">
-                <h1 className="text-3xl font-semibold text-white tracking-tight mb-2">
+                <h1 className="text-3xl font-semibold text-white tracking-tight">
                   {t('createAccount')}
                 </h1>
-                <p className="text-white/50 text-sm">
-                  {t('signUpSubtitle') || t('signUpTitle')}
-                </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
