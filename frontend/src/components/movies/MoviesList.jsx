@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { moviesService } from '../../services/moviesService';
 import { useLanguageStore } from '../../stores/languageStore';
-import { FiFilm, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiClock, FiCheck, FiPlay, FiExternalLink } from 'react-icons/fi';
+import { FiFilm, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiClock, FiCheck, FiPlay, FiExternalLink, FiChevronLeft, FiChevronRight, FiChevronsLeft, FiChevronsRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const MoviesList = () => {
@@ -22,9 +22,11 @@ const MoviesList = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [totalMovies, setTotalMovies] = useState(0);
   const pageSize = 12;
   const [showSortMenu, setShowSortMenu] = useState(false);
+
+  const totalPages = Math.ceil(totalMovies / pageSize);
 
   const sortOptions = [
     { value: 'default', label: t('sortDefault') },
@@ -61,8 +63,12 @@ const MoviesList = () => {
   const heroStats = [
     {
       label: t('total') || 'Всего',
-      value: movies.length,
+      value: totalMovies,
       caption: t('movies') || 'Movies',
+    },
+    {
+      label: t('page') || 'Страница',
+      value: `${page} / ${totalPages || 1}`,
     },
     {
       label: t('sortBy') || 'Сортировка',
@@ -88,8 +94,8 @@ const MoviesList = () => {
     try {
       setLoading(true);
       const params = {
-        skip: (page - 1) * pageSize,
-        take: pageSize,
+        page: page,
+        pageSize: pageSize,
       };
 
       if (searchQuery) {
@@ -103,24 +109,13 @@ const MoviesList = () => {
 
       const response = await moviesService.getAll(params);
       // Проверяем структуру ответа - может быть массив или объект с items
-      let newMovies = Array.isArray(response) ? response : (response?.items || []);
-
-      // Сортировка
-      if (sortBy === 'year') {
-        newMovies = [...newMovies].sort((a, b) => b.year - a.year);
-      } else if (sortBy === 'rating') {
-        newMovies = [...newMovies].sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
-      } else if (sortBy === 'title') {
-        newMovies = [...newMovies].sort((a, b) => a.title.localeCompare(b.title));
-      }
-
-      if (page === 1) {
-        setMovies(newMovies);
-      } else {
-        setMovies(prev => [...prev, ...newMovies]);
-      }
-
-      setHasMore(newMovies.length === pageSize);
+      const items = Array.isArray(response) ? response : (response?.items || []);
+      
+      // Получаем общее количество из ответа
+      const total = response?.total ?? response?.totalCount ?? items.length;
+      
+      setMovies(items);
+      setTotalMovies(total);
     } catch (error) {
       toast.error(t('errorLoadingMovies'));
       console.error(error);
@@ -155,6 +150,126 @@ const MoviesList = () => {
     setSearchQuery('');
     setPage(1);
     setSearchParams({});
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+    const maxVisible = 5;
+    let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+    if (endPage - startPage < maxVisible - 1) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return (
+      <div className="flex items-center justify-center gap-2 flex-wrap mt-8">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setPage(1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          disabled={page === 1}
+          className="px-3 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <FiChevronsLeft size={18} />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setPage(page - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          disabled={page === 1}
+          className="px-3 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <FiChevronLeft size={18} />
+        </motion.button>
+
+        {startPage > 1 && (
+          <>
+            <button
+              onClick={() => {
+                setPage(1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-4 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              1
+            </button>
+            {startPage > 2 && <span className="text-white/40">...</span>}
+          </>
+        )}
+
+        {pages.map((pageNum) => (
+          <motion.button
+            key={pageNum}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              setPage(pageNum);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`px-4 py-2 border transition-colors ${
+              pageNum === page
+                ? 'border-white bg-white text-black'
+                : 'border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            {pageNum}
+          </motion.button>
+        ))}
+
+        {endPage < totalPages && (
+          <>
+            {endPage < totalPages - 1 && <span className="text-white/40">...</span>}
+            <button
+              onClick={() => {
+                setPage(totalPages);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-4 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setPage(page + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          disabled={page === totalPages}
+          className="px-3 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <FiChevronRight size={18} />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setPage(totalPages);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          disabled={page === totalPages}
+          className="px-3 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <FiChevronsRight size={18} />
+        </motion.button>
+      </div>
+    );
   };
 
   return (
@@ -717,23 +832,7 @@ const MoviesList = () => {
               </div>
             )}
 
-            {hasMore && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center mt-8"
-              >
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setPage(prev => prev + 1)}
-                  disabled={loading}
-                  className="btn-secondary"
-                >
-                  {loading ? t('loading') : t('loadMore')}
-                </motion.button>
-              </motion.div>
-            )}
+            {renderPagination()}
           </>
         )}
       </div>

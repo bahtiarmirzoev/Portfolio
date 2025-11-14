@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { seriesService } from '../../services/seriesService';
 import { useLanguageStore } from '../../stores/languageStore';
-import { FiTv, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiPlay, FiLayers, FiCheck, FiExternalLink } from 'react-icons/fi';
+import { FiTv, FiSearch, FiFilter, FiX, FiGrid, FiList, FiChevronDown, FiStar, FiArrowUp, FiArrowDown, FiCalendar, FiPlay, FiLayers, FiCheck, FiExternalLink, FiChevronLeft, FiChevronRight, FiChevronsLeft, FiChevronsRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const SeriesList = () => {
@@ -23,9 +23,11 @@ const SeriesList = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showOngoing, setShowOngoing] = useState(searchParams.get('ongoing') === 'true');
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [totalSeries, setTotalSeries] = useState(0);
   const pageSize = 12;
   const [showSortMenu, setShowSortMenu] = useState(false);
+
+  const totalPages = Math.ceil(totalSeries / pageSize);
 
   const sortOptions = [
     { value: 'default', label: t('sortDefault') },
@@ -95,8 +97,12 @@ const SeriesList = () => {
   const heroStats = [
     {
       label: t('total') || 'Всего',
-      value: series.length,
+      value: totalSeries,
       caption: t('series') || 'Series',
+    },
+    {
+      label: t('page') || 'Страница',
+      value: `${page} / ${totalPages || 1}`,
     },
     {
       label: t('sortBy') || 'Сортировка',
@@ -126,16 +132,13 @@ const SeriesList = () => {
     try {
       setLoading(true);
       const params = {
-        skip: (page - 1) * pageSize,
-        take: pageSize,
+        page: page,
+        pageSize: pageSize,
       };
 
-      let newSeries = [];
-
+      let response;
       if (showOngoing) {
-        const response = await seriesService.getOngoing(params);
-        // Проверяем структуру ответа
-        newSeries = Array.isArray(response) ? response : (response?.items || []);
+        response = await seriesService.getOngoing(params);
       } else {
         if (searchQuery) {
           params.search = searchQuery;
@@ -146,27 +149,17 @@ const SeriesList = () => {
           if (filters.actor) params.actor = filters.actor;
         }
 
-        const response = await seriesService.getAll(params);
-        // Проверяем структуру ответа - может быть массив или объект с items
-        newSeries = Array.isArray(response) ? response : (response?.items || []);
+        response = await seriesService.getAll(params);
       }
-
-      // Сортировка
-      if (sortBy === 'year') {
-        newSeries = [...newSeries].sort((a, b) => b.yearOfRelease - a.yearOfRelease);
-      } else if (sortBy === 'rating') {
-        newSeries = [...newSeries].sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
-      } else if (sortBy === 'title') {
-        newSeries = [...newSeries].sort((a, b) => a.title.localeCompare(b.title));
-      }
-
-      if (page === 1) {
-        setSeries(newSeries);
-      } else {
-        setSeries(prev => [...prev, ...newSeries]);
-      }
-
-      setHasMore(newSeries.length === pageSize);
+      
+      // Проверяем структуру ответа - может быть массив или объект с items
+      const items = Array.isArray(response) ? response : (response?.items || []);
+      
+      // Получаем общее количество из ответа
+      const total = response?.total ?? response?.totalCount ?? items.length;
+      
+      setSeries(items);
+      setTotalSeries(total);
     } catch (error) {
       toast.error(t('errorLoadingSeries'));
       console.error(error);
@@ -205,6 +198,126 @@ const SeriesList = () => {
     setShowOngoing(false);
     setPage(1);
     setSearchParams({});
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+    const maxVisible = 5;
+    let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+    if (endPage - startPage < maxVisible - 1) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return (
+      <div className="flex items-center justify-center gap-2 flex-wrap mt-8">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setPage(1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          disabled={page === 1}
+          className="px-3 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <FiChevronsLeft size={18} />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setPage(page - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          disabled={page === 1}
+          className="px-3 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <FiChevronLeft size={18} />
+        </motion.button>
+
+        {startPage > 1 && (
+          <>
+            <button
+              onClick={() => {
+                setPage(1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-4 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              1
+            </button>
+            {startPage > 2 && <span className="text-white/40">...</span>}
+          </>
+        )}
+
+        {pages.map((pageNum) => (
+          <motion.button
+            key={pageNum}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              setPage(pageNum);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`px-4 py-2 border transition-colors ${
+              pageNum === page
+                ? 'border-white bg-white text-black'
+                : 'border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            {pageNum}
+          </motion.button>
+        ))}
+
+        {endPage < totalPages && (
+          <>
+            {endPage < totalPages - 1 && <span className="text-white/40">...</span>}
+            <button
+              onClick={() => {
+                setPage(totalPages);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-4 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setPage(page + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          disabled={page === totalPages}
+          className="px-3 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <FiChevronRight size={18} />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setPage(totalPages);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          disabled={page === totalPages}
+          className="px-3 py-2 border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <FiChevronsRight size={18} />
+        </motion.button>
+      </div>
+    );
   };
 
   return (
@@ -810,23 +923,7 @@ const SeriesList = () => {
               </div>
             )}
 
-            {hasMore && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center mt-8"
-              >
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setPage(prev => prev + 1)}
-                  disabled={loading}
-                  className="btn-secondary"
-                >
-                  {loading ? t('loading') : t('loadMore')}
-                </motion.button>
-              </motion.div>
-            )}
+            {renderPagination()}
           </>
         )}
       </div>
