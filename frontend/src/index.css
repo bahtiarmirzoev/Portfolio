@@ -136,5 +136,14 @@
   .smooth-transition {
     @apply transition-all duration-700 ease-in-out;
   }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 

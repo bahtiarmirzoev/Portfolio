@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 import { useLanguageStore } from '../stores/languageStore';
-import { FiFilm, FiTv, FiHeart, FiTrendingUp, FiStar, FiArrowRight, FiZap, FiMessageSquare, FiPlay, FiExternalLink } from 'react-icons/fi';
+import { FiFilm, FiTv, FiHeart, FiTrendingUp, FiStar, FiArrowRight, FiZap, FiMessageSquare, FiPlay, FiExternalLink, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { moviesService } from '../services/moviesService';
 import { seriesService } from '../services/seriesService';
@@ -14,16 +14,50 @@ const Home = () => {
   const [featuredMovies, setFeaturedMovies] = useState([]);
   const [trendingSeries, setTrendingSeries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const moviesCarouselRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   useEffect(() => {
     loadFeaturedContent();
   }, []);
 
+  const checkScrollButtons = () => {
+    if (moviesCarouselRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = moviesCarouselRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    checkScrollButtons();
+    const carousel = moviesCarouselRef.current;
+    if (carousel) {
+      carousel.addEventListener('scroll', checkScrollButtons);
+      return () => carousel.removeEventListener('scroll', checkScrollButtons);
+    }
+  }, [featuredMovies]);
+
+  const scrollMovies = (direction) => {
+    if (moviesCarouselRef.current) {
+      const scrollAmount = moviesCarouselRef.current.clientWidth * 0.8;
+      const scrollTo = direction === 'left' 
+        ? moviesCarouselRef.current.scrollLeft - scrollAmount
+        : moviesCarouselRef.current.scrollLeft + scrollAmount;
+      
+      moviesCarouselRef.current.scrollTo({
+        left: scrollTo,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const loadFeaturedContent = async () => {
     try {
       const [moviesResponse, seriesResponse] = await Promise.all([
-        moviesService.getAll({ take: 6 }),
-        seriesService.getOngoing({ take: 6 }),
+        moviesService.getAll({ page: 1, pageSize: 15 }),
+        seriesService.getOngoing({ page: 1, pageSize: 6 }),
       ]);
       // Проверяем структуру ответа
       setFeaturedMovies(moviesResponse?.items || moviesResponse || []);
@@ -250,76 +284,112 @@ const Home = () => {
                   </Link>
                 </motion.div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-                {featuredMovies.map((movie, index) => (
-                  <motion.div
-                    key={movie.id}
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: 0.9 + index * 0.1, duration: 0.5, type: "spring" }}
-                    whileHover={{ y: -12, scale: 1.03 }}
-                    className="group cursor-pointer"
+              <div className="relative">
+                {/* Navigation Buttons */}
+                {canScrollLeft && (
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={() => scrollMovies('left')}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 glass rounded-full p-3 border border-white/20 bg-black/60 hover:bg-black/80 text-white transition-all hover:scale-110"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
-                    <Link to={`/movies/${movie.id}`}>
-                      {movie.posterUrl ? (
-                        <div className="relative overflow-hidden rounded-xl mb-3 aspect-[2/3] border border-white/10 group-hover:border-white/30 transition-all">
-                          <img
-                            src={movie.posterUrl}
-                            alt={movie.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                            <div className="absolute bottom-0 left-0 right-0 p-4">
-                              <h3 className="text-white font-bold text-sm line-clamp-2 mb-2">
-                                {movie.title}
-                              </h3>
-                              {movie.averageRating && (
-                                <div className="flex items-center gap-1.5">
-                                  <FiStar className="text-white fill-white" size={14} />
-                                  <span className="text-white text-xs font-semibold">{movie.averageRating.toFixed(1)}</span>
-                                </div>
-                              )}
-                              <motion.button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  if (movie.watchUrl) {
-                                    window.open(movie.watchUrl, '_blank', 'noopener,noreferrer');
-                                  } else {
-                                    toast.error('Ссылка для просмотра недоступна');
-                                  }
-                                }}
-                                initial={{ opacity: 0, y: 10 }}
-                                whileHover={{ opacity: 1, y: 0, scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className={`mt-3 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors ${
-                                  movie.watchUrl
-                                    ? 'bg-white/20 hover:bg-white/30 text-white'
-                                    : 'bg-white/10 text-white/60 cursor-not-allowed opacity-60'
-                                }`}
-                              >
-                                <FiExternalLink className="text-white" size={14} />
-                                <span>Смотреть фильм</span>
-                              </motion.button>
+                    <FiChevronLeft size={24} />
+                  </motion.button>
+                )}
+                {canScrollRight && (
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={() => scrollMovies('right')}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 glass rounded-full p-3 border border-white/20 bg-black/60 hover:bg-black/80 text-white transition-all hover:scale-110"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <FiChevronRight size={24} />
+                  </motion.button>
+                )}
+
+                {/* Carousel Container */}
+                <div
+                  ref={moviesCarouselRef}
+                  className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+                  style={{
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                  }}
+                >
+                  {featuredMovies.map((movie, index) => (
+                    <motion.div
+                      key={movie.id}
+                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: 0.9 + index * 0.1, duration: 0.5, type: "spring" }}
+                      whileHover={{ y: -12, scale: 1.03 }}
+                      className="group cursor-pointer flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px]"
+                    >
+                      <Link to={`/movies/${movie.id}`}>
+                        {movie.posterUrl ? (
+                          <div className="relative overflow-hidden rounded-xl mb-3 aspect-[2/3] border border-white/10 group-hover:border-white/30 transition-all">
+                            <img
+                              src={movie.posterUrl}
+                              alt={movie.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                              <div className="absolute bottom-0 left-0 right-0 p-4">
+                                <h3 className="text-white font-bold text-sm line-clamp-2 mb-2">
+                                  {movie.title}
+                                </h3>
+                                {movie.averageRating && (
+                                  <div className="flex items-center gap-1.5">
+                                    <FiStar className="text-white fill-white" size={14} />
+                                    <span className="text-white text-xs font-semibold">{movie.averageRating.toFixed(1)}</span>
+                                  </div>
+                                )}
+                                <motion.button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    if (movie.watchUrl) {
+                                      window.open(movie.watchUrl, '_blank', 'noopener,noreferrer');
+                                    } else {
+                                      toast.error('Ссылка для просмотра недоступна');
+                                    }
+                                  }}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  whileHover={{ opacity: 1, y: 0, scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  className={`mt-3 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors ${
+                                    movie.watchUrl
+                                      ? 'bg-white/20 hover:bg-white/30 text-white'
+                                      : 'bg-white/10 text-white/60 cursor-not-allowed opacity-60'
+                                  }`}
+                                >
+                                  <FiExternalLink className="text-white" size={14} />
+                                  <span>Смотреть фильм</span>
+                                </motion.button>
+                              </div>
                             </div>
+                            {movie.year && (
+                              <div className="absolute top-2 left-2 glass rounded-lg px-2 py-1 border border-white/10">
+                                <span className="text-white text-xs font-medium">{movie.year}</span>
+                              </div>
+                            )}
                           </div>
-                          {movie.year && (
-                            <div className="absolute top-2 left-2 glass rounded-lg px-2 py-1 border border-white/10">
-                              <span className="text-white text-xs font-medium">{movie.year}</span>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="aspect-[2/3] glass rounded-xl flex items-center justify-center mb-3 border border-white/10">
-                          <FiFilm className="text-white/20 text-4xl" />
-                        </div>
-                      )}
-                      <h3 className="text-white/80 text-sm font-medium line-clamp-2 group-hover:text-white transition-colors px-1">
-                        {movie.title}
-                      </h3>
-                    </Link>
-                  </motion.div>
-                ))}
+                        ) : (
+                          <div className="aspect-[2/3] glass rounded-xl flex items-center justify-center mb-3 border border-white/10">
+                            <FiFilm className="text-white/20 text-4xl" />
+                          </div>
+                        )}
+                        <h3 className="text-white/80 text-sm font-medium line-clamp-2 group-hover:text-white transition-colors px-1">
+                          {movie.title}
+                        </h3>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </motion.section>
           )}
