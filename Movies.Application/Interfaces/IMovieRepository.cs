@@ -12,8 +12,8 @@ public interface IMovieRepository
     Task<bool> DeleteMovieByIdAsync(Guid id);
     Task<bool> ExistsByIdAsync(Guid id);
     
-    Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take); 
-    Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take);
+    Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take, string? sortBy = null, string? sortOrder = "asc"); 
+    Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take, string? sortBy = null, string? sortOrder = "asc");
     
     Task<(IEnumerable<Movie> movies, int totalCount)> FilterAsync(
         string? genre, 
@@ -21,7 +21,9 @@ public interface IMovieRepository
         int? yearTo, 
         string? actor,
         int skip, 
-        int take);
+        int take,
+        string? sortBy = null,
+        string? sortOrder = "asc");
     
     Task<IEnumerable<Movie>> GetSimilarMoviesAsync(Guid movieId, int count = 5);
 }

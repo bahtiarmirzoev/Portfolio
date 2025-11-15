@@ -72,10 +72,20 @@ public class MoviesController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetAll([FromQuery] PagedRequest request)
     {
+        // Определяем направление сортировки на основе sortBy
+        // Для year и rating по умолчанию desc, для title - asc
+        var sortOrder = request.SortOrder ?? 
+            (request.SortBy?.ToLower() == "year" || request.SortBy?.ToLower() == "rating" ? "desc" : "asc");
+        
         // 1. Если есть поисковый запрос - используем поиск
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
-            var searchResult = await _movieService.SearchAsync(request.Search, request.Skip, request.Take);
+            var searchResult = await _movieService.SearchAsync(
+                request.Search, 
+                request.Skip, 
+                request.Take,
+                request.SortBy,
+                sortOrder);
             var searchResponse = searchResult.MapToResponse(request);
             return Ok(searchResponse);
         }
@@ -92,14 +102,16 @@ public class MoviesController : ControllerBase
                 request.YearTo, 
                 request.Actor,
                 request.Skip, 
-                request.Take);
+                request.Take,
+                request.SortBy,
+                sortOrder);
                 
             var filterResponse = filterResult.MapToResponse(request);
             return Ok(filterResponse);
         }
         
         // 3. Иначе - обычный список с пагинацией
-        var result = await _movieService.GetAllAsync(request.Skip, request.Take);
+        var result = await _movieService.GetAllAsync(request.Skip, request.Take, request.SortBy, sortOrder);
         var response = result.MapToResponse(request);
         return Ok(response);
     }

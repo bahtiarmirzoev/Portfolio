@@ -275,15 +275,21 @@ public class MovieRepository : IMovieRepository
         return count > 0;
     }
 
-    public async Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take)
+    public async Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take, string? sortBy = null, string? sortOrder = "asc")
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
         var totalCount = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM movies");
 
+        // Определяем ORDER BY в зависимости от sortBy
+        var orderBy = GetOrderByClause(sortBy, sortOrder);
+
         // 🆕 Добавляем PosterUrl, TrailerUrl и WatchUrl в SELECT
         var movies = await connection.QueryAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl, watchurl as WatchUrl FROM movies ORDER BY title LIMIT @Take OFFSET @Skip",
+            $@"SELECT id, title, yearofrelease as YearOfRelease, slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl, watchurl as WatchUrl 
+               FROM movies 
+               {orderBy}
+               LIMIT @Take OFFSET @Skip",
             new { Take = take, Skip = skip });
 
         foreach (var movie in movies)
@@ -312,7 +318,7 @@ public class MovieRepository : IMovieRepository
         return (movies, totalCount);
     }
 
-    public async Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take)
+    public async Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take, string? sortBy = null, string? sortOrder = "asc")
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
@@ -320,9 +326,16 @@ public class MovieRepository : IMovieRepository
             "SELECT COUNT(*) FROM movies WHERE title ILIKE @Search",
             new { Search = $"%{search}%" });
 
+        // Определяем ORDER BY в зависимости от sortBy
+        var orderBy = GetOrderByClause(sortBy, sortOrder);
+
         // 🆕 Добавляем PosterUrl, TrailerUrl и WatchUrl в SELECT
         var movies = await connection.QueryAsync<Movie>(
-            "SELECT id, title, yearofrelease as YearOfRelease, slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl, watchurl as WatchUrl FROM movies WHERE title ILIKE @Search ORDER BY title LIMIT @Take OFFSET @Skip",
+            $@"SELECT id, title, yearofrelease as YearOfRelease, slug, description, posterurl as PosterUrl, trailerurl as TrailerUrl, watchurl as WatchUrl 
+               FROM movies 
+               WHERE title ILIKE @Search 
+               {orderBy}
+               LIMIT @Take OFFSET @Skip",
             new { Search = $"%{search}%", Take = take, Skip = skip });
 
         foreach (var movie in movies)
@@ -357,7 +370,9 @@ public class MovieRepository : IMovieRepository
         int? yearTo, 
         string? actor,
         int skip, 
-        int take)
+        int take,
+        string? sortBy = null,
+        string? sortOrder = "asc")
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
@@ -402,12 +417,15 @@ public class MovieRepository : IMovieRepository
         parameters.Add("Take", take);
         parameters.Add("Skip", skip);
 
+        // Определяем ORDER BY в зависимости от sortBy
+        var orderBy = GetOrderByClause(sortBy, sortOrder, "m");
+
         // 🆕 Добавляем PosterUrl и TrailerUrl в SELECT
         var moviesSql = $@"
             SELECT m.id, m.title, m.yearofrelease as YearOfRelease, m.slug, m.description, m.posterurl as PosterUrl, m.trailerurl as TrailerUrl, m.watchurl as WatchUrl 
             FROM movies m 
             {whereClause}
-            ORDER BY m.title 
+            {orderBy}
             LIMIT @Take OFFSET @Skip";
 
         var movies = await connection.QueryAsync<Movie>(moviesSql, parameters);
@@ -623,5 +641,19 @@ public class MovieRepository : IMovieRepository
         }
         
         return moviesList;
+    }
+    
+    private string GetOrderByClause(string? sortBy, string? sortOrder, string? tablePrefix = null)
+    {
+        var prefix = string.IsNullOrWhiteSpace(tablePrefix) ? "" : $"{tablePrefix}.";
+        var order = (sortOrder?.ToLower() == "desc") ? "DESC" : "ASC";
+        
+        return sortBy?.ToLower() switch
+        {
+            "year" => $"ORDER BY {prefix}yearofrelease {order}",
+            "rating" => $"ORDER BY (SELECT AVG(value)::float FROM ratings WHERE movieid = {prefix}id) {order} NULLS LAST",
+            "title" => $"ORDER BY {prefix}title {order}",
+            _ => $"ORDER BY {prefix}title ASC"
+        };
     }
 }

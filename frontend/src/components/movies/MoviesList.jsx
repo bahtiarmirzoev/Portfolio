@@ -107,6 +107,13 @@ const MoviesList = () => {
         if (filters.actor) params.actor = filters.actor;
       }
 
+      // Добавляем параметры сортировки
+      if (sortBy && sortBy !== 'default') {
+        params.sortBy = sortBy;
+        // Для year и rating по умолчанию desc, для title - asc
+        params.sortOrder = (sortBy === 'year' || sortBy === 'rating') ? 'desc' : 'asc';
+      }
+
       const response = await moviesService.getAll(params);
       // Проверяем структуру ответа - может быть массив или объект с items
       const items = Array.isArray(response) ? response : (response?.items || []);

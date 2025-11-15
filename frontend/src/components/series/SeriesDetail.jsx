@@ -18,6 +18,7 @@ const SeriesDetail = () => {
   const { t, translateGenre } = useLanguageStore();
   const [series, setSeries] = useState(null);
   const [comments, setComments] = useState([]);
+  const [similarSeries, setSimilarSeries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userRating, setUserRating] = useState(null);
   const [rating, setRating] = useState(0);
@@ -33,6 +34,12 @@ const SeriesDetail = () => {
     }
     loadComments();
   }, [id, isAuthenticated]);
+
+  useEffect(() => {
+    if (series) {
+      loadSimilarSeries();
+    }
+  }, [series]);
 
   const loadSeries = async () => {
     try {
@@ -75,6 +82,34 @@ const SeriesDetail = () => {
       setComments(data);
     } catch (error) {
       console.error('Error loading comments:', error);
+    }
+  };
+
+  const loadSimilarSeries = async () => {
+    try {
+      if (!series || !series.id) return;
+      
+      // Используем новый улучшенный алгоритм похожих сериалов
+      const similar = await seriesService.getSimilar(series.id, 5);
+      setSimilarSeries(Array.isArray(similar) ? similar : []);
+    } catch (error) {
+      console.error('Error loading similar series:', error);
+      // В случае ошибки, пробуем загрузить сериалы того же жанра как fallback
+      try {
+        if (series.genres && series.genres.length > 0) {
+          const genre = series.genres[0];
+          const response = await seriesService.getAll({
+            genre,
+            page: 1,
+            pageSize: 6,
+          });
+          const similar = (response.items || response || []).filter(s => s.id !== series.id).slice(0, 5);
+          setSimilarSeries(similar);
+        }
+      } catch (fallbackError) {
+        console.error('Error loading similar series fallback:', fallbackError);
+        setSimilarSeries([]);
+      }
     }
   };
 
@@ -476,6 +511,56 @@ const SeriesDetail = () => {
             )}
           </div>
         </motion.div>
+
+        {/* Similar Series */}
+        {similarSeries.length > 0 && (
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="glass rounded-2xl p-6 mt-8"
+          >
+            <h2 className="text-2xl font-bold text-white mb-6">{t('similarSeries') || 'Похожие сериалы'}</h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {similarSeries.map((similarSerie, index) => (
+                <motion.div
+                  key={similarSerie.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7 + index * 0.1 }}
+                  whileHover={{ y: -5, scale: 1.05 }}
+                  className="group cursor-pointer"
+                >
+                  <Link to={`/series/${similarSerie.id}`}>
+                    {similarSerie.posterUrl ? (
+                      <div className="relative overflow-hidden rounded-lg mb-3 aspect-[2/3]">
+                        <img
+                          src={similarSerie.posterUrl}
+                          alt={similarSerie.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="absolute bottom-0 left-0 right-0 p-3">
+                            <h3 className="text-white font-semibold text-xs line-clamp-2">
+                              {similarSerie.title}
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="aspect-[2/3] bg-white/5 rounded-lg mb-3 flex items-center justify-center">
+                        <FiTv className="text-white/20 text-3xl" />
+                      </div>
+                    )}
+                    <h3 className="text-white/80 text-sm font-medium line-clamp-2 group-hover:text-white transition-colors">
+                      {similarSerie.title}
+                    </h3>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

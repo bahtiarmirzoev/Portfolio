@@ -57,19 +57,19 @@ public class MovieService : IMovieService
         return _movieRepository.DeleteMovieByIdAsync(id);
     }
     
-    public async Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take)
+    public async Task<(IEnumerable<Movie> movies, int totalCount)> GetAllAsync(int skip, int take, string? sortBy = null, string? sortOrder = "asc")
     {
-        return await _movieRepository.GetAllAsync(skip, take);
+        return await _movieRepository.GetAllAsync(skip, take, sortBy, sortOrder);
     }
 
-    public async Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take)
+    public async Task<(IEnumerable<Movie> movies, int totalCount)> SearchAsync(string search, int skip, int take, string? sortBy = null, string? sortOrder = "asc")
     {
         if (string.IsNullOrWhiteSpace(search))
         {
-            return await _movieRepository.GetAllAsync(skip, take);
+            return await _movieRepository.GetAllAsync(skip, take, sortBy, sortOrder);
         }
     
-        return await _movieRepository.SearchAsync(search, skip, take);
+        return await _movieRepository.SearchAsync(search, skip, take, sortBy, sortOrder);
     }
 
     public async Task<(IEnumerable<Movie> movies, int totalCount)> FilterAsync(
@@ -78,9 +78,11 @@ public class MovieService : IMovieService
         int? yearTo, 
         string? actor,
         int skip, 
-        int take)
+        int take,
+        string? sortBy = null,
+        string? sortOrder = "asc")
     {
-        return await _movieRepository.FilterAsync(genre, yearFrom, yearTo, actor, skip, take);
+        return await _movieRepository.FilterAsync(genre, yearFrom, yearTo, actor, skip, take, sortBy, sortOrder);
     }
     
     public async Task<IEnumerable<Movie>> GetSimilarMoviesAsync(Guid movieId, int count = 5)

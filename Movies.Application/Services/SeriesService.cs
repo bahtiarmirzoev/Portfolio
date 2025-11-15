@@ -58,20 +58,20 @@ public class SeriesService : ISeriesService
         return _seriesRepository.DeleteSeriesByIdAsync(id);
     }
     
-    public async Task<(IEnumerable<Series> series, int totalCount)> GetAllAsync(int skip, int take)
+    public async Task<(IEnumerable<Series> series, int totalCount)> GetAllAsync(int skip, int take, string? sortBy = null, string? sortOrder = "asc")
     {
-        return await _seriesRepository.GetAllAsync(skip, take);
+        return await _seriesRepository.GetAllAsync(skip, take, sortBy, sortOrder);
     }
 
     public async Task<(IEnumerable<Series> series, int totalCount)> SearchAsync(
-        string search, int skip, int take)
+        string search, int skip, int take, string? sortBy = null, string? sortOrder = "asc")
     {
         if (string.IsNullOrWhiteSpace(search))
         {
-            return await _seriesRepository.GetAllAsync(skip, take);
+            return await _seriesRepository.GetAllAsync(skip, take, sortBy, sortOrder);
         }
     
-        return await _seriesRepository.SearchAsync(search, skip, take);
+        return await _seriesRepository.SearchAsync(search, skip, take, sortBy, sortOrder);
     }
 
     public async Task<(IEnumerable<Series> series, int totalCount)> FilterAsync(
@@ -80,13 +80,20 @@ public class SeriesService : ISeriesService
         int? yearTo, 
         string? actor,
         int skip, 
-        int take)
+        int take,
+        string? sortBy = null,
+        string? sortOrder = "asc")
     {
-        return await _seriesRepository.FilterAsync(genre, yearFrom, yearTo, actor, skip, take);
+        return await _seriesRepository.FilterAsync(genre, yearFrom, yearTo, actor, skip, take, sortBy, sortOrder);
     }
 
-    public async Task<(IEnumerable<Series> series, int totalCount)> GetOngoingAsync(int skip, int take)
+    public async Task<(IEnumerable<Series> series, int totalCount)> GetOngoingAsync(int skip, int take, string? sortBy = null, string? sortOrder = "asc")
     {
-        return await _seriesRepository.GetOngoingAsync(skip, take);
+        return await _seriesRepository.GetOngoingAsync(skip, take, sortBy, sortOrder);
+    }
+    
+    public async Task<IEnumerable<Series>> GetSimilarSeriesAsync(Guid seriesId, int count = 5)
+    {
+        return await _seriesRepository.GetSimilarSeriesAsync(seriesId, count);
     }
 }

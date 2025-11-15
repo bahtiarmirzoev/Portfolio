@@ -73,10 +73,20 @@ public class SeriesController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetAll([FromQuery] PagedRequest request)
     {
+        // Определяем направление сортировки на основе sortBy
+        // Для year и rating по умолчанию desc, для title - asc
+        var sortOrder = request.SortOrder ?? 
+            (request.SortBy?.ToLower() == "year" || request.SortBy?.ToLower() == "rating" ? "desc" : "asc");
+        
         // 1. Если есть поисковый запрос - используем поиск
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
-            var searchResult = await _seriesService.SearchAsync(request.Search, request.Skip, request.Take);
+            var searchResult = await _seriesService.SearchAsync(
+                request.Search, 
+                request.Skip, 
+                request.Take,
+                request.SortBy,
+                sortOrder);
             var searchResponse = searchResult.MapToSeriesResponse(request);
             return Ok(searchResponse);
         }
@@ -93,14 +103,16 @@ public class SeriesController : ControllerBase
                 request.YearTo, 
                 request.Actor,
                 request.Skip, 
-                request.Take);
+                request.Take,
+                request.SortBy,
+                sortOrder);
                 
             var filterResponse = filterResult.MapToSeriesResponse(request);
             return Ok(filterResponse);
         }
         
         // 3. Иначе - обычный список с пагинацией
-        var result = await _seriesService.GetAllAsync(request.Skip, request.Take);
+        var result = await _seriesService.GetAllAsync(request.Skip, request.Take, request.SortBy, sortOrder);
         var response = result.MapToSeriesResponse(request);
         return Ok(response);
     }
@@ -109,8 +121,21 @@ public class SeriesController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetOngoing([FromQuery] PagedRequest request)
     {
-        var result = await _seriesService.GetOngoingAsync(request.Skip, request.Take);
+        // Определяем направление сортировки на основе sortBy
+        var sortOrder = request.SortOrder ?? 
+            (request.SortBy?.ToLower() == "year" || request.SortBy?.ToLower() == "rating" ? "desc" : "asc");
+        
+        var result = await _seriesService.GetOngoingAsync(request.Skip, request.Take, request.SortBy, sortOrder);
         var response = result.MapToSeriesResponse(request);
+        return Ok(response);
+    }
+
+    [HttpGet("{id:guid}/similar")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetSimilar([FromRoute] Guid id, [FromQuery] int count = 5)
+    {
+        var similarSeries = await _seriesService.GetSimilarSeriesAsync(id, count);
+        var response = similarSeries.Select(s => s.MapToResponse());
         return Ok(response);
     }
 }

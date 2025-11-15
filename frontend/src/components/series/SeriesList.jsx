@@ -136,6 +136,13 @@ const SeriesList = () => {
         pageSize: pageSize,
       };
 
+      // Добавляем параметры сортировки
+      if (sortBy && sortBy !== 'default') {
+        params.sortBy = sortBy;
+        // Для year и rating по умолчанию desc, для title - asc
+        params.sortOrder = (sortBy === 'year' || sortBy === 'rating') ? 'desc' : 'asc';
+      }
+
       let response;
       if (showOngoing) {
         response = await seriesService.getOngoing(params);
@@ -151,7 +158,7 @@ const SeriesList = () => {
 
         response = await seriesService.getAll(params);
       }
-      
+
       // Проверяем структуру ответа - может быть массив или объект с items
       const items = Array.isArray(response) ? response : (response?.items || []);
       
