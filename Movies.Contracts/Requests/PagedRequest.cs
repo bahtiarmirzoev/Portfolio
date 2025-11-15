@@ -8,7 +8,7 @@ public class PagedRequest
     public string? Genre { get; set; }
     public int? YearFrom { get; set; }
     public int? YearTo { get; set; }
-    public string? Actor { get; set; }
+    public string? Actor { get; set; }          
     public string? SortBy { get; set; } // 'default', 'year', 'rating', 'title'
     public string? SortOrder { get; set; } = "asc"; // 'asc' or 'desc'
     

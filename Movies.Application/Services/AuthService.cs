@@ -39,9 +39,23 @@ public class AuthService : IAuthService
 
     public async Task<bool> SignUp(User user)
     {
+        // Валидация входных данных
+        if (user == null)
+        {
+            _logger.LogWarning("SignUp called with null user");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(user.Username) || string.IsNullOrWhiteSpace(user.Email))
+        {
+            _logger.LogWarning("SignUp called with empty username or email");
+            return false;
+        }
+
         var role = await _roleRepository.GetByNameAsync("user");
         if (role == null)
         {
+            _logger.LogError("Default 'user' role not found in database");
             return false;
         }
 
@@ -51,18 +65,50 @@ public class AuthService : IAuthService
             user.Email = user.Email.Trim().ToLowerInvariant();
         }
 
-        // Хешируем пароль перед сохранением пользователя
-        user.PasswordHash = PasswordHasher.Generate(user.PasswordHash);
+        // Нормализуем username: убираем пробелы и приводим к нижнему регистру
+        if (!string.IsNullOrWhiteSpace(user.Username))
+        {
+            user.Username = user.Username.Trim().ToLowerInvariant();
+        }
+
+        // Проверяем, не существует ли уже пользователь с таким username
+        var existingUserByUsername = await _userRepository.GetByUsernameAsync(user.Username);
+        if (existingUserByUsername != null)
+        {
+            _logger.LogWarning("User registration failed: username '{Username}' already exists", user.Username);
+            return false;
+        }
+
+        // Проверяем, не существует ли уже пользователь с таким email
+        var existingUserByEmail = await _userRepository.GetByEmailAsync(user.Email);
+        if (existingUserByEmail != null)
+        {
+            _logger.LogWarning("User registration failed: email '{Email}' already exists", user.Email);
+            return false;
+        }
+
+        // Пароль уже хеширован в UserMapping.MapToUser, поэтому не хешируем повторно
+        // user.PasswordHash уже содержит хеш пароля
 
         // 1. Создаём пользователя
         var result = await _userRepository.CreateUserAsync(user);
         if (!result)
         {
+            _logger.LogError("Failed to create user in database");
             return false;
         }
 
         // 2. Выдаём роль
+        try
+        {
         await _roleService.AssignRoleToUserAsync(user.Id, role.Name);
+            _logger.LogInformation("User '{Username}' registered successfully with role '{Role}'", user.Username, role.Name);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to assign role to user '{Username}'", user.Username);
+            // Роль не критична, пользователь уже создан
+        }
 
         return true;
     }
@@ -72,18 +118,52 @@ public class AuthService : IAuthService
         string password
     )
     {
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        {
+            _logger.LogWarning("SignIn called with empty username or password");
+            return null;
+        }
+
+        // Передаем оригинальный username в репозиторий, он сам нормализует его
+        _logger.LogInformation("🔐 SignIn attempt for username: '{Username}'", username);
+        
         var user = await _userRepository.GetByUsernameAsync(username);
 
         if (user is null)
         {
+            _logger.LogWarning("❌ User not found for username: '{Username}'", username);
             return null;
         }
 
+        _logger.LogInformation("✅ User found: Id={UserId}, Username='{Username}', Email='{Email}'", user.Id, user.Username, user.Email);
+        _logger.LogInformation("🔑 Password hash from DB: {PasswordHashPrefix}... (length: {HashLength})", 
+            user.PasswordHash?.Substring(0, Math.Min(20, user.PasswordHash?.Length ?? 0)), 
+            user.PasswordHash?.Length ?? 0);
+
         // Используем ваш PasswordHasher для проверки пароля
+        try
+        {
         var isPasswordValid = PasswordHasher.Verify(password, user.PasswordHash);
+            _logger.LogInformation("🔐 Password verification result: {IsValid}", isPasswordValid);
 
         if (!isPasswordValid)
         {
+                // Возможно, пароль был захеширован дважды из-за старой ошибки
+                // Попробуем проверить, может быть хеш в базе - это хеш от хеша
+                // Но это невозможно проверить без знания исходного пароля
+                // Поэтому просто логируем и возвращаем ошибку
+                
+                _logger.LogWarning("❌ Invalid password for user '{Username}' (Id: {UserId})", user.Username, user.Id);
+                _logger.LogWarning("💡 If this user was created before the fix, the password may be double-hashed. Consider resetting the password.");
+                return null;
+            }
+
+            _logger.LogInformation("✅ Password verified successfully for user '{Username}'", user.Username);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Error during password verification for user '{Username}': {ErrorMessage}", user.Username, ex.Message);
+            _logger.LogError("Stack trace: {StackTrace}", ex.StackTrace);
             return null;
         }
 
@@ -96,6 +176,7 @@ public class AuthService : IAuthService
 
         await _userRepository.UpdateUserAsync(user);
 
+        _logger.LogInformation("🎉 SignIn successful for user '{Username}' (Id: {UserId})", user.Username, user.Id);
         return new TokenData(
             accessToken,
             refreshToken,
@@ -107,21 +188,44 @@ public class AuthService : IAuthService
         string accessToken, string refreshToken
     )
     {
-        ArgumentNullException.ThrowIfNull(accessToken);
-        ArgumentNullException.ThrowIfNull(refreshToken);
-
-        var principal = await _tokenService.GetClaimsIdentity(accessToken);
-
-        var userId = principal.Claims.FirstOrDefault(c => c.Type == "userId")!.Value;
-        var user = await _userRepository.GetByIdAsync(new Guid(userId));
-        
-        ArgumentNullException.ThrowIfNull(user);
-
-        if (
-            user.RefreshToken != refreshToken
-            || user.RefreshTokenExpiryTime < DateTime.UtcNow
-        )
+        if (string.IsNullOrWhiteSpace(accessToken) || string.IsNullOrWhiteSpace(refreshToken))
         {
+            _logger.LogWarning("RefreshTokenAsync called with null or empty tokens");
+            return null;
+        }
+
+        try
+        {
+        var principal = await _tokenService.GetClaimsIdentity(accessToken);
+            if (principal == null)
+            {
+                _logger.LogWarning("Invalid access token provided for refresh");
+                return null;
+            }
+
+            var userIdClaim = principal.Claims.FirstOrDefault(c => c.Type == "userId");
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                _logger.LogWarning("User ID claim not found in access token");
+                return null;
+            }
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User not found for ID: {UserId}", userId);
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(user.RefreshToken) || user.RefreshToken != refreshToken)
+            {
+                _logger.LogWarning("Invalid refresh token for user {UserId}", userId);
+                return null;
+            }
+
+            if (user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime < DateTime.UtcNow)
+        {
+                _logger.LogWarning("Refresh token expired for user {UserId}", userId);
             return null;
         }
 
@@ -134,24 +238,62 @@ public class AuthService : IAuthService
 
         await _userRepository.UpdateUserAsync(user);
 
+            _logger.LogInformation("Token refreshed successfully for user {UserId}", userId);
         return new TokenData(
             newAccessToken,
             newRefreshToken,
             expiryTime
         );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during token refresh");
+            return null;
+        }
     }
 
     public async Task SignOut(string accessToken, string refreshToken)
     {
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            _logger.LogWarning("SignOut called with null or empty access token");
+            return;
+        }
+
+        try
+    {
         var claimsIdentity = await _tokenService.GetClaimsIdentity(accessToken);
-        var userId = new Guid(claimsIdentity.Claims.First(c => c.Type == "userId").Value);
+            if (claimsIdentity == null)
+            {
+                _logger.LogWarning("Invalid access token provided for sign out");
+                return;
+            }
+
+            var userIdClaim = claimsIdentity.Claims.FirstOrDefault(c => c.Type == "userId");
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                _logger.LogWarning("User ID claim not found in access token during sign out");
+                return;
+            }
 
         var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User not found for ID: {UserId} during sign out", userId);
+                return;
+            }
 
         user.RefreshToken = null;
         user.RefreshTokenExpiryTime = DateTime.UtcNow;
 
         await _userRepository.UpdateUserAsync(user);
+            _logger.LogInformation("User {UserId} signed out successfully", userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during sign out");
+            // Не пробрасываем исключение, так как выход должен быть идемпотентным
+        }
     }
 
     public async Task<ForgotPasswordResult> ForgotPasswordAsync(string email)
@@ -343,5 +485,41 @@ public class AuthService : IAuthService
 
         _logger.LogInformation("Password changed successfully for user {UserId}", userId);
         return ChangePasswordResult.SuccessResult();
+    }
+
+    public async Task<bool> AdminResetUserPasswordAsync(Guid userId, string newPassword)
+    {
+        if (string.IsNullOrWhiteSpace(newPassword))
+        {
+            _logger.LogWarning("AdminResetUserPasswordAsync called with empty password");
+            return false;
+        }
+
+        if (newPassword.Length < 8)
+        {
+            _logger.LogWarning("AdminResetUserPasswordAsync called with password shorter than 8 characters");
+            return false;
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            _logger.LogWarning("User not found for ID: {UserId}", userId);
+            return false;
+        }
+
+        // Генерируем новый хеш пароля
+        var newPasswordHash = PasswordHasher.Generate(newPassword);
+        
+        // Обновляем пароль
+        var updated = await _userRepository.UpdatePasswordAsync(userId, newPasswordHash);
+        if (!updated)
+        {
+            _logger.LogError("Failed to update password for user {UserId}", userId);
+            return false;
+        }
+
+        _logger.LogInformation("Admin reset password successfully for user {UserId} (Username: {Username})", userId, user.Username);
+        return true;
     }
 }

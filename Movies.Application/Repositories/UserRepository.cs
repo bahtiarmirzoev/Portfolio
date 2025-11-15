@@ -16,13 +16,43 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> CreateUserAsync(User user)
     {
+        if (user == null)
+        {
+            _logger.LogWarning("CreateUserAsync called with null user");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(user.Username) || string.IsNullOrWhiteSpace(user.Email) || string.IsNullOrWhiteSpace(user.PasswordHash))
+        {
+            _logger.LogWarning("CreateUserAsync called with invalid user data");
+            return false;
+        }
+
+        try
+        {
         using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
         var res = await connection.ExecuteAsync(new CommandDefinition("""
                                                                       insert into users(id, username, passwordhash, email, firstname, lastname, refreshtoken, refreshtokenexpirytime)
                                                                       values (@Id, @Username, @PasswordHash,  @Email, @FirstName, @LastName, @RefreshToken, @RefreshTokenExpiryTime)
                                                                       """, user));
+            
+            if (res > 0)
+            {
+                _logger.LogInformation("User created successfully: {Username}", user.Username);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to create user: {Username}", user.Username);
+            }
+            
         return res > 0;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating user: {Username}", user.Username);
+            return false;
+        }
     }
 
     public async Task<User?> GetByIdAsync(Guid id)
@@ -45,12 +75,67 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByUsernameAsync(string username)
     {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            _logger.LogWarning("GetByUsernameAsync called with null or empty username");
+            return null;
+        }
+
         using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
+        // Нормализуем username: убираем пробелы и приводим к нижнему регистру для поиска
+        var normalizedUsername = username?.Trim().ToLowerInvariant();
+        _logger.LogInformation("🔍 Searching for user with normalized username: '{NormalizedUsername}'", normalizedUsername);
+        
+        // Пробуем найти пользователя с учетом регистра (на случай, если в базе username в другом регистре)
         var user = await connection.QuerySingleOrDefaultAsync<User>(
-            new CommandDefinition("select * from users where username = @username", new { username }));
+            new CommandDefinition("SELECT * FROM users WHERE LOWER(TRIM(username)) = @Username", new { Username = normalizedUsername }));
 
-        if (user is null) return null;
+        if (user is null)
+        {
+            _logger.LogWarning("❌ User not found with normalized username: '{NormalizedUsername}'", normalizedUsername);
+            
+            // Попробуем найти без нормализации (на случай, если в базе есть пользователи со старым форматом)
+            var trimmedUsername = username?.Trim();
+            if (!string.IsNullOrWhiteSpace(trimmedUsername))
+            {
+                var userWithoutNormalization = await connection.QuerySingleOrDefaultAsync<User>(
+                    new CommandDefinition("SELECT * FROM users WHERE username = @Username", new { Username = trimmedUsername }));
+                
+                if (userWithoutNormalization != null)
+                {
+                    _logger.LogInformation("⚠️ Found user with non-normalized username: '{Username}' (stored as: '{StoredUsername}')", 
+                        trimmedUsername, userWithoutNormalization.Username);
+                    user = userWithoutNormalization;
+                }
+                else
+                {
+                    // Попробуем найти с case-insensitive поиском (на случай, если регистр отличается)
+                    var userCaseInsensitive = await connection.QuerySingleOrDefaultAsync<User>(
+                        new CommandDefinition("SELECT * FROM users WHERE LOWER(username) = @Username", new { Username = trimmedUsername.ToLowerInvariant() }));
+
+                    if (userCaseInsensitive != null)
+                    {
+                        _logger.LogInformation("⚠️ Found user with case-different username: '{Username}' (stored as: '{StoredUsername}')", 
+                            trimmedUsername, userCaseInsensitive.Username);
+                        user = userCaseInsensitive;
+                    }
+                    else
+                    {
+                        _logger.LogWarning("❌ User not found with any username variation: '{Username}'", trimmedUsername);
+                        return null;
+                    }
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else
+        {
+            _logger.LogInformation("✅ User found: Id={UserId}, Username='{Username}'", user.Id, user.Username);
+        }
 
         var roles = await connection.QueryAsync<Role>(new CommandDefinition("""
                                                                             select * from roles where id = (select roleid from userrole where userid = @Id)
@@ -89,36 +174,66 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> UpdateUserAsync(User user)
     {
+        if (user == null)
+        {
+            _logger.LogWarning("UpdateUserAsync called with null user");
+            return false;
+        }
+
         using var connection = await _dbConnectionFactory.CreateConnectionAsync();
         using var transaction = connection.BeginTransaction();
 
-        // ✅ ДОБАВЬ ПРОВЕРКУ НА NULL
+        try
+        {
+            // Обновляем роли только если они указаны
         if (user.Roles != null && user.Roles.Any())
         {
             await connection.ExecuteAsync(new CommandDefinition("delete from userrole where userid = @userId",
-                new { userId = user.Id }));
+                    new { userId = user.Id }, transaction));
         
             foreach (var role in user.Roles)
+            {
                 await connection.ExecuteAsync(new CommandDefinition("""
-                                                                    insert into userrole(userid, roleid) values (@userId, @roleId)
-                                                                    """, new { userId = user.Id, roleId = role.Id }));
-        }
+                    insert into userrole(userid, roleid) values (@userId, @roleId)
+                    """, new { userId = user.Id, roleId = role.Id }, transaction));
+            }
+            }
 
-        var res = await connection.ExecuteAsync(new CommandDefinition("""
-                                                                      update users
-                                                                      set username = @Username,
-                                                                          passwordhash = @PasswordHash,
-                                                                          email = @Email,
-                                                                          firstname = @FirstName,
-                                                                          lastname = @LastName,
-                                                                          refreshtoken = @RefreshToken,
-                                                                          refreshtokenexpirytime = @RefreshTokenExpiryTime
-                                                                          where id = @Id
-                                                                      """,
-            user));
+            // Обновляем пользователя, но не обновляем passwordhash если он null (чтобы не сломать пароль)
+            var sql = user.PasswordHash == null
+                ? """
+                  update users
+                  set username = @Username,
+                      email = @Email,
+                      firstname = @FirstName,
+                      lastname = @LastName,
+                      refreshtoken = @RefreshToken,
+                      refreshtokenexpirytime = @RefreshTokenExpiryTime
+                  where id = @Id
+                  """
+                : """
+                  update users
+                  set username = @Username,
+                      passwordhash = @PasswordHash,
+                      email = @Email,
+                      firstname = @FirstName,
+                      lastname = @LastName,
+                      refreshtoken = @RefreshToken,
+                      refreshtokenexpirytime = @RefreshTokenExpiryTime
+                  where id = @Id
+                  """;
+
+            var res = await connection.ExecuteAsync(new CommandDefinition(sql, user, transaction));
 
         transaction.Commit();
         return res > 0;
+        }
+        catch (Exception ex)
+        {
+            transaction.Rollback();
+            _logger.LogError(ex, "Error updating user {UserId}", user.Id);
+            throw;
+        }
     }
 
     public async Task<bool> DeleteUserByIdAsync(Guid id)

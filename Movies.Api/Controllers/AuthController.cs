@@ -100,40 +100,123 @@ namespace Movies.Api.Controllers
         [HttpPost("sign-up")]
         public async Task<IActionResult> SignUp([FromBody] CreateUserRequest request)
         {
-            // Твоя существующая реализация
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(new ErrorResponse("Invalid request data", errors));
+            }
 
-            var response = await _authService.SignUp(request.MapToUser());
-            return Created(nameof(SignUp), response);
+            // Проверяем совпадение паролей
+            if (request.Password != request.ConfirmPassword)
+            {
+                return BadRequest(new ErrorResponse("Passwords do not match"));
+            }
+
+            // Проверяем минимальную длину пароля
+            if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 8)
+            {
+                return BadRequest(new ErrorResponse("Password must be at least 8 characters long"));
+            }
+
+            try
+            {
+                var user = request.MapToUser();
+                var success = await _authService.SignUp(user);
+                
+                if (!success)
+                {
+                    return BadRequest(new ErrorResponse("Registration failed. Username or email may already exist."));
+                }
+
+                return Ok(new MessageResponse("User registered successfully"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during user registration");
+                return StatusCode(500, new ErrorResponse("An error occurred during registration"));
+            }
         }
 
         [HttpPost("sign-in")]
         public async Task<IActionResult> SignIn([FromBody] SignInRequest request)
         {
-            // Твоя существующая реализация
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ErrorResponse("Invalid request data"));
+            }
 
+            if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+            {
+                return BadRequest(new ErrorResponse("Username and password are required"));
+            }
+
+            try
+            {
             var tokenData = await _authService.SignIn(request.Username, request.Password);
-            if (tokenData is null) return BadRequest("Invalid username or password");
+                if (tokenData is null)
+                {
+                    _logger.LogWarning("Failed login attempt for username: {Username}", request.Username);
+                    return BadRequest(new ErrorResponse("Invalid username or password"));
+                }
 
+                _logger.LogInformation("Successful login for username: {Username}", request.Username);
             return Ok(tokenData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during sign in");
+                return StatusCode(500, new ErrorResponse("An error occurred during sign in"));
+            }
         }
 
         [HttpPost("token/refresh")]
         public async Task<IActionResult> RefreshToken(RefreshTokenRequest tokens)
         {
-            // Твоя существующая реализация
+            if (string.IsNullOrWhiteSpace(tokens.AccessToken) || string.IsNullOrWhiteSpace(tokens.RefreshToken))
+            {
+                return BadRequest(new ErrorResponse("Access token and refresh token are required"));
+            }
+
+            try
+            {
             var tokenData = await _authService.RefreshTokenAsync(tokens.AccessToken, tokens.RefreshToken);
-            if (tokenData is null) return BadRequest();
+                if (tokenData is null)
+                {
+                    _logger.LogWarning("Failed to refresh token");
+                    return BadRequest(new ErrorResponse("Invalid or expired refresh token"));
+                }
+
             return Ok(tokenData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during token refresh");
+                return StatusCode(500, new ErrorResponse("An error occurred during token refresh"));
+            }
         }
 
         [HttpPost("sign-out")]
         public new async Task<IActionResult> SignOut(SignOutRequest request)
         {
-            // Твоя существующая реализация
+            if (string.IsNullOrWhiteSpace(request.AccessToken))
+            {
+                return BadRequest(new ErrorResponse("Access token is required"));
+            }
+
+            try
+            {
             await _authService.SignOut(request.AccessToken, request.RefreshToken);
             return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during sign out");
+                // Все равно возвращаем успех, так как выход должен быть идемпотентным
+                return NoContent();
+            }
         }
 
         [HttpGet("check")]
@@ -203,6 +286,38 @@ namespace Movies.Api.Controllers
             }
 
             return Ok(new MessageResponse("Password changed successfully."));
+        }
+
+        [HttpPost("admin/reset-user-password")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> AdminResetUserPassword([FromBody] AdminResetUserPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ErrorResponse("Invalid request data"));
+            }
+
+            if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)
+            {
+                return BadRequest(new ErrorResponse("Password must be at least 8 characters long"));
+            }
+
+            try
+            {
+                var success = await _authService.AdminResetUserPasswordAsync(request.UserId, request.NewPassword);
+                if (!success)
+                {
+                    return BadRequest(new ErrorResponse("Failed to reset user password"));
+                }
+
+                _logger.LogInformation("Admin reset password for user {UserId}", request.UserId);
+                return Ok(new MessageResponse("User password has been reset successfully."));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during admin password reset");
+                return StatusCode(500, new ErrorResponse("An error occurred during password reset"));
+            }
         }
     }
 

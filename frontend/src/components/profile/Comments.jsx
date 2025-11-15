@@ -102,7 +102,7 @@ const Comments = () => {
                   createdAt: createdAt,
                   updatedAt: updatedAt,
                   movie: movie,
-                  type: 'movie',
+                type: 'movie',
                 };
                 
                 console.log(`Processed comment ${index}:`, processedComment);
@@ -111,7 +111,7 @@ const Comments = () => {
                 console.error(`Error processing comment ${index}:`, error);
                 console.error('Comment data:', comment);
                 return null;
-              }
+            }
             })
           );
           
@@ -282,22 +282,22 @@ const Comments = () => {
         {/* Tabs */}
         <div className="flex gap-2 mb-4">
           {['all', 'movies', 'series'].map((tab) => (
-            <motion.button
-              key={tab}
-              onClick={() => {
-                setActiveTab(tab);
-                setComments([]);
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`px-4 py-2 rounded-lg transition-all ${
-                activeTab === tab
-                  ? 'bg-white text-black font-semibold'
-                  : 'bg-white/10 text-white/70 hover:bg-white/20'
-              }`}
-            >
-              {tab === 'all' ? t('all') : tab === 'movies' ? t('movies') : t('series')}
-            </motion.button>
+              <motion.button
+                key={tab}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setComments([]);
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-4 py-2 rounded-lg transition-all ${
+                  activeTab === tab
+                    ? 'bg-white text-black font-semibold'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                {tab === 'all' ? t('all') : tab === 'movies' ? t('movies') : t('series')}
+              </motion.button>
           ))}
         </div>
         

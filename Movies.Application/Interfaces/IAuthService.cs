@@ -14,5 +14,6 @@ namespace Movies.Application.Interfaces
         Task<ResetPasswordResult> ResetPasswordAsync(string email, string otpCode, string newPassword);
         Task<User?> GetUserByIdAsync(Guid userId);
         Task<ChangePasswordResult> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
+        Task<bool> AdminResetUserPasswordAsync(Guid userId, string newPassword);
     }
 }
