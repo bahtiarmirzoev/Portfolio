@@ -341,29 +341,12 @@ const MovieDetail = () => {
 
               {/* Actions */}
               <div className="flex flex-wrap gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleToggleFavorite}
-                  className={`btn-secondary flex items-center gap-2 ${
-                    isFavorite ? 'bg-white/20' : ''
-                  }`}
-                >
-                  <motion.div
-                    animate={isFavorite ? { scale: [1, 1.2, 1] } : {}}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <FiHeart className={isFavorite ? 'fill-white' : ''} />
-                  </motion.div>
-                  {isFavorite ? t('removeFromFavorites') : t('addToFavorites')}
-                </motion.button>
-
                 {movie.trailerUrl && (
                   <motion.a
                     href={movie.trailerUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="btn-secondary flex items-center gap-2"
                   >
@@ -381,7 +364,7 @@ const MovieDetail = () => {
                       toast.error(t('watchUrlNotAvailable') || 'Ссылка для просмотра недоступна');
                     }
                   }}
-                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`flex items-center gap-2 px-6 py-3 rounded-xl border-2 transition-all ${
                     movie.watchUrl
@@ -391,6 +374,26 @@ const MovieDetail = () => {
                 >
                   <FiExternalLink /> {t('watchMovie') || 'Смотреть фильм'}
                 </motion.a>
+                {isAuthenticated && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleToggleFavorite}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl border-2 transition-all ${
+                      isFavorite
+                        ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30'
+                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                    }`}
+                  >
+                    <motion.div
+                      animate={isFavorite ? { scale: [1, 1.2, 1] } : {}}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <FiHeart className={isFavorite ? 'fill-current' : ''} />
+                    </motion.div>
+                    {isFavorite ? t('removeFromFavorites') : t('addToFavorites')}
+                  </motion.button>
+                )}
               </div>
             </div>
           </div>
