@@ -347,7 +347,7 @@ public class DbInitializer
                                           CREATE INDEX IF NOT EXISTS idx_user_otps_userid ON user_otps(userid);
                                       """);
 
-// ДОБАВЬ ЭТОТ ИНДЕКС ДЛЯ ПРОИЗВОДИТЕЛЬНОСТИ
+
         await connection.ExecuteAsync("""
                                           CREATE INDEX IF NOT EXISTS idx_user_otps_code ON user_otps(code);
                                       """);

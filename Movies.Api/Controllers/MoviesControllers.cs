@@ -72,8 +72,6 @@ public class MoviesController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetAll([FromQuery] PagedRequest request)
     {
-        // Определяем направление сортировки на основе sortBy
-        // Для year и rating по умолчанию desc, для title - asc
         var sortOrder = request.SortOrder ?? 
             (request.SortBy?.ToLower() == "year" || request.SortBy?.ToLower() == "rating" ? "desc" : "asc");
         

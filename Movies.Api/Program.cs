@@ -28,7 +28,7 @@ builder.Services.Configure<JwtOptions>(config.GetSection("JwtOptions"));
 builder.Services.Configure<S3StorageOptions>(config.GetSection(S3StorageOptions.SectionName));
 builder.Services.Configure<AiOptions>(config.GetSection(AiOptions.SectionName));
 
-// AWS S3 Configuration
+
 builder.Services.AddSingleton<IAmazonS3>(sp =>
 {
     var options = sp.GetRequiredService<IOptions<S3StorageOptions>>().Value;
@@ -53,7 +53,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 
-    // 🔹 Add JWT support in Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -79,14 +78,12 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    // 🔹 Configure Swagger to handle file uploads
     c.MapType<Microsoft.AspNetCore.Http.IFormFile>(() => new OpenApiSchema
     {
         Type = "string",
         Format = "binary"
     });
     
-    // Используем CustomOperationIds для правильной обработки операций
     c.CustomOperationIds(apiDesc => apiDesc.TryGetMethodInfo(out var methodInfo) 
         ? methodInfo.Name 
         : null);
@@ -101,14 +98,14 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
-// Настройка лимитов для загрузки файлов
+
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = 5 * 1024 * 1024; // 5 MB
     options.ValueLengthLimit = 5 * 1024 * 1024;
 });
 
-// CORS configuration
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -124,16 +121,16 @@ builder.Services.AddApplication();
 builder.Services.AddDatabase(config["Database:ConnectionString"]!);
 
 
-// 🔴 ИСПРАВЬ ЭТИ СТРОЧКИ:
+
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAuthService, AuthService>(); 
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 
-// ✅ ДОБАВЬ ЭТИ РЕГИСТРАЦИИ:
-builder.Services.AddScoped<IOtpRepository, OtpRepository>(); // 🔴 ВАЖНО: интерфейс, а не класс
-builder.Services.AddScoped<IOtpService, OtpService>();       // 🔴 ВАЖНО: интерфейс, а не класс
+
+builder.Services.AddScoped<IOtpRepository, OtpRepository>();
+builder.Services.AddScoped<IOtpService, OtpService>();
 
 
 
@@ -153,13 +150,12 @@ builder.Services.AddScoped<ISeriesRatingService, SeriesRatingService>();
 builder.Services.AddScoped<ISeriesCommentRepository, SeriesCommentRepository>();
 builder.Services.AddScoped<ISeriesCommentService, SeriesCommentService>();
 
-// AI Assistant Service
+
 builder.Services.AddHttpClient<IAiAssistantService, AiAssistantService>((sp, client) =>
 {
     var options = sp.GetRequiredService<IOptions<AiOptions>>().Value;
     client.Timeout = TimeSpan.FromSeconds(60);
     
-    // Устанавливаем BaseAddress в зависимости от провайдера
     var baseUrl = options.Provider.ToLower() switch
     {
         "groq" => "https://api.groq.com",
@@ -171,12 +167,9 @@ builder.Services.AddHttpClient<IAiAssistantService, AiAssistantService>((sp, cli
     
     if (!string.IsNullOrEmpty(options.ApiKey))
     {
-        // Для Hugging Face используется заголовок "Authorization" с Bearer токеном
-        // Для Groq и OpenAI тоже используется "Authorization"
         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.ApiKey}");
     }
     
-    // Hugging Face требует дополнительный заголовок
     if (options.Provider.ToLower() == "huggingface")
     {
         client.DefaultRequestHeaders.Add("Accept", "application/json");

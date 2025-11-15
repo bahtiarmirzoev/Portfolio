@@ -116,7 +116,7 @@ const Settings = () => {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-6">
-        {/* Sidebar */}
+        {}
         <motion.div
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -144,7 +144,7 @@ const Settings = () => {
           })}
         </motion.div>
 
-        {/* Content */}
+        {}
         <motion.div
           key={activeSection}
           initial={{ opacity: 0, y: 20 }}

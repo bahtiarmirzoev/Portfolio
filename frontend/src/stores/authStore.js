@@ -232,7 +232,7 @@ export const useAuthStore = create((set, get) => {
   };
 });
 
-// Экспортируем функцию для обновления ролей глобально (для использования в api.js)
+
 if (typeof window !== 'undefined') {
   window.updateUserRoles = (token) => {
     useAuthStore.getState().updateUserRoles(token);

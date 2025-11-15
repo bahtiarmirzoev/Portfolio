@@ -218,7 +218,7 @@ const SeriesDetail = () => {
       className="min-h-screen p-4 md:p-8"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
+        {}
         <motion.button
           initial={{ x: -30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -229,7 +229,7 @@ const SeriesDetail = () => {
           <FiArrowLeft /> {t('back')}
         </motion.button>
 
-        {/* Series Info */}
+        {}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -237,7 +237,7 @@ const SeriesDetail = () => {
           className="glass rounded-2xl p-6 md:p-8 mb-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Poster */}
+            {}
             <div>
               {series.posterUrl ? (
                 <img
@@ -252,7 +252,7 @@ const SeriesDetail = () => {
               )}
             </div>
 
-            {/* Info */}
+            {}
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 <h1 className="text-4xl font-bold text-white">{series.title}</h1>
@@ -329,7 +329,7 @@ const SeriesDetail = () => {
                 </div>
               )}
 
-              {/* Actions */}
+              {}
               <div className="flex flex-wrap gap-4">
                 {series.trailerUrl && (
                   <motion.a
@@ -389,7 +389,7 @@ const SeriesDetail = () => {
           </div>
         </motion.div>
 
-        {/* Rating Section */}
+        {}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -425,7 +425,7 @@ const SeriesDetail = () => {
           </div>
         </motion.div>
 
-        {/* Comments Section */}
+        {}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -512,7 +512,7 @@ const SeriesDetail = () => {
           </div>
         </motion.div>
 
-        {/* Similar Series */}
+        {}
         {similarSeries.length > 0 && (
           <motion.div
             initial={{ y: 30, opacity: 0 }}

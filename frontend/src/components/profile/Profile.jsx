@@ -54,7 +54,7 @@ const Profile = () => {
         transition={{ duration: 0.6 }}
         className="relative min-h-screen p-4 md:p-6 lg:p-8"
       >
-        {/* Animated Background Elements */}
+        {}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <motion.div
             className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
@@ -77,7 +77,7 @@ const Profile = () => {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto">
-          {/* Header Section */}
+          {}
           <motion.header
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -144,7 +144,7 @@ const Profile = () => {
           </motion.header>
 
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-            {/* Sidebar Navigation */}
+            {}
             <motion.aside
               initial={{ x: -50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -228,7 +228,7 @@ const Profile = () => {
               </div>
             </motion.aside>
 
-            {/* Main Content */}
+            {}
             <motion.main
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

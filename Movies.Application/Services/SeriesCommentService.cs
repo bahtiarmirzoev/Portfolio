@@ -1,4 +1,4 @@
-// Movies.Application/Services/SeriesCommentService.cs
+
 using Movies.Application.Interfaces;
 using Movies.Application.Models;
 

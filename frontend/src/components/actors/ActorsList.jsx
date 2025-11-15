@@ -61,7 +61,6 @@ const ActorsList = () => {
 
       const items = result.items || [];
       
-      // Убираем дубликаты по ID и имени (на случай, если бэкенд вернул дубликаты)
       const uniqueActors = items.reduce((acc, actor) => {
         const existing = acc.find(a => 
           a.id === actor.id || 
@@ -337,14 +336,14 @@ const ActorsList = () => {
       className="min-h-screen p-4 md:p-8"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {}
         <motion.section
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="relative mb-12"
         >
-          {/* Title Section */}
+          {}
           <div className="relative mb-8 pb-8 border-b border-white/10">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <div className="space-y-3">
@@ -383,7 +382,7 @@ const ActorsList = () => {
                 </motion.p>
               </div>
 
-              {/* Stats Bar */}
+              {}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -404,7 +403,7 @@ const ActorsList = () => {
             </div>
           </div>
 
-          {/* Controls Section */}
+          {}
           <div className="space-y-4">
             <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
               <div className="relative flex-1 w-full lg:max-w-2xl">
@@ -497,7 +496,7 @@ const ActorsList = () => {
           </div>
         </motion.section>
 
-        {/* Content */}
+        {}
         {error ? (
           <div className="rounded-3xl border border-red-500/50 bg-red-500/10 p-16 text-center">
             <h2 className="text-2xl font-semibold text-red-400 mb-2">{t?.('error') || 'Ошибка'}</h2>
@@ -552,7 +551,7 @@ const ActorsList = () => {
                         transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
                       />
                       <div className="relative z-10 flex flex-col flex-1 p-5">
-                        {/* Avatar Section */}
+                        {}
                         <div className="flex justify-center mb-4">
                           <motion.div
                             whileHover={{ scale: 1.1, rotate: 5 }}
@@ -562,9 +561,9 @@ const ActorsList = () => {
                           </motion.div>
                         </div>
 
-                        {/* Content Section - Fixed Height */}
+                        {}
                         <div className="flex flex-col flex-1 space-y-3 text-center">
-                          {/* Name - Fixed Height */}
+                          {}
                           <div className="min-h-[3rem] flex items-center justify-center">
                             <h3 
                               className="text-base font-bold text-white leading-tight"
@@ -579,7 +578,7 @@ const ActorsList = () => {
                             </h3>
                           </div>
 
-                          {/* Birth Year - Fixed Height */}
+                          {}
                           <div className="min-h-[1.5rem] flex items-center justify-center">
                             {birthYear ? (
                               <div className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-xs font-medium text-white/70">
@@ -591,7 +590,7 @@ const ActorsList = () => {
                             )}
                           </div>
 
-                          {/* Biography - Fixed Height */}
+                          {}
                           <div className="min-h-[3rem] flex-1 flex items-start justify-center">
                             {actor.biography ? (
                               <p
@@ -665,13 +664,13 @@ const ActorsList = () => {
               </div>
             )}
 
-            {/* Pagination */}
+            {}
             {renderPagination()}
           </>
         )}
       </div>
 
-      {/* Details Modal */}
+      {}
       <AnimatePresence>
         {showDetailsModal && (
           <>

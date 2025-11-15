@@ -132,7 +132,7 @@ const Favorites = () => {
           {t('favorites')}
         </h2>
         
-        {/* Tabs */}
+        {}
         <div className="flex gap-2 mb-4">
           {['all', 'movies', 'series'].map((tab) => (
             <motion.button

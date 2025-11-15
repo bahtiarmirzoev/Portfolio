@@ -221,7 +221,7 @@ const MovieDetail = () => {
       className="min-h-screen p-4 md:p-8"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
+        {}
         <motion.button
           initial={{ x: -30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -232,7 +232,7 @@ const MovieDetail = () => {
           <FiArrowLeft /> {t('back')}
         </motion.button>
 
-        {/* Movie Info */}
+        {}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -240,7 +240,7 @@ const MovieDetail = () => {
           className="glass rounded-2xl p-6 md:p-8 mb-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Poster */}
+            {}
             <div>
               {movie.posterUrl ? (
                 <img
@@ -255,7 +255,7 @@ const MovieDetail = () => {
               )}
             </div>
 
-            {/* Info */}
+            {}
             <div className="md:col-span-2">
               <motion.h1 
                 initial={{ opacity: 0, y: -10 }}
@@ -339,7 +339,7 @@ const MovieDetail = () => {
                 </motion.div>
               )}
 
-              {/* Actions */}
+              {}
               <div className="flex flex-wrap gap-4">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -396,7 +396,7 @@ const MovieDetail = () => {
           </div>
         </motion.div>
 
-        {/* Rating Section */}
+        {}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -432,7 +432,7 @@ const MovieDetail = () => {
           </div>
         </motion.div>
 
-        {/* Comments Section */}
+        {}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -517,7 +517,7 @@ const MovieDetail = () => {
           </div>
         </motion.div>
 
-        {/* Similar Movies */}
+        {}
         {similarMovies.length > 0 && (
           <motion.div
             initial={{ y: 30, opacity: 0 }}

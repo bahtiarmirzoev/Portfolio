@@ -34,10 +34,8 @@ public class PasswordHasher
 
         try
         {
-            // Проверяем, что хеш имеет правильный формат BCrypt
             if (!passwordHash.StartsWith("$2"))
             {
-                // Хеш не в формате BCrypt - возможно, это двойной хеш или поврежденные данные
                 System.Diagnostics.Debug.WriteLine($"Password hash does not start with $2: {passwordHash.Substring(0, Math.Min(20, passwordHash.Length))}...");
                 return false;
             }
@@ -47,13 +45,11 @@ public class PasswordHasher
         }
         catch (BCrypt.Net.SaltParseException ex)
         {
-            // Ошибка парсинга соли - возможно, хеш поврежден или это двойной хеш
             System.Diagnostics.Debug.WriteLine($"BCrypt salt parse error: {ex.Message}");
             return false;
         }
         catch (Exception ex)
         {
-            // Логируем ошибку, но не пробрасываем исключение
             System.Diagnostics.Debug.WriteLine($"Password verification error: {ex.GetType().Name} - {ex.Message}");
             return false;
         }

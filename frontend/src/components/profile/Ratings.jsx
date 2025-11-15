@@ -187,7 +187,7 @@ const Ratings = () => {
           </h2>
         </div>
         
-        {/* Tabs */}
+        {}
         <div className="flex gap-2">
           {['all', 'movies', 'series'].map((tab) => (
             <motion.button

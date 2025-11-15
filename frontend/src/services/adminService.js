@@ -1,7 +1,6 @@
 import api from './api';
 
 export const adminService = {
-  // Movies
   async createMovie(movieData) {
     const response = await api.post('/movies', movieData);
     return response.data;
@@ -17,7 +16,6 @@ export const adminService = {
     return response.data;
   },
 
-  // Series
   async createSeries(seriesData) {
     const response = await api.post('/series', seriesData);
     return response.data;
@@ -33,7 +31,6 @@ export const adminService = {
     return response.data;
   },
 
-  // Actors
   async createActor(actorData) {
     const response = await api.post('/actors', actorData);
     return response.data;

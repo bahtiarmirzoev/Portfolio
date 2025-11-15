@@ -1,7 +1,6 @@
 import api from './api';
 
 export const favoritesService = {
-  // Movies
   async getFavorites(page = 1, pageSize = 10) {
     const response = await api.get('/favorites/movies', {
       params: { page, pageSize },
@@ -19,7 +18,6 @@ export const favoritesService = {
     return response.data;
   },
 
-  // Series
   async getFavoriteSeries(page = 1, pageSize = 10) {
     const response = await api.get('/favorites/series', {
       params: { page, pageSize },

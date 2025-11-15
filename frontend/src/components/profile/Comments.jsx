@@ -26,7 +26,6 @@ const Comments = () => {
       setLoading(true);
       const allComments = [];
 
-      // Загружаем комментарии к фильмам
       if (activeTab === 'all' || activeTab === 'movies') {
         try {
           console.log('Loading movie comments...');
@@ -35,12 +34,10 @@ const Comments = () => {
           console.log('Response type:', typeof response);
           console.log('Is array:', Array.isArray(response));
           
-          // Обрабатываем разные форматы ответа
           let commentsArray = [];
           if (Array.isArray(response)) {
             commentsArray = response;
           } else if (response && typeof response === 'object') {
-            // Проверяем все возможные поля
             if (Array.isArray(response.items)) {
               commentsArray = response.items;
             } else if (Array.isArray(response.data)) {
@@ -48,7 +45,6 @@ const Comments = () => {
             } else if (Array.isArray(response.comments)) {
               commentsArray = response.comments;
             } else {
-              // Если это не массив, попробуем преобразовать в массив
               commentsArray = [response];
             }
           }
@@ -65,7 +61,6 @@ const Comments = () => {
               try {
                 console.log(`Processing comment ${index}:`, comment);
                 
-                // Обрабатываем разные форматы полей (camelCase и PascalCase)
                 const movieId = comment.movieId || comment.MovieId || comment.movie_id;
                 const commentId = comment.id || comment.Id || comment.comment_id;
                 const userId = comment.userId || comment.UserId || comment.user_id;
@@ -128,7 +123,6 @@ const Comments = () => {
         }
       }
 
-      // Загружаем комментарии к сериалам
       if (activeTab === 'all' || activeTab === 'series') {
         try {
           const seriesComments = await seriesCommentsService.getMyComments();
@@ -279,7 +273,7 @@ const Comments = () => {
           {t('myComments')}
         </h2>
         
-        {/* Tabs */}
+        {}
         <div className="flex gap-2 mb-4">
           {['all', 'movies', 'series'].map((tab) => (
               <motion.button

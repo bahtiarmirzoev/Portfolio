@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-// Interceptor для добавления токена к запросам
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -17,7 +17,6 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Если это FormData, не устанавливаем Content-Type - браузер сам установит с boundary
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     }
@@ -29,7 +28,7 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor для обработки ошибок и обновления токена
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -52,7 +51,6 @@ api.interceptors.response.use(
           localStorage.setItem('accessToken', newAccessToken);
           localStorage.setItem('refreshToken', newRefreshToken);
 
-          // Обновляем роли после обновления токена
           if (window.updateUserRoles) {
             window.updateUserRoles(newAccessToken);
           }

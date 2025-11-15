@@ -1,4 +1,4 @@
-// Movies.Api/Controllers/SeriesCommentsController.cs
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Movies.Application.Interfaces;

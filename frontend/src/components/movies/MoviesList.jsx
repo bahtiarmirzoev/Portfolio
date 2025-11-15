@@ -107,18 +107,14 @@ const MoviesList = () => {
         if (filters.actor) params.actor = filters.actor;
       }
 
-      // Добавляем параметры сортировки
       if (sortBy && sortBy !== 'default') {
         params.sortBy = sortBy;
-        // Для year и rating по умолчанию desc, для title - asc
         params.sortOrder = (sortBy === 'year' || sortBy === 'rating') ? 'desc' : 'asc';
       }
 
       const response = await moviesService.getAll(params);
-      // Проверяем структуру ответа - может быть массив или объект с items
       const items = Array.isArray(response) ? response : (response?.items || []);
       
-      // Получаем общее количество из ответа
       const total = response?.total ?? response?.totalCount ?? items.length;
       
       setMovies(items);
@@ -287,14 +283,14 @@ const MoviesList = () => {
       className="min-h-screen p-4 md:p-8"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {}
         <motion.section
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="relative mb-12"
         >
-          {/* Title Section */}
+          {}
           <div className="relative mb-8 pb-8 border-b border-white/10">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <div className="space-y-3">
@@ -333,7 +329,7 @@ const MoviesList = () => {
                 </motion.p>
               </div>
 
-              {/* Stats Bar */}
+              {}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -357,7 +353,7 @@ const MoviesList = () => {
             </div>
           </div>
 
-          {/* Controls Section */}
+          {}
           <div className="space-y-4">
             <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
               <form
@@ -567,7 +563,7 @@ const MoviesList = () => {
           )}
         </AnimatePresence>
 
-        {/* Movies Grid */}
+        {}
         {loading && movies.length === 0 ? (
           <div
             className={
@@ -640,7 +636,7 @@ const MoviesList = () => {
                       transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
                     />
                     <Link to={`/movies/${movie.id}`} className="relative z-10 flex flex-col h-full">
-                      {/* Poster Section */}
+                      {}
                       <div className="relative overflow-hidden rounded-t-2xl">
                         <div className="aspect-[2/3] overflow-hidden">
                           {movie.posterUrl ? (
@@ -673,9 +669,9 @@ const MoviesList = () => {
                         </motion.div>
                       </div>
 
-                      {/* Content Section - Fixed Height */}
+                      {}
                       <div className="flex flex-col flex-1 p-4 space-y-3">
-                        {/* Title and Year */}
+                        {}
                         <div className="flex items-start justify-between gap-2 min-h-[3.5rem]">
                           <h3
                             className="text-base font-bold text-white leading-tight flex-1"
@@ -694,7 +690,7 @@ const MoviesList = () => {
                           </span>
                         </div>
 
-                        {/* Description - Fixed Height */}
+                        {}
                         <div className="min-h-[3rem] flex-1">
                           {movie.description ? (
                             <p
@@ -713,7 +709,7 @@ const MoviesList = () => {
                           )}
                         </div>
 
-                        {/* Genres - Fixed Height */}
+                        {}
                         <div className="min-h-[1.75rem] flex items-start">
                           {movie.genres && movie.genres.length > 0 ? (
                             <div className="flex flex-wrap gap-1.5">
@@ -731,7 +727,7 @@ const MoviesList = () => {
                           )}
                         </div>
 
-                        {/* Watch Button - Fixed at Bottom */}
+                        {}
                         <motion.button
                           onClick={(e) => {
                             e.stopPropagation();

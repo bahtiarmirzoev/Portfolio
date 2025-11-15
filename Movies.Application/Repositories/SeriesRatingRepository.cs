@@ -1,4 +1,4 @@
-// Movies.Application/Repositories/SeriesRatingRepository.cs
+
 using Dapper;
 using Movies.Application.Database;
 using Movies.Application.Interfaces;

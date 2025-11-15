@@ -1,4 +1,4 @@
-// Movies.Application/Interfaces/ISeriesCommentRepository.cs
+
 using Movies.Application.Models;
 
 namespace Movies.Application.Interfaces;

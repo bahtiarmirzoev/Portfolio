@@ -1,4 +1,4 @@
-// Утилита для декодирования JWT токена
+
 export const decodeJWT = (token) => {
   try {
     const base64Url = token.split('.')[1];
@@ -16,7 +16,7 @@ export const decodeJWT = (token) => {
   }
 };
 
-// Получить роли из токена
+
 export const getRolesFromToken = (token) => {
   if (!token) return [];
   
@@ -35,13 +35,13 @@ export const getRolesFromToken = (token) => {
   return [];
 };
 
-// Проверить, является ли пользователь trusted_user
+
 export const isTrustedUser = (token) => {
   const roles = getRolesFromToken(token);
   return roles.includes('trusted_user');
 };
 
-// Проверить, является ли пользователь admin
+
 export const isAdmin = (token) => {
   const roles = getRolesFromToken(token);
   return roles.includes('admin');

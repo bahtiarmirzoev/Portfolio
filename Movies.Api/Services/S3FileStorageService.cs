@@ -40,17 +40,14 @@ public class S3FileStorageService : IFileStorageService
 
         try
         {
-            // Создаем запрос без CannedACL, так как bucket не поддерживает ACL
             var request = new PutObjectRequest
             {
                 BucketName = _options.BucketName,
                 Key = normalizedKey,
                 InputStream = stream,
                 ContentType = contentType
-                // Не устанавливаем CannedACL - публичный доступ настраивается через Bucket Policy
             };
 
-            // Явно не устанавливаем ACL
             request.CannedACL = null;
             
             request.Metadata.Add("x-amz-meta-uploaded-at", DateTime.UtcNow.ToString("O"));

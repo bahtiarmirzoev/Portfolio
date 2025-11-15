@@ -74,9 +74,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-950 to-black">
-      {/* Hero Section */}
+      {}
       <section className="relative overflow-hidden">
-        {/* Animated Background Elements */}
+        {}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
             animate={{
@@ -117,7 +117,7 @@ const Home = () => {
           />
         </div>
 
-        {/* Gradient Overlay */}
+        {}
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"></div>
         
         <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-24 md:py-40">
@@ -225,7 +225,7 @@ const Home = () => {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 pb-20">
 
-        {/* Featured Movies */}
+        {}
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.section
@@ -285,7 +285,7 @@ const Home = () => {
                 </motion.div>
               </div>
               <div className="relative">
-                {/* Navigation Buttons */}
+                {}
                 {canScrollLeft && (
                   <motion.button
                     initial={{ opacity: 0 }}
@@ -311,7 +311,7 @@ const Home = () => {
                   </motion.button>
                 )}
 
-                {/* Carousel Container */}
+                {}
                 <div
                   ref={moviesCarouselRef}
                   className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
@@ -395,7 +395,7 @@ const Home = () => {
           )}
         </AnimatePresence>
 
-        {/* Trending Series */}
+        {}
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.section
@@ -545,7 +545,7 @@ const Home = () => {
           )}
         </AnimatePresence>
 
-        {/* Quick Navigation */}
+        {}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -644,7 +644,7 @@ const Home = () => {
           </div>
         </motion.section>
 
-        {/* Features for authenticated users */}
+        {}
         {isAuthenticated && (
           <motion.section
             initial={{ y: 30, opacity: 0 }}

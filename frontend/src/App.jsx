@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
   const [timeoutReached, setTimeoutReached] = useState(false);
 
-  // Таймаут для loading - если загрузка длится больше 3 секунд, показываем страницу или редирект
+
   useEffect(() => {
     if (loading) {
       const timer = setTimeout(() => {
@@ -33,7 +33,7 @@ const ProtectedRoute = ({ children }) => {
     }
   }, [loading]);
 
-  // Если загрузка и таймаут не достигнут, показываем спиннер
+
   if (loading && !timeoutReached) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -42,7 +42,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // Если таймаут достигнут, проверяем аутентификацию
+
   return isAuthenticated ? children : <Navigate to="/sign-in" replace />;
 };
 
@@ -50,7 +50,7 @@ const AdminRoute = ({ children }) => {
   const { isAuthenticated, isAdmin, loading } = useAuthStore();
   const [timeoutReached, setTimeoutReached] = useState(false);
 
-  // Таймаут для loading - если загрузка длится больше 3 секунд, показываем страницу или редирект
+
   useEffect(() => {
     if (loading) {
       const timer = setTimeout(() => {
@@ -62,7 +62,7 @@ const AdminRoute = ({ children }) => {
     }
   }, [loading]);
 
-  // Если загрузка и таймаут не достигнут, показываем спиннер
+
   if (loading && !timeoutReached) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -71,7 +71,7 @@ const AdminRoute = ({ children }) => {
     );
   }
 
-  // Если таймаут достигнут, проверяем аутентификацию и права
+
   if (!isAuthenticated) {
     return <Navigate to="/sign-in" replace />;
   }
@@ -87,7 +87,7 @@ const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
   const [timeoutReached, setTimeoutReached] = useState(false);
 
-  // Таймаут для loading - если загрузка длится больше 2 секунд, показываем страницу
+
   useEffect(() => {
     if (loading) {
       const timer = setTimeout(() => {
@@ -99,7 +99,7 @@ const PublicRoute = ({ children }) => {
     }
   }, [loading]);
 
-  // Если загрузка и таймаут не достигнут, показываем спиннер
+
   if (loading && !timeoutReached) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -108,12 +108,12 @@ const PublicRoute = ({ children }) => {
     );
   }
 
-  // Если пользователь уже аутентифицирован, перенаправляем на главную
+
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 
-  // Показываем страницу входа/регистрации
+
   return children;
 };
 

@@ -1,4 +1,4 @@
-// Movies.Application/Interfaces/IAuthService.cs
+
 using Movies.Application.Models;
 using Movies.Contracts.Responses;
 

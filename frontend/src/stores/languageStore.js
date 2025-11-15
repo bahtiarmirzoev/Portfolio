@@ -628,7 +628,7 @@ const translations = {
   },
 };
 
-// Словарь переводов жанров
+
 const genreTranslations = {
   ru: {
     'Action': 'Боевик',

@@ -589,7 +589,7 @@ const AdminPanel = () => {
       className="min-h-screen p-4 md:p-8"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {}
         <motion.header
           initial={{ y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -607,7 +607,7 @@ const AdminPanel = () => {
           </div>
         </motion.header>
 
-        {/* Tabs */}
+        {}
         <div className="glass rounded-2xl p-6 mb-8">
           <div className="flex gap-2 flex-wrap">
             {tabs.map((tab) => {
@@ -639,7 +639,7 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        {/* Content */}
+        {}
         <div className="glass rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-white">
@@ -671,7 +671,7 @@ const AdminPanel = () => {
             </div>
           )}
 
-          {/* Movies List */}
+          {}
           {activeTab === 'movies' && !loading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {movies.map((movie) => (
@@ -707,7 +707,7 @@ const AdminPanel = () => {
             </div>
           )}
 
-          {/* Series List */}
+          {}
           {activeTab === 'series' && !loading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {series.map((item) => (
@@ -743,7 +743,7 @@ const AdminPanel = () => {
             </div>
           )}
 
-          {/* Actors List */}
+          {}
           {activeTab === 'actors' && !loading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {actors.map((actor) => (
@@ -773,7 +773,7 @@ const AdminPanel = () => {
         </div>
       </div>
 
-      {/* Create/Edit Modal */}
+      {}
       <AnimatePresence>
         {(showCreateModal || showEditModal) && (
           <motion.div
@@ -813,7 +813,7 @@ const AdminPanel = () => {
                 </button>
               </div>
 
-              {/* Movie Form */}
+              {}
               {activeTab === 'movies' && (
                 <div className="space-y-4">
                   <div>
@@ -970,7 +970,7 @@ const AdminPanel = () => {
                 </div>
               )}
 
-              {/* Series Form */}
+              {}
               {activeTab === 'series' && (
                 <div className="space-y-4">
                   <div>
@@ -1167,7 +1167,7 @@ const AdminPanel = () => {
                 </div>
               )}
 
-              {/* Actor Form */}
+              {}
               {activeTab === 'actors' && (
                 <div className="space-y-4">
                   <div>

@@ -1,4 +1,4 @@
-// Movies.Application/Models/Results.cs
+
 namespace Movies.Application.Models
 {
     public abstract class Result

@@ -75,7 +75,7 @@ const AiAssistant = () => {
 
   return (
     <>
-      {/* Floating Button */}
+      {}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 glass hover:glass-strong text-white rounded-full shadow-2xl flex items-center justify-center transition-all"
@@ -86,7 +86,7 @@ const AiAssistant = () => {
         {isOpen ? <FiX size={24} /> : <FiMessageCircle size={24} />}
       </motion.button>
 
-      {/* Chat Window */}
+      {}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -96,7 +96,7 @@ const AiAssistant = () => {
             transition={{ duration: 0.2 }}
             className="fixed bottom-24 right-6 z-50 w-96 h-[600px] glass rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
-            {/* Header */}
+            {}
             <div className="border-b border-white/10 p-4 flex items-center justify-between bg-white/5">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/10 border border-white/20 rounded-full flex items-center justify-center">
@@ -117,7 +117,7 @@ const AiAssistant = () => {
               </motion.button>
             </div>
 
-            {/* Messages */}
+            {}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
               {messages.map((message, index) => (
                 <motion.div
@@ -183,7 +183,7 @@ const AiAssistant = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
+            {}
             <div className="border-t border-white/10 p-4 bg-white/5">
               <div className="flex gap-2">
                 <input

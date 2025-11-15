@@ -39,7 +39,6 @@ public class AuthService : IAuthService
 
     public async Task<bool> SignUp(User user)
     {
-        // Валидация входных данных
         if (user == null)
         {
             _logger.LogWarning("SignUp called with null user");
@@ -59,19 +58,16 @@ public class AuthService : IAuthService
             return false;
         }
 
-        // Нормализуем email: приводим к нижнему регистру и убираем пробелы
         if (!string.IsNullOrWhiteSpace(user.Email))
         {
             user.Email = user.Email.Trim().ToLowerInvariant();
         }
 
-        // Нормализуем username: убираем пробелы и приводим к нижнему регистру
         if (!string.IsNullOrWhiteSpace(user.Username))
         {
             user.Username = user.Username.Trim().ToLowerInvariant();
         }
 
-        // Проверяем, не существует ли уже пользователь с таким username
         var existingUserByUsername = await _userRepository.GetByUsernameAsync(user.Username);
         if (existingUserByUsername != null)
         {
