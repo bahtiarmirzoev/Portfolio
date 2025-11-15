@@ -10,7 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <Toaster 
       position="top-right"
       toastOptions={{
-        duration: 4000,
+        duration: 2000,
         style: {
           background: 'rgba(0, 0, 0, 0.8)',
           backdropFilter: 'blur(20px)',
@@ -20,12 +20,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
         },
         success: {
+          duration: 2000,
           iconTheme: {
             primary: '#fff',
             secondary: '#000',
           },
         },
         error: {
+          duration: 2000,
           iconTheme: {
             primary: '#fff',
             secondary: '#000',
