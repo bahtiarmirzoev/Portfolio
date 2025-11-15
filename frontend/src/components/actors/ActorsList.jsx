@@ -544,37 +544,71 @@ const ActorsList = () => {
                         e.preventDefault();
                         handleActorClick(actor.id);
                       }}
-                      className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 cursor-pointer backdrop-blur-2xl shadow-[0_0_60px_rgba(255,255,255,0.05)] transition-all"
+                      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] cursor-pointer backdrop-blur-2xl shadow-[0_0_60px_rgba(255,255,255,0.05)] transition-all flex flex-col h-full"
                     >
                       <motion.span
                         className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-white/10"
                         animate={{ rotate: [0, 360] }}
                         transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
                       />
-                      <div className="relative z-10 flex flex-col items-center text-center space-y-4">
-                        <motion.div
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          className="flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-white/20 bg-gradient-to-br from-white/15 to-white/5 text-3xl font-bold text-white shadow-lg"
-                        >
-                          {getInitials(actor.name)}
-                        </motion.div>
-                        <div className="space-y-2 w-full">
-                          <h3 className="text-lg font-semibold text-white group-hover:text-white/80 transition-colors">
-                            {actor.name}
-                          </h3>
-                          {birthYear && (
-                            <div className="flex items-center justify-center gap-1 text-sm text-white/50">
-                              <FiCalendar className="opacity-60" size={14} />
-                              <span>{birthYear}</span>
-                            </div>
-                          )}
-                          {actor.biography && (
-                            <p
-                              className="text-xs text-white/40 line-clamp-2"
+                      <div className="relative z-10 flex flex-col flex-1 p-5">
+                        {/* Avatar Section */}
+                        <div className="flex justify-center mb-4">
+                          <motion.div
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            className="flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-white/20 bg-gradient-to-br from-white/15 to-white/5 text-2xl font-bold text-white shadow-lg backdrop-blur-sm"
+                          >
+                            {getInitials(actor.name)}
+                          </motion.div>
+                        </div>
+
+                        {/* Content Section - Fixed Height */}
+                        <div className="flex flex-col flex-1 space-y-3 text-center">
+                          {/* Name - Fixed Height */}
+                          <div className="min-h-[3rem] flex items-center justify-center">
+                            <h3 
+                              className="text-base font-bold text-white leading-tight"
+                              style={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                              }}
                             >
-                              {actor.biography}
-                            </p>
-                          )}
+                              {actor.name}
+                            </h3>
+                          </div>
+
+                          {/* Birth Year - Fixed Height */}
+                          <div className="min-h-[1.5rem] flex items-center justify-center">
+                            {birthYear ? (
+                              <div className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-xs font-medium text-white/70">
+                                <FiCalendar size={12} className="opacity-70" />
+                                <span>{birthYear}</span>
+                              </div>
+                            ) : (
+                              <div className="h-full"></div>
+                            )}
+                          </div>
+
+                          {/* Biography - Fixed Height */}
+                          <div className="min-h-[3rem] flex-1 flex items-start justify-center">
+                            {actor.biography ? (
+                              <p
+                                className="text-xs text-white/60 leading-relaxed"
+                                style={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 3,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden',
+                                }}
+                              >
+                                {actor.biography}
+                              </p>
+                            ) : (
+                              <div className="h-full"></div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </motion.div>
