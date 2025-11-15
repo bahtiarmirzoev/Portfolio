@@ -17,5 +17,12 @@ export const moviesService = {
     });
     return response.data;
   },
+
+  async getSimilar(id, count = 5) {
+    const response = await api.get(`/movies/${id}/similar`, {
+      params: { count },
+    });
+    return response.data;
+  },
 };
 

@@ -82,4 +82,9 @@ public class MovieService : IMovieService
     {
         return await _movieRepository.FilterAsync(genre, yearFrom, yearTo, actor, skip, take);
     }
+    
+    public async Task<IEnumerable<Movie>> GetSimilarMoviesAsync(Guid movieId, int count = 5)
+    {
+        return await _movieRepository.GetSimilarMoviesAsync(movieId, count);
+    }
 }

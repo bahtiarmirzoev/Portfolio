@@ -21,4 +21,6 @@ public interface IMovieService
         string? actor,
         int skip, 
         int take);
+    
+    Task<IEnumerable<Movie>> GetSimilarMoviesAsync(Guid movieId, int count = 5);
 }

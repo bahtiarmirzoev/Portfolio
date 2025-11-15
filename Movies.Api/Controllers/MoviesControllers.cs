@@ -103,4 +103,13 @@ public class MoviesController : ControllerBase
         var response = result.MapToResponse(request);
         return Ok(response);
     }
+
+    [HttpGet("{id:guid}/similar")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetSimilar([FromRoute] Guid id, [FromQuery] int count = 5)
+    {
+        var similarMovies = await _movieService.GetSimilarMoviesAsync(id, count);
+        var response = similarMovies.Select(m => m.MapToResponse());
+        return Ok(response);
+    }
 }

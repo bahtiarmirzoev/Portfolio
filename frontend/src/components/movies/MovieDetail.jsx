@@ -88,26 +88,29 @@ const MovieDetail = () => {
 
   const loadSimilarMovies = async () => {
     try {
-      if (!movie) return;
+      if (!movie || !movie.id) return;
       
-      // Загружаем фильмы того же жанра
-      if (movie.genres && movie.genres.length > 0) {
-        const genre = movie.genres[0];
-        const response = await moviesService.getAll({
-          genre,
-          take: 6,
-        });
-        // Исключаем текущий фильм
-        const similar = (response.items || []).filter(m => m.id !== movie.id).slice(0, 5);
-        setSimilarMovies(similar);
-      } else {
-        // Если нет жанра, просто загружаем последние фильмы
-        const response = await moviesService.getAll({ take: 6 });
-        const similar = (response.items || []).filter(m => m.id !== movie.id).slice(0, 5);
-        setSimilarMovies(similar);
-      }
+      // Используем новый улучшенный алгоритм похожих фильмов
+      const similar = await moviesService.getSimilar(movie.id, 5);
+      setSimilarMovies(Array.isArray(similar) ? similar : []);
     } catch (error) {
       console.error('Error loading similar movies:', error);
+      // В случае ошибки, пробуем загрузить фильмы того же жанра как fallback
+      try {
+        if (movie.genres && movie.genres.length > 0) {
+          const genre = movie.genres[0];
+          const response = await moviesService.getAll({
+            genre,
+            page: 1,
+            pageSize: 6,
+          });
+          const similar = (response.items || response || []).filter(m => m.id !== movie.id).slice(0, 5);
+          setSimilarMovies(similar);
+        }
+      } catch (fallbackError) {
+        console.error('Error loading similar movies fallback:', fallbackError);
+        setSimilarMovies([]);
+      }
     }
   };
 
