@@ -632,50 +632,53 @@ const MoviesList = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05, duration: 0.6, ease: 'easeOut' }}
                     whileHover={{ y: -8, scale: 1.02 }}
-                    className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-2xl shadow-[0_0_60px_rgba(255,255,255,0.05)] transition-all"
+                    className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-2xl shadow-[0_0_60px_rgba(255,255,255,0.05)] transition-all flex flex-col h-full"
                   >
                     <motion.span
                       className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-white/10"
                       animate={{ rotate: [0, 360] }}
                       transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
                     />
-                    <Link to={`/movies/${movie.id}`} className="relative z-10 flex flex-col gap-4">
-                      <div className="relative overflow-hidden rounded-2xl">
-                        <div className="aspect-[2/3] overflow-hidden rounded-2xl">
+                    <Link to={`/movies/${movie.id}`} className="relative z-10 flex flex-col h-full">
+                      {/* Poster Section */}
+                      <div className="relative overflow-hidden rounded-t-2xl">
+                        <div className="aspect-[2/3] overflow-hidden">
                           {movie.posterUrl ? (
                             <img
                               src={movie.posterUrl}
                               alt={movie.title}
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                             />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-black/40">
+                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-black/60 to-black/40">
                               <FiFilm className="text-white/20 text-5xl" />
                             </div>
                           )}
                         </div>
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                         {movie.averageRating && (
-                          <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/70 px-3 py-1 text-sm text-white backdrop-blur-sm">
-                            <FiStar className="text-yellow-400 fill-yellow-400" />
+                          <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/80 backdrop-blur-md px-2.5 py-1 text-xs font-semibold text-white border border-white/20">
+                            <FiStar className="text-yellow-400 fill-yellow-400" size={14} />
                             {movie.averageRating.toFixed(1)}
                           </div>
                         )}
                         <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          whileHover={{ opacity: 1, y: 0 }}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          whileHover={{ opacity: 1, scale: 1 }}
                           className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         >
-                          <div className="rounded-full bg-white/20 backdrop-blur-sm p-4">
+                          <div className="rounded-full bg-white/20 backdrop-blur-md p-4 border border-white/30 shadow-lg">
                             <FiPlay className="text-white text-2xl" />
                           </div>
                         </motion.div>
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-3">
+                      {/* Content Section - Fixed Height */}
+                      <div className="flex flex-col flex-1 p-4 space-y-3">
+                        {/* Title and Year */}
+                        <div className="flex items-start justify-between gap-2 min-h-[3.5rem]">
                           <h3
-                            className="text-lg font-semibold text-white transition-colors group-hover:text-white/80"
+                            className="text-base font-bold text-white leading-tight flex-1"
                             style={{
                               display: '-webkit-box',
                               WebkitLineClamp: 2,
@@ -685,33 +688,50 @@ const MoviesList = () => {
                           >
                             {movie.title}
                           </h3>
-                          <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/60 flex-shrink-0">
-                            <FiCalendar className="opacity-70" />
+                          <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-xs font-medium text-white/70 flex-shrink-0 whitespace-nowrap">
+                            <FiCalendar size={12} className="opacity-70" />
                             {movie.year}
                           </span>
                         </div>
 
-                        {movie.description && (
-                          <p
-                            className="text-sm text-white/60 line-clamp-3"
-                          >
-                            {movie.description}
-                          </p>
-                        )}
+                        {/* Description - Fixed Height */}
+                        <div className="min-h-[3rem] flex-1">
+                          {movie.description ? (
+                            <p
+                              className="text-xs text-white/60 leading-relaxed"
+                              style={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                              }}
+                            >
+                              {movie.description}
+                            </p>
+                          ) : (
+                            <div className="h-full"></div>
+                          )}
+                        </div>
 
-                        {movie.genres && movie.genres.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {movie.genres.slice(0, 3).map((genre, idx) => (
-                              <span
-                                key={idx}
-                                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/60"
-                              >
-                                {translateGenre(genre)}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        {/* Genres - Fixed Height */}
+                        <div className="min-h-[1.75rem] flex items-start">
+                          {movie.genres && movie.genres.length > 0 ? (
+                            <div className="flex flex-wrap gap-1.5">
+                              {movie.genres.slice(0, 2).map((genre, idx) => (
+                                <span
+                                  key={idx}
+                                  className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-white/60"
+                                >
+                                  {translateGenre(genre)}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="h-full"></div>
+                          )}
+                        </div>
 
+                        {/* Watch Button - Fixed at Bottom */}
                         <motion.button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -722,16 +742,16 @@ const MoviesList = () => {
                               toast.error(t('watchUrlNotAvailable') || 'Ссылка для просмотра недоступна');
                             }
                           }}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className={`mt-2 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-white transition-colors ${
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`mt-auto flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-xs font-medium text-white transition-all ${
                             movie.watchUrl 
-                              ? 'bg-white/10 hover:bg-white/20' 
-                              : 'bg-white/5 hover:bg-white/10 cursor-not-allowed opacity-60'
+                              ? 'bg-white/10 hover:bg-white/20 border border-white/20' 
+                              : 'bg-white/5 border border-white/10 cursor-not-allowed opacity-50'
                           }`}
                         >
-                          <FiExternalLink size={16} />
-                          <span>{t('watchMovie') || 'Смотреть фильм'}</span>
+                          <FiExternalLink size={14} />
+                          <span>{t('watchMovie') || 'Смотреть'}</span>
                         </motion.button>
                       </div>
                     </Link>
