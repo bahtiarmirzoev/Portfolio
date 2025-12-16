@@ -1,0 +1,6 @@
+{
+  "/elaqe/page": "app/elaqe/page.js",
+  "/haqqimizda/page": "app/haqqimizda/page.js",
+  "/page": "app/page.js",
+  "/xidmetler/page": "app/xidmetler/page.js"
+}
