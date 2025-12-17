@@ -3,7 +3,7 @@ import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Building, Home, Factory, Car, FileText, Briefcase, ArrowRight } from "lucide-react"
+import { Building, Home, Factory, Car, FileText, Wrench, ArrowRight } from "lucide-react"
 
 const services = [
   {
@@ -27,14 +27,14 @@ const services = [
     description: "Yüngül və yük avtomobillərinin, xüsusi texnikaların qiymətləndirilməsi.",
   },
   {
+    icon: Wrench,
+    title: "Dəymiş zərərin qiymətləndirilməsi",
+    description: "İSığorta hadisələri, hüquqi mübahisələr və başqa səbəblərdən yaranan maddi zərərin miqdarının müəyyən edilməsi.",
+  },
+  {
     icon: FileText,
     title: "Biznesin qiymətləndirilməsi",
     description: "Şirkətlərin və biznes aktivlərinin bazar dəyərinin müəyyən edilməsi.",
-  },
-  {
-    icon: Briefcase,
-    title: "Maliyyə konsaltinqi",
-    description: "İnvestisiya layihələrinin qiymətləndirilməsi və maliyyə məsləhətləri.",
   },
 ]
 
@@ -57,20 +57,67 @@ export default function ServicesPage() {
         {/* Services Grid */}
         <section className="py-20 px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            {/* Mobile and Tablet: 1-2 колонки */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:hidden gap-6 mb-16">
               {services.map((service, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
+                <Card 
+                  key={index} 
+                  className="hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+                >
+                  <CardHeader className="pb-4">
                     <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
                       <service.icon className="h-6 w-6 text-primary" />
                     </div>
                     <CardTitle className="text-xl">{service.title}</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-0 flex-1">
                     <p className="text-sm text-muted-foreground leading-relaxed">{service.description}</p>
                   </CardContent>
                 </Card>
               ))}
+            </div>
+
+            {/* Desktop: 3 карточки в строку, теперь 6 карточек = 2 строки */}
+            <div className="hidden lg:block mb-16">
+              {/* Первые 3 карточки */}
+              <div className="grid grid-cols-3 gap-6 mb-6">
+                {services.slice(0, 3).map((service, index) => (
+                  <Card 
+                    key={index} 
+                    className="hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+                  >
+                    <CardHeader className="pb-4">
+                      <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
+                        <service.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <CardTitle className="text-xl">{service.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0 flex-1">
+                      <p className="text-sm text-muted-foreground leading-relaxed">{service.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              {/* Последние 3 карточки */}
+              <div className="grid grid-cols-3 gap-6">
+                {services.slice(3, 6).map((service, index) => (
+                  <Card 
+                    key={index + 3} 
+                    className="hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+                  >
+                    <CardHeader className="pb-4">
+                      <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
+                        <service.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <CardTitle className="text-xl">{service.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0 flex-1">
+                      <p className="text-sm text-muted-foreground leading-relaxed">{service.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
 
             {/* Process Section */}

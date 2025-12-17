@@ -50,8 +50,7 @@ export default function ContactPage() {
         <section className="py-20 px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Contact Form */}
-              {/* Contact Info */}
+           
               <div className="col-span-2">
                 <div className="text-center mb-12">
                   <h2 className="text-3xl font-bold mb-4">Əlaqə məlumatları</h2>
@@ -69,8 +68,8 @@ export default function ContactPage() {
                         </div>
                         <div>
                           <h3 className="font-semibold mb-2 text-lg">Telefon</h3>
-                          <p className="text-sm text-muted-foreground mb-1">+994 12 XXX XX XX</p>
-                          <p className="text-sm text-muted-foreground">+994 XX XXX XX XX</p>
+                          <p className="text-sm text-muted-foreground">+994 50 380 15 02</p>
+                           <p className="text-sm text-muted-foreground">+994 70 380 15 02</p>
                         </div>
                       </div>
                     </CardContent>
@@ -84,8 +83,7 @@ export default function ContactPage() {
                         </div>
                         <div>
                           <h3 className="font-semibold mb-2 text-lg">Email</h3>
-                          <p className="text-sm text-muted-foreground mb-1">info@premium.az</p>
-                          <p className="text-sm text-muted-foreground">contact@premium.az</p>
+                          <p className="text-sm text-muted-foreground">premium.qiymetlendirme@gmail.com</p>
                         </div>
                       </div>
                     </CardContent>
@@ -99,7 +97,7 @@ export default function ContactPage() {
                         </div>
                         <div>
                           <h3 className="font-semibold mb-2 text-lg">Ünvan</h3>
-                          <p className="text-sm text-muted-foreground">Bakı şəhəri, Azərbaycan</p>
+                          <p className="text-sm text-muted-foreground">Bakı şəhəri, Nərimanov rayonu AP plaza</p>
                         </div>
                       </div>
                     </CardContent>
@@ -124,11 +122,18 @@ export default function ContactPage() {
                 <div className="mt-12">
                   <Card className="overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="aspect-[21/9] bg-secondary/20 flex items-center justify-center">
-                        <div className="text-center">
-                          <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">Xəritə</p>
-                        </div>
+                      {/* Google Maps карта */}
+                      <div className="aspect-[21/9] w-full">
+                        <iframe
+                          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3038.222901280286!2d49.83105567631063!3d40.40391257144164!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4030874d869bb079%3A0x25f62100ccee9f09!2sAP%20Plaza!5e0!3m2!1sru!2saz!4v1765887518569!5m2!1sru!2saz"
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          title="Premium şirkətinin ünvanı - AP Plaza, Bakı"
+                        />
                       </div>
                     </CardContent>
                   </Card>

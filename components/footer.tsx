@@ -8,9 +8,9 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">PREMIUM</h3>
+            <h3 className="text-lg font-semibold mb-4">PREMIUM QIYMƏTLƏNDİRMƏ MMC</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Qiymətləndirmə MMC - Azərbaycanda professional və etibarlı qiymətləndirmə xidmətləri.
+              Premium Qiymətləndirmə MMC - Azərbaycanda professional və etibarlı qiymətləndirmə xidmətləri.
             </p>
           </div>
 
@@ -47,15 +47,15 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+994 12 XXX XX XX</span>
+                <span>+994 50 380 15 02</span>
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>info@premium.az</span>
+                <span>premium.qiymetlendirme@gmail.com</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 mt-0.5" />
-                <span>Bakı, Azərbaycan</span>
+                <span>Bakı şəhəri, Nərimanov rayonu AP plaza</span>
               </li>
             </ul>
           </div>

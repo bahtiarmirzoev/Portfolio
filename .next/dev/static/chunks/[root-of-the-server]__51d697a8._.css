@@ -709,8 +709,16 @@
     grid-column: span 2 / span 2;
   }
 
+  .col-start-1 {
+    grid-column-start: 1;
+  }
+
   .col-start-2 {
     grid-column-start: 2;
+  }
+
+  .col-start-3 {
+    grid-column-start: 3;
   }
 
   .row-span-2 {
@@ -1224,6 +1232,10 @@
     max-width: var(--container-7xl);
   }
 
+  .max-w-\[calc\(33\.333\%-0\.75rem\)\] {
+    max-width: calc(33.333% - .75rem);
+  }
+
   .max-w-\[calc\(100\%-2rem\)\] {
     max-width: calc(100% - 2rem);
   }
@@ -1442,6 +1454,10 @@
 
   .grid-cols-1 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .grid-cols-\[0_1fr\] {
@@ -1911,16 +1927,6 @@
 
   .bg-secondary {
     background-color: var(--secondary);
-  }
-
-  .bg-secondary\/20 {
-    background-color: var(--secondary);
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-secondary\/20 {
-      background-color: color-mix(in oklab, var(--secondary) 20%, transparent);
-    }
   }
 
   .bg-secondary\/30 {
@@ -4620,6 +4626,12 @@
   }
 
   @media (min-width: 40rem) {
+    .sm\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 40rem) {
     .sm\:flex-col {
       flex-direction: column;
     }
@@ -4849,14 +4861,26 @@
   }
 
   @media (min-width: 64rem) {
-    .lg\:grid-cols-2 {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .lg\:block {
+      display: block;
     }
   }
 
   @media (min-width: 64rem) {
-    .lg\:grid-cols-3 {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+    .lg\:grid {
+      display: grid;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .lg\:hidden {
+      display: none;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .lg\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
