@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+log.txt
+output/
+
+input_pdf/
+input_excel/
+
+*.DS_Store
